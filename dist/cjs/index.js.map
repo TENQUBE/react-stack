@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sources":["../../src/src/lib/index.tsx"],"sourcesContent":["import React from 'react'\n\nconst WebviewStack = () => {\n    return <>hello world</>\n}\n\nexport default WebviewStack"],"names":["_jsx"],"mappings":";;;;AAEM,MAAA,YAAY,GAAG,MAAK;AACtB,IAAA,OAAOA,gEAAgB,CAAA;AAC3B;;;;"}
