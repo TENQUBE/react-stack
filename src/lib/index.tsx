@@ -1,35 +1,22 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import Stack from './data/stack'
+import { createContext, useEffect } from 'react'
+import LocaitonHistoryProvider from '@tenqube/location-history'
+
+import './styles/main.scss'
 import { AnimationType } from './interfaces'
+import HybridRoute from './componets/route'
+import HybridStackProvider from './componets/provider'
 
-const HybridStackContext = createContext(null)
+export const HybridStackContext = createContext(null)
 
-const HybridRoute = ({ route, component, animation }) => {
-  const [stacks, setStacks] = useContext(HybridStackContext)
-  
-  useEffect(() => {
-    setStacks([
-      ...stacks, 
-      new Stack({ route, component, animation })
-    ])
-  }, [])
-
-  return null
-}
-
-const HybridStackProvider = ({ children }) => {
-  const [stacks, setStacks] = useState([])
-
-  useEffect(() => {
-    console.log(stacks)
-  }, [stacks])
-  
+const Index = ({ children }) => {
   return (
-    <HybridStackContext.Provider value={[stacks, setStacks]}>
-      {children}
-    </HybridStackContext.Provider>
+    <LocaitonHistoryProvider>
+      <HybridStackProvider>
+        {children}
+      </HybridStackProvider>
+    </LocaitonHistoryProvider>
   )
 }
 
 export { HybridRoute, AnimationType }
-export default HybridStackProvider
+export default Index

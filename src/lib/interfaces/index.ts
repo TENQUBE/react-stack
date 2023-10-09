@@ -1,5 +1,14 @@
 export enum AnimationType {
   None,
   ToLeft,
-  Scale
+  ToUp,
+  Scale,
+}
+
+
+export enum AnimationClassName {
+  'none',
+  'to-feft',
+  'to-up',
+  'scale'
 }

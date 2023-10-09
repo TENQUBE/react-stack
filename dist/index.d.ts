@@ -1,9 +1,12 @@
+/// <reference types="react" />
 import * as react_jsx_runtime from 'react/jsx-runtime';
+import * as react from 'react';
 
 declare enum AnimationType {
     None = 0,
     ToLeft = 1,
-    Scale = 2
+    ToUp = 2,
+    Scale = 3
 }
 
 declare const HybridRoute: ({ route, component, animation }: {
@@ -11,8 +14,10 @@ declare const HybridRoute: ({ route, component, animation }: {
     component: any;
     animation: any;
 }) => any;
-declare const HybridStackProvider: ({ children }: {
+
+declare const HybridStackContext: react.Context<any>;
+declare const Index: ({ children }: {
     children: any;
 }) => react_jsx_runtime.JSX.Element;
 
-export { AnimationType, HybridRoute, HybridStackProvider as default };
+export { AnimationType, HybridRoute, HybridStackContext, Index as default };

@@ -28,7 +28,7 @@ export default [
       commonjs(),
       typescript({ tsconfig: './tsconfig.json' }),
       postcss({
-        modules: true,
+        modules: false,
         use: [ 'sass' ]
       })
     ],
@@ -38,6 +38,7 @@ export default [
     output: [
       { file: 'dist/index.d.ts', format: 'esm' }
     ],
+    external: [/\.(sass|scss|css)$/],
     plugins: [
       dts.default()
     ],
