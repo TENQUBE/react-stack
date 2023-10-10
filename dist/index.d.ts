@@ -5,7 +5,7 @@ import * as react from 'react';
 declare enum AnimationType {
     None = 0,
     ToLeft = 1,
-    ToUp = 2,
+    ToTop = 2,
     Scale = 3
 }
 

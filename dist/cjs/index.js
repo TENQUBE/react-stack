@@ -137,21 +137,21 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z = ".hybrid-stack-area {\n  background-color: #ffffff;\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  overflow-y: hidden;\n  transition: transform 0.25s ease-in-out; }\n\n.hybrid-dimmed {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: #000;\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.25s;\n  z-index: 9999; }\n  .hybrid-dimmed.prev {\n    opacity: 0.4; }\n    .hybrid-dimmed.prev.active {\n      opacity: 0; }\n  .hybrid-dimmed.active {\n    opacity: 0.4; }\n";
+var css_248z = ".hybrid-webview-stack {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  overflow: hidden; }\n\n.hybrid-stack-area {\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  overflow-y: hidden;\n  transition: all 0.3s;\n  transform: translateX(0) scale(1);\n  opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-enter {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-scale-enter-active, .hybrid-stack-area.hybrid-scale-enter-done, .hybrid-stack-area.hybrid-scale-exit {\n    transform: scale(1);\n    opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-exit-active {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-to-left-enter {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-left-enter-active, .hybrid-stack-area.hybrid-to-left-enter-done, .hybrid-stack-area.hybrid-to-left-exit {\n    transform: translateX(0); }\n  .hybrid-stack-area.hybrid-to-left-exit-active {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter {\n    transform: translateY(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter-active, .hybrid-stack-area.hybrid-to-top-enter-done, .hybrid-stack-area.hybrid-to-top-exit {\n    transform: translateY(0); }\n  .hybrid-stack-area.hybrid-to-top-exit-active {\n    transform: translateY(100%); }\n  .hybrid-stack-area[data-before-ani=\"to-left\"] {\n    transform: translateX(-10%); }\n  .hybrid-stack-area[data-before-ani=\"to-top\"] .hybrid-dimmed {\n    opacity: 0; }\n  .hybrid-stack-area[data-before-ani=\"scale\"] {\n    transform: scale(1.05); }\n    .hybrid-stack-area[data-before-ani=\"scale\"] .hybrid-dimmed {\n      opacity: 0; }\n\n.hybrid-dimmed {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: #000;\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.3s;\n  z-index: 9999; }\n  .hybrid-dimmed.prev {\n    opacity: 0.3; }\n    .hybrid-dimmed.prev.active {\n      opacity: 0; }\n  .hybrid-dimmed.active {\n    opacity: 0.3; }\n";
 styleInject(css_248z);
 
 exports.AnimationType = void 0;
 (function (AnimationType) {
     AnimationType[AnimationType["None"] = 0] = "None";
     AnimationType[AnimationType["ToLeft"] = 1] = "ToLeft";
-    AnimationType[AnimationType["ToUp"] = 2] = "ToUp";
+    AnimationType[AnimationType["ToTop"] = 2] = "ToTop";
     AnimationType[AnimationType["Scale"] = 3] = "Scale";
 })(exports.AnimationType || (exports.AnimationType = {}));
 var AnimationClassName;
 (function (AnimationClassName) {
     AnimationClassName[AnimationClassName["none"] = 0] = "none";
-    AnimationClassName[AnimationClassName["to-feft"] = 1] = "to-feft";
-    AnimationClassName[AnimationClassName["to-up"] = 2] = "to-up";
+    AnimationClassName[AnimationClassName["to-left"] = 1] = "to-left";
+    AnimationClassName[AnimationClassName["to-top"] = 2] = "to-top";
     AnimationClassName[AnimationClassName["scale"] = 3] = "scale";
 })(AnimationClassName || (AnimationClassName = {}));
 
@@ -33722,6 +33722,7 @@ const HybridStackProvider = ({ children }) => {
     const stackList = React.useRef([]);
     const [history] = useLocationHistory();
     const [printStack, setPrintStack] = React.useState([]);
+    const [noDimmed, setNoDimmed] = React.useState(false);
     const [isAddStack, setAddStack] = React.useState();
     const [isMoveActive, setMoveActive] = React.useState(false);
     const [isMoveAction, setMoveAction] = React.useState(false);
@@ -33729,10 +33730,9 @@ const HybridStackProvider = ({ children }) => {
         if (history.list.length === 0)
             return;
         setAddStack(history.list.length > printStack.length);
-        const list = history.list.map(({ pathname }) => {
+        setPrintStack(history.list.map(({ pathname }) => {
             return stackList.current.find(({ route }) => route === pathname);
-        });
-        setPrintStack(list);
+        }));
     }, [history]);
     React.useEffect(() => {
         if (isAddStack === null)
@@ -33743,18 +33743,33 @@ const HybridStackProvider = ({ children }) => {
             setTimeout(() => {
                 setMoveActive(false);
                 setMoveAction(false);
-            }, 230);
+            }, 300);
         }, 20);
     }, [history]);
     const addStackList = (data) => {
         stackList.current = [...stackList.current, data];
     };
-    return (jsxRuntime.jsxs(HybridStackContext.Provider, { value: [addStackList], children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: printStack.map(({ component, animation }, i, arr) => {
-                    const activePage = arr.length - 2;
-                    return (jsxRuntime.jsx(CSSTransition$1, { timeout: 250, classNames: `hybrid-${AnimationClassName[animation]}`, children: jsxRuntime.jsxs("div", { className: `hybrid-stack-area`, children: [component, (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsxRuntime.jsx("div", { className: `hybrid-dimmed ${isAddStack
-                                        ? `next ${isMoveAction ? 'active' : ''}`
-                                        : `prev ${isMoveAction ? 'active' : ''}`}` }))] }) }, i));
-                }) })] }));
+    const hybridDimmedClassName = () => {
+        const customClassName = ['hybrid-dimmed'];
+        customClassName.push(isAddStack ? 'next' : 'prev');
+        if (isMoveAction)
+            customClassName.push('active');
+        return customClassName.join(' ');
+    };
+    const checkDimmed = (animation) => {
+        if (animation === exports.AnimationType.ToLeft)
+            return;
+        setNoDimmed(true);
+        setTimeout(() => {
+            setNoDimmed(false);
+        }, 300);
+    };
+    return (jsxRuntime.jsx("div", { className: "hybrid-webview-stack", children: jsxRuntime.jsxs(HybridStackContext.Provider, { value: [addStackList], children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: printStack.map(({ component, animation }, i, arr) => {
+                        const activePage = arr.length - 2;
+                        const activeIdx = arr.length - 1;
+                        const nextAnimation = i < activeIdx ? arr[i + 1].animation : false;
+                        return (jsxRuntime.jsx(CSSTransition$1, { timeout: 300, classNames: `hybrid-stack-area hybrid-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), children: jsxRuntime.jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, children: [component, !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsxRuntime.jsx("div", { className: hybridDimmedClassName() }))] }) }, i));
+                    }) })] }) }));
 };
 
 const HybridStackContext = React.createContext(null);
