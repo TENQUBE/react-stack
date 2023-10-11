@@ -1,6 +1,5 @@
-/// <reference types="react" />
 import * as react_jsx_runtime from 'react/jsx-runtime';
-import * as react from 'react';
+export { ILocationHistory, ILocationVO, useLocationHistory } from '@tenqube/location-history';
 
 declare enum AnimationType {
     None = 0,
@@ -22,9 +21,8 @@ declare const HybridLink: ({ to, target, state, children }: {
     children: any;
 }) => react_jsx_runtime.JSX.Element;
 
-declare const HybridStackContext: react.Context<any>;
 declare const Index: ({ children }: {
     children: any;
 }) => react_jsx_runtime.JSX.Element;
 
-export { AnimationType, HybridLink, HybridRoute, HybridStackContext, Index as default };
+export { AnimationType, HybridLink, HybridRoute, Index as default };

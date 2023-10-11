@@ -1,13 +1,10 @@
-import { createContext } from 'react'
-import LocaitonHistoryProvider from '@tenqube/location-history'
+import LocaitonHistoryProvider, { useLocationHistory, ILocationHistory, ILocationVO } from '@tenqube/location-history'
 
 import './styles/main.scss'
 import { AnimationType } from './interfaces'
 import HybridRoute from './componets/route'
 import HybridStackProvider from './componets/provider'
 import HybridLink from './componets/link'
-
-export const HybridStackContext = createContext(null)
 
 const Index = ({ children }) => {
   return (
@@ -19,5 +16,5 @@ const Index = ({ children }) => {
   )
 }
 
-export { HybridRoute, HybridLink, AnimationType }
+export { HybridRoute, HybridLink, AnimationType, useLocationHistory, ILocationHistory, ILocationVO }
 export default Index

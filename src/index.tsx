@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
-import HybridStackProvider, { AnimationType, HybridRoute, HybridLink } from '../dist/esm/'
+import HybridStackProvider, { AnimationType, HybridRoute, HybridLink, useLocationHistory } from '../dist/esm/'
 
 const container = document.getElementById('wrap') as HTMLElement
 const root = ReactDOM.createRoot(container)
@@ -13,6 +13,12 @@ const styles: any = {
 }
 
 const White = () => {
+  const history = useLocationHistory()
+
+  useEffect(() => {
+    console.log(history)
+  }, [history])
+
   return (
     <div style={{...styles}}>
       <h1>white</h1>

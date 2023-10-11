@@ -1,14 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import { createContext, useEffect, useRef, useState } from 'react'
 import { CSSTransition, TransitionGroup } from 'react-transition-group'
-import { useLocationHistory } from '@tenqube/location-history'
+import { ILocationHistory, useLocationHistory } from '@tenqube/location-history'
 
 import { AnimationClassName, AnimationType } from '../interfaces'
-import { HybridStackContext } from '..'
 import { IStack } from '../data/stack'
+
+export const HybridStackContext = createContext(null)
 
 const HybridStackProvider = ({ children }) => {
   const stackList = useRef<IStack[]>([])
-  const [history] = useLocationHistory()
+  const history: ILocationHistory = useLocationHistory()
 
   const [printStack, setPrintStack] = useState([])
   const [noDimmed, setNoDimmed] = useState(false)
@@ -55,6 +56,10 @@ const HybridStackProvider = ({ children }) => {
       setNoDimmed(false)
     }, 300)
   }
+
+  useEffect(() => {
+    console.log(printStack)
+  }, [printStack])
 
   return (
     <div className="hybrid-webview-stack">

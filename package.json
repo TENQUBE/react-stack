@@ -1,6 +1,6 @@
 {
   "name": "@tenqube/hybrid-webview-stack",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Mobile Web and hybrid webview component stack management library for React",
   "keywords": [
     "react",
@@ -26,7 +26,7 @@
     "@rollup/plugin-commonjs": "^25.0.4",
     "@rollup/plugin-node-resolve": "^15.2.1",
     "@rollup/plugin-typescript": "^11.1.4",
-    "@tenqube/location-history": "^0.0.4",
+    "@tenqube/location-history": "^0.0.10",
     "@types/react": "^18.2.25",
     "@types/react-dom": "^18.2.10",
     "@types/react-transition-group": "^4.4.7",

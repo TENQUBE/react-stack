@@ -1,5 +1,5 @@
 import { jsx, jsxs } from 'react/jsx-runtime';
-import React, { createContext, useState, useCallback, useEffect, useRef, useContext, Children, isValidElement, cloneElement } from 'react';
+import React, { createContext, useRef, useContext, useCallback, useEffect, useState, Children, isValidElement, cloneElement } from 'react';
 
 class LocationVO {
     constructor() {
@@ -81,7 +81,7 @@ const useLocationHistory = () => {
         setInitHistory();
         addObserver();
     }, [history]);
-    return [history, setHistory];
+    return history;
 };
 const LocaitonHistoryProvider = ({ children }) => {
     const [history, setHistory] = useState({
@@ -150,20 +150,6 @@ var AnimationClassName;
     AnimationClassName[AnimationClassName["to-top"] = 2] = "to-top";
     AnimationClassName[AnimationClassName["scale"] = 3] = "scale";
 })(AnimationClassName || (AnimationClassName = {}));
-
-class Stack {
-    constructor({ route, component, animation }) {
-        this.route = route;
-        this.component = component;
-        this.animation = animation;
-    }
-}
-
-const HybridRoute = ({ route, component, animation }) => {
-    const [addStackList] = useContext(HybridStackContext);
-    addStackList(new Stack({ route, component, animation }));
-    return null;
-};
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -33714,9 +33700,10 @@ TransitionGroup.propTypes = process.env.NODE_ENV !== "production" ? {
 TransitionGroup.defaultProps = defaultProps;
 var TransitionGroup$1 = TransitionGroup;
 
+const HybridStackContext = createContext(null);
 const HybridStackProvider = ({ children }) => {
     const stackList = useRef([]);
-    const [history] = useLocationHistory();
+    const history = useLocationHistory();
     const [printStack, setPrintStack] = useState([]);
     const [noDimmed, setNoDimmed] = useState(false);
     const [isAddStack, setAddStack] = useState();
@@ -33760,12 +33747,29 @@ const HybridStackProvider = ({ children }) => {
             setNoDimmed(false);
         }, 300);
     };
+    useEffect(() => {
+        console.log(printStack);
+    }, [printStack]);
     return (jsx("div", { className: "hybrid-webview-stack", children: jsxs(HybridStackContext.Provider, { value: [addStackList], children: [children, jsx(TransitionGroup$1, { children: printStack.map(({ component, animation }, i, arr) => {
                         const activePage = arr.length - 2;
                         const activeIdx = arr.length - 1;
                         const nextAnimation = i < activeIdx ? arr[i + 1].animation : false;
                         return (jsx(CSSTransition$1, { timeout: 300, classNames: `hybrid-stack-area hybrid-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), children: jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, children: [component, !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsx("div", { className: hybridDimmedClassName() }))] }) }, i));
                     }) })] }) }));
+};
+
+class Stack {
+    constructor({ route, component, animation }) {
+        this.route = route;
+        this.component = component;
+        this.animation = animation;
+    }
+}
+
+const HybridRoute = ({ route, component, animation }) => {
+    const [addStackList] = useContext(HybridStackContext);
+    addStackList(new Stack({ route, component, animation }));
+    return null;
 };
 
 const HybridLink = ({ to, target = '_self', state = {}, children }) => {
@@ -33778,10 +33782,9 @@ const HybridLink = ({ to, target = '_self', state = {}, children }) => {
     return (jsx("a", { href: to, onClick: handleClickLink, target: target, children: children }));
 };
 
-const HybridStackContext = createContext(null);
 const Index = ({ children }) => {
     return (jsx(LocaitonHistoryProvider, { children: jsx(HybridStackProvider, { children: children }) }));
 };
 
-export { AnimationType, HybridLink, HybridRoute, HybridStackContext, Index as default };
+export { AnimationType, HybridLink, HybridRoute, Index as default, useLocationHistory };
 //# sourceMappingURL=index.js.map

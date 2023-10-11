@@ -69,3 +69,57 @@ root.render(
   </HybridStackProvider>
 )
 ```
+
+## Enum
+Supports 4 route transition animations.
+```ts
+enum AnimationType {
+  None,
+  ToLeft,
+  ToTop,
+  Scale,
+}
+```
+
+## Hooks
+### useLocationHistory
+We use '[@tenqube/locaiton-history](https://github.com/TENQUBE/location-history)' to check the history state and this hook is exactly the same.
+
+```ts
+...
+import { useLocationHistory, ILocationHistory } from '@tenqube/hybrid-webview-stack'
+
+const White = () => {
+  const history: ILocationHistory = useLocationHistory()
+
+  useEffect(() => {
+    console.log(history)
+  }, [history])
+
+  ...
+}
+```
+
+```ts
+interface ILocationHistory {
+  list: ILocationVO[],
+  before: ILocationVO | null
+}
+```
+
+```ts
+interface ILocationVO {
+  readonly hash: string
+  readonly host: string
+  readonly hostname: string
+  readonly href: string
+  readonly origin: string
+  readonly pathname: string
+  readonly port: string
+  readonly protocol: string
+  readonly search: string
+  
+  readonly searchObj: unknown
+  readonly hashObj: unknown
+}
+```

@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 
-import { HybridStackContext } from '..'
+import { HybridStackContext } from './provider'
 import Stack from '../data/stack'
 
 const HybridRoute = ({ route, component, animation }) => {

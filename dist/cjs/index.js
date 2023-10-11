@@ -85,7 +85,7 @@ const useLocationHistory = () => {
         setInitHistory();
         addObserver();
     }, [history]);
-    return [history, setHistory];
+    return history;
 };
 const LocaitonHistoryProvider = ({ children }) => {
     const [history, setHistory] = React.useState({
@@ -154,20 +154,6 @@ var AnimationClassName;
     AnimationClassName[AnimationClassName["to-top"] = 2] = "to-top";
     AnimationClassName[AnimationClassName["scale"] = 3] = "scale";
 })(AnimationClassName || (AnimationClassName = {}));
-
-class Stack {
-    constructor({ route, component, animation }) {
-        this.route = route;
-        this.component = component;
-        this.animation = animation;
-    }
-}
-
-const HybridRoute = ({ route, component, animation }) => {
-    const [addStackList] = React.useContext(HybridStackContext);
-    addStackList(new Stack({ route, component, animation }));
-    return null;
-};
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -33718,9 +33704,10 @@ TransitionGroup.propTypes = process.env.NODE_ENV !== "production" ? {
 TransitionGroup.defaultProps = defaultProps;
 var TransitionGroup$1 = TransitionGroup;
 
+const HybridStackContext = React.createContext(null);
 const HybridStackProvider = ({ children }) => {
     const stackList = React.useRef([]);
-    const [history] = useLocationHistory();
+    const history = useLocationHistory();
     const [printStack, setPrintStack] = React.useState([]);
     const [noDimmed, setNoDimmed] = React.useState(false);
     const [isAddStack, setAddStack] = React.useState();
@@ -33764,12 +33751,29 @@ const HybridStackProvider = ({ children }) => {
             setNoDimmed(false);
         }, 300);
     };
+    React.useEffect(() => {
+        console.log(printStack);
+    }, [printStack]);
     return (jsxRuntime.jsx("div", { className: "hybrid-webview-stack", children: jsxRuntime.jsxs(HybridStackContext.Provider, { value: [addStackList], children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: printStack.map(({ component, animation }, i, arr) => {
                         const activePage = arr.length - 2;
                         const activeIdx = arr.length - 1;
                         const nextAnimation = i < activeIdx ? arr[i + 1].animation : false;
                         return (jsxRuntime.jsx(CSSTransition$1, { timeout: 300, classNames: `hybrid-stack-area hybrid-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), children: jsxRuntime.jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, children: [component, !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsxRuntime.jsx("div", { className: hybridDimmedClassName() }))] }) }, i));
                     }) })] }) }));
+};
+
+class Stack {
+    constructor({ route, component, animation }) {
+        this.route = route;
+        this.component = component;
+        this.animation = animation;
+    }
+}
+
+const HybridRoute = ({ route, component, animation }) => {
+    const [addStackList] = React.useContext(HybridStackContext);
+    addStackList(new Stack({ route, component, animation }));
+    return null;
 };
 
 const HybridLink = ({ to, target = '_self', state = {}, children }) => {
@@ -33782,13 +33786,12 @@ const HybridLink = ({ to, target = '_self', state = {}, children }) => {
     return (jsxRuntime.jsx("a", { href: to, onClick: handleClickLink, target: target, children: children }));
 };
 
-const HybridStackContext = React.createContext(null);
 const Index = ({ children }) => {
     return (jsxRuntime.jsx(LocaitonHistoryProvider, { children: jsxRuntime.jsx(HybridStackProvider, { children: children }) }));
 };
 
 exports.HybridLink = HybridLink;
 exports.HybridRoute = HybridRoute;
-exports.HybridStackContext = HybridStackContext;
 exports.default = Index;
+exports.useLocationHistory = useLocationHistory;
 //# sourceMappingURL=index.js.map

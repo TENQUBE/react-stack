@@ -7,7 +7,6 @@ export interface IStack {
   readonly animation: AnimationType
 }
 
-
 class Stack implements IStack {
   readonly route: string
   readonly component: ReactNode
