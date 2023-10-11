@@ -15,9 +15,16 @@ declare const HybridRoute: ({ route, component, animation }: {
     animation: any;
 }) => any;
 
+declare const HybridLink: ({ to, target, state, children }: {
+    to: any;
+    target?: string;
+    state?: {};
+    children: any;
+}) => react_jsx_runtime.JSX.Element;
+
 declare const HybridStackContext: react.Context<any>;
 declare const Index: ({ children }: {
     children: any;
 }) => react_jsx_runtime.JSX.Element;
 
-export { AnimationType, HybridRoute, HybridStackContext, Index as default };
+export { AnimationType, HybridLink, HybridRoute, HybridStackContext, Index as default };

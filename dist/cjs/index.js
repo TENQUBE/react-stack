@@ -33772,11 +33772,22 @@ const HybridStackProvider = ({ children }) => {
                     }) })] }) }));
 };
 
+const HybridLink = ({ to, target = '_self', state = {}, children }) => {
+    const handleClickLink = (e) => {
+        if (target === '_blank')
+            return;
+        e.preventDefault();
+        window.history.pushState(state, "", to);
+    };
+    return (jsxRuntime.jsx("a", { href: to, onClick: handleClickLink, target: target, children: children }));
+};
+
 const HybridStackContext = React.createContext(null);
 const Index = ({ children }) => {
     return (jsxRuntime.jsx(LocaitonHistoryProvider, { children: jsxRuntime.jsx(HybridStackProvider, { children: children }) }));
 };
 
+exports.HybridLink = HybridLink;
 exports.HybridRoute = HybridRoute;
 exports.HybridStackContext = HybridStackContext;
 exports.default = Index;
