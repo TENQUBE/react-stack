@@ -1,3 +1,5 @@
+>❗ __The current version is being developed and tested internally.__
+
 # @tenqube/hybrid-webview-stack
 This is a library that helps with screen stack routing and transition animation in web views of mobile web and hybrid apps.
 
