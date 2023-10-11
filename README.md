@@ -12,8 +12,10 @@ $ npm install @tenqube/hybrid-webview-stack
 ```ts
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-
 import HybridStackProvider, { AnimationType, HybridRoute } from '@tenqube/hybrid-webview-stack'
+
+const container = document.getElementById('wrap') as HTMLElement
+const root = ReactDOM.createRoot(container)
 
 const styles: any = {
   background: '#fff',
@@ -23,54 +25,40 @@ const styles: any = {
 }
 
 const White = () => {
-  const handleClick = () => {
-    window.history.pushState({}, "", '/black')
-  }
   return (
     <div style={{...styles}}>
       <h1>white</h1>
-      <p onClick={handleClick}>/black</p>
+      <HybridLink to="/black">/black</HybridLink>
     </div>
   )
 }
 
 const Black = () => {
-  const handleClick = () => {
-    window.history.pushState("", "", '/red')
-  }
   return (
     <div style={{...styles}}>
       <h1>black</h1>
-      <p onClick={handleClick}>/red</p>
+      <HybridLink to="/red">/red</HybridLink>
     </div>
   )
 }
 
 const Red = () => {
-  const handleClick = () => {
-    window.history.pushState("", "", '/blue')
-  }
   return (
     <div style={{...styles}}>
       <h1>Red</h1>
-      <p onClick={handleClick}>/blue</p>
+      <HybridLink to="/blue">/blue</HybridLink>
     </div>
   )
 }
 
 const Blue = () => {
-  const handleClick = () => {
-    window.history.pushState("", "", '/')
-  }
   return (
     <div style={{...styles}}>
       <h1>blue</h1>
-      <p onClick={handleClick}>/white</p>
+      <HybridLink to="/">/white</HybridLink>
     </div>
   )
 }
-const container = document.getElementById('wrap') as HTMLElement
-const root = ReactDOM.createRoot(container)
 
 root.render(
   <HybridStackProvider>

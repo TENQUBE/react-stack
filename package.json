@@ -1,6 +1,6 @@
 {
   "name": "@tenqube/hybrid-webview-stack",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Mobile Web and hybrid webview component stack management library for React",
   "keywords": [
     "react",
