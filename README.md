@@ -12,7 +12,7 @@ $ npm install @tenqube/hybrid-webview-stack
 ```ts
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import HybridStackProvider, { AnimationType, HybridRoute } from '@tenqube/hybrid-webview-stack'
+import HybridStackProvider, { AnimationType, HybridRoute, HybridLink } from '@tenqube/hybrid-webview-stack'
 
 const container = document.getElementById('wrap') as HTMLElement
 const root = ReactDOM.createRoot(container)

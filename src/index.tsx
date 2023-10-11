@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import HybridStackProvider, { AnimationType, HybridLink, HybridRoute } from '../dist/esm/'
+import HybridStackProvider, { AnimationType, HybridRoute, HybridLink } from '../dist/esm/'
 
 const container = document.getElementById('wrap') as HTMLElement
 const root = ReactDOM.createRoot(container)
