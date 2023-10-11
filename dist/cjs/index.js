@@ -33751,9 +33751,6 @@ const HybridStackProvider = ({ children }) => {
             setNoDimmed(false);
         }, 300);
     };
-    React.useEffect(() => {
-        console.log(printStack);
-    }, [printStack]);
     return (jsxRuntime.jsx("div", { className: "hybrid-webview-stack", children: jsxRuntime.jsxs(HybridStackContext.Provider, { value: [addStackList], children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: printStack.map(({ component, animation }, i, arr) => {
                         const activePage = arr.length - 2;
                         const activeIdx = arr.length - 1;

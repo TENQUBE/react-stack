@@ -56,11 +56,7 @@ const HybridStackProvider = ({ children }) => {
       setNoDimmed(false)
     }, 300)
   }
-
-  useEffect(() => {
-    console.log(printStack)
-  }, [printStack])
-
+  
   return (
     <div className="hybrid-webview-stack">
       <HybridStackContext.Provider value={[addStackList]}>
