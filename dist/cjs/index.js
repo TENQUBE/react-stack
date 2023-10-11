@@ -33763,7 +33763,7 @@ class Stack {
     constructor({ route, component, animation }) {
         this.route = route;
         this.component = component;
-        this.animation = animation;
+        this.animation = typeof animation === 'undefined' ? exports.AnimationType.None : animation;
     }
 }
 
@@ -33783,6 +33783,18 @@ const HybridLink = ({ to, target = '_self', state = {}, children }) => {
     return (jsxRuntime.jsx("a", { href: to, onClick: handleClickLink, target: target, children: children }));
 };
 
+const useHybridRouter = () => {
+    const [router, setRouter] = React.useState({});
+    React.useEffect(() => {
+        setRouter({
+            push: (to, state = {}) => {
+                window.history.pushState(state, '', to);
+            }
+        });
+    }, []);
+    return router;
+};
+
 const Index = ({ children }) => {
     return (jsxRuntime.jsx(LocaitonHistoryProvider, { children: jsxRuntime.jsx(HybridStackProvider, { children: children }) }));
 };
@@ -33790,5 +33802,6 @@ const Index = ({ children }) => {
 exports.HybridLink = HybridLink;
 exports.HybridRoute = HybridRoute;
 exports.default = Index;
+exports.useHybridRouter = useHybridRouter;
 exports.useLocationHistory = useLocationHistory;
 //# sourceMappingURL=index.js.map

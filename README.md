@@ -82,6 +82,29 @@ enum AnimationType {
 ```
 
 ## Hooks
+
+### useHybridRouter
+Currently, only the push method, which operates the same as 'history.pushState', is provided.
+```ts
+...
+import { useHybridRouter, IHybridRouter } from '@tenqube/hybrid-webview-stack'
+
+const White = () => {
+  const router: IHybridRouter = useHybridRouter()
+
+  const handleClickEvent = () => {
+    router.push('/black')
+  }
+
+  ...
+}
+```
+```ts
+interface IHybridRouter {
+  push: (to: string, state?: unknown) => void
+}
+```
+
 ### useLocationHistory
 We use '[@tenqube/locaiton-history](https://github.com/TENQUBE/location-history)' to check the history state and this hook is exactly the same.
 

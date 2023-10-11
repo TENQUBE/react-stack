@@ -15,7 +15,7 @@ class Stack implements IStack {
   constructor({ route, component, animation }) {
     this.route = route
     this.component = component
-    this.animation = animation
+    this.animation = typeof animation === 'undefined' ? AnimationType.None : animation
   }
 }
 

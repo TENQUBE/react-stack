@@ -33759,7 +33759,7 @@ class Stack {
     constructor({ route, component, animation }) {
         this.route = route;
         this.component = component;
-        this.animation = animation;
+        this.animation = typeof animation === 'undefined' ? AnimationType.None : animation;
     }
 }
 
@@ -33779,9 +33779,21 @@ const HybridLink = ({ to, target = '_self', state = {}, children }) => {
     return (jsx("a", { href: to, onClick: handleClickLink, target: target, children: children }));
 };
 
+const useHybridRouter = () => {
+    const [router, setRouter] = useState({});
+    useEffect(() => {
+        setRouter({
+            push: (to, state = {}) => {
+                window.history.pushState(state, '', to);
+            }
+        });
+    }, []);
+    return router;
+};
+
 const Index = ({ children }) => {
     return (jsx(LocaitonHistoryProvider, { children: jsx(HybridStackProvider, { children: children }) }));
 };
 
-export { AnimationType, HybridLink, HybridRoute, Index as default, useLocationHistory };
+export { AnimationType, HybridLink, HybridRoute, Index as default, useHybridRouter, useLocationHistory };
 //# sourceMappingURL=index.js.map

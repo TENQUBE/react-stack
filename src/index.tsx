@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
-import HybridStackProvider, { AnimationType, HybridRoute, HybridLink, useLocationHistory } from '../dist/esm/'
+import HybridStackProvider, { AnimationType, HybridRoute, HybridLink, useLocationHistory, useHybridRouter } from '../dist/esm/'
 
 const container = document.getElementById('wrap') as HTMLElement
 const root = ReactDOM.createRoot(container)
@@ -28,10 +28,16 @@ const White = () => {
 }
 
 const Black = () => {
+  const router: any = useHybridRouter()
+
+  const handleLinkClick = () => {
+    router.push('/red')
+  }
+
   return (
     <div style={{...styles}}>
       <h1>black</h1>
-      <HybridLink to="/red">/red</HybridLink>
+      <p onClick={handleLinkClick}>/red</p>
     </div>
   )
 }
