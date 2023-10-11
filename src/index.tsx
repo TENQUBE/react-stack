@@ -1,7 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-
 import HybridStackProvider, { AnimationType, HybridLink, HybridRoute } from '../dist/esm/'
+
+const container = document.getElementById('wrap') as HTMLElement
+const root = ReactDOM.createRoot(container)
 
 const styles: any = {
   background: '#fff',
@@ -45,8 +47,6 @@ const Blue = () => {
     </div>
   )
 }
-const container = document.getElementById('wrap') as HTMLElement
-const root = ReactDOM.createRoot(container)
 
 root.render(
   <HybridStackProvider>
