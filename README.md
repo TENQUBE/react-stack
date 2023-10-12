@@ -1,7 +1,7 @@
 >❗ __The current version is being developed and tested internally.__
 
 # @tenqube/hybrid-webview-stack
-This is a library that helps with screen stack routing and transition animation in web views of mobile web and hybrid apps.
+A library that helps with screen stack routing and transition animation in webviews of hybrid apps.
 
 ## Installation
 ```sh
@@ -89,6 +89,8 @@ const White = () => {
 
   const handleClickBack = () => {
     router.back()
+    // Go back one step
+    // router.back(2) - Go back two steps
   }
 
   ...
