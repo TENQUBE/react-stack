@@ -1,5 +1,4 @@
 import * as react_jsx_runtime from 'react/jsx-runtime';
-export { ILocationHistory, ILocationVO, useLocationHistory } from '@tenqube/location-history';
 import { ReactNode } from 'react';
 
 declare enum AnimationType {
@@ -19,13 +18,13 @@ declare const HybridRoute: ({ route, component, animation }: IProps$1) => any;
 interface IProps {
     to: string;
     target?: string;
-    state?: unknown;
     children?: ReactNode;
 }
-declare const HybridLink: ({ to, target, state, children }: IProps) => react_jsx_runtime.JSX.Element;
+declare const HybridLink: ({ to, target, children }: IProps) => react_jsx_runtime.JSX.Element;
 
 interface IHybridRouter {
-    push?: (to: string, state?: unknown) => void;
+    push?: (to: string) => void;
+    go?: (to: number) => void;
 }
 declare const useHybridRouter: () => IHybridRouter;
 

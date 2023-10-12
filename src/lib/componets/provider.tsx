@@ -1,6 +1,5 @@
-import { createContext, useEffect, useRef, useState } from 'react'
+import { createContext, useCallback, useEffect, useRef, useState } from 'react'
 import { CSSTransition, TransitionGroup } from 'react-transition-group'
-import { ILocationHistory, useLocationHistory } from '@tenqube/location-history'
 
 import { AnimationClassName, AnimationType } from '../interfaces'
 import { IStack } from '../data/stack'
@@ -9,22 +8,32 @@ export const HybridStackContext = createContext(null)
 
 const HybridStackProvider = ({ children }) => {
   const stackList = useRef<IStack[]>([])
-  const history: ILocationHistory = useLocationHistory()
-
-  const [printStack, setPrintStack] = useState([])
-  const [noDimmed, setNoDimmed] = useState(false)
-
+  
+  const [stack, setStack] = useState<IStack[]>([])
   const [isAddStack, setAddStack] = useState<boolean>()
+
   const [isMoveActive, setMoveActive] = useState<boolean>(false)
   const [isMoveAction, setMoveAction] = useState<boolean>(false)
+  const [noDimmed, setNoDimmed] = useState(false)
 
-  useEffect(() => {
-    if(history.list.length === 0) return
-    setAddStack(history.list.length > printStack.length)
-    setPrintStack(history.list.map(({ pathname }) => {
-      return stackList.current.find(({ route }) => route === pathname)
-    }))
-  }, [history])
+  const addStackList = (data: IStack) => {
+    stackList.current = [...stackList.current, data]
+  }
+
+  const updateStack = useCallback((to: string | number) => {
+    const isToNumber = typeof to === 'number'
+    setAddStack(!(isToNumber && to < 0))
+    if(isToNumber) {
+      if(to > 0) return
+      setStack(stack.slice(0, stack.length + to))
+    } else {
+      setStack([...stack, stackList.current.find(({ route }) => route === to)])
+    }
+  }, [stack])
+
+  const historyBackStack = useCallback(() => {
+    updateStack(-1)
+  }, [stack])
 
   useEffect(() => {
     if(isAddStack === null) return
@@ -34,13 +43,20 @@ const HybridStackProvider = ({ children }) => {
       setTimeout(() => {
         setMoveActive(false)
         setMoveAction(false)
-      }, 300)
+      }, 230)
     }, 20)
-  }, [history])
+  }, [stack])
 
-  const addStackList = (data: IStack) => {
-    stackList.current = [...stackList.current, data]
-  }
+  useEffect(() => {
+    window.addEventListener('popstate', historyBackStack)
+    return () => {
+      window.removeEventListener('popstate', historyBackStack)
+    }
+  }, [stack])
+  
+  useEffect(() => {
+    updateStack(window.location.pathname)
+  }, [])
 
   const hybridDimmedClassName = () => {
     const customClassName = ['hybrid-dimmed']
@@ -54,15 +70,15 @@ const HybridStackProvider = ({ children }) => {
     setNoDimmed(true)
     setTimeout(() => {
       setNoDimmed(false)
-    }, 300)
+    }, 250)
   }
   
   return (
     <div className="hybrid-webview-stack">
-      <HybridStackContext.Provider value={[addStackList]}>
+      <HybridStackContext.Provider value={[addStackList, updateStack]}>
         {children}
         <TransitionGroup>
-          {printStack.map(({ component, animation }, i, arr) => {
+          {stack.map(({ component, animation }, i, arr) => {
             const activePage = arr.length - 2
             const activeIdx = arr.length - 1
             const nextAnimation = i < activeIdx ? arr[i + 1].animation : false
@@ -70,7 +86,7 @@ const HybridStackProvider = ({ children }) => {
             return (
               <CSSTransition 
                 key={i} 
-                timeout={300} 
+                timeout={250} 
                 classNames={`hybrid-stack-area hybrid-${AnimationClassName[animation]}`}
                 onExit={() => checkDimmed(animation)}
               >

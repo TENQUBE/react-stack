@@ -84,7 +84,8 @@ enum AnimationType {
 ## Hooks
 
 ### useHybridRouter
-Currently, only the push method, which operates the same as 'history.pushState', is provided.
+Currently, push and go methods are provided.  
+The push method is equivalent to 'history.pushState' and the go method is equivalent to 'history.go', but currently only provides negative numbers (going back).
 ```ts
 ...
 import { useHybridRouter, IHybridRouter } from '@tenqube/hybrid-webview-stack'
@@ -96,53 +97,16 @@ const White = () => {
     router.push('/black')
   }
 
+    const handleClickBack = () => {
+    router.go(-1)
+  }
+
   ...
 }
 ```
 ```ts
 interface IHybridRouter {
-  push: (to: string, state?: unknown) => void
-}
-```
-
-### useLocationHistory
-We use '[@tenqube/locaiton-history](https://github.com/TENQUBE/location-history)' to check the history state and this hook is exactly the same.
-
-```ts
-...
-import { useLocationHistory, ILocationHistory } from '@tenqube/hybrid-webview-stack'
-
-const White = () => {
-  const history: ILocationHistory = useLocationHistory()
-
-  useEffect(() => {
-    console.log(history)
-  }, [history])
-
-  ...
-}
-```
-
-```ts
-interface ILocationHistory {
-  list: ILocationVO[],
-  before: ILocationVO | null
-}
-```
-
-```ts
-interface ILocationVO {
-  readonly hash: string
-  readonly host: string
-  readonly hostname: string
-  readonly href: string
-  readonly origin: string
-  readonly pathname: string
-  readonly port: string
-  readonly protocol: string
-  readonly search: string
-  
-  readonly searchObj: unknown
-  readonly hashObj: unknown
+  push: (to: string) => void
+  go: (to: number) => void
 }
 ```

@@ -10,7 +10,7 @@
   height: 100%;
   position: absolute;
   overflow-y: hidden;
-  transition: all 0.3s;
+  transition: all 0.25s;
   transform: translateX(0) scale(1);
   opacity: 1;
 
@@ -89,7 +89,7 @@
   background: #000;
   opacity: 0;
   will-change: opacity;
-  transition: opacity 0.3s;
+  transition: opacity 0.25s;
   z-index: 9999;
   &.prev {
     opacity: 0.3;

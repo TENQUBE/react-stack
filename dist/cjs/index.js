@@ -5,111 +5,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var jsxRuntime = require('react/jsx-runtime');
 var React = require('react');
 
-class LocationVO {
-    constructor() {
-        const { hash, host, hostname, href, origin, pathname, port, protocol, search } = document.location;
-        this.host = host;
-        this.hostname = hostname;
-        this.href = href;
-        this.origin = origin;
-        this.pathname = pathname;
-        this.port = port;
-        this.protocol = protocol;
-        this.hash = hash.substring(1);
-        this.search = search.substring(1);
-        this.hashObj = this.groupParamsByKey(new URLSearchParams(this.hash));
-        this.searchObj = this.groupParamsByKey(new URLSearchParams(this.search));
-    }
-    groupParamsByKey(params) {
-        return [...params.entries()].reduce((acc, tuple) => {
-            const [key, val] = tuple;
-            if (acc.hasOwnProperty(key)) {
-                if (Array.isArray(acc[key])) {
-                    acc[key] = [...acc[key], val];
-                }
-                else {
-                    acc[key] = [acc[key], val];
-                }
-            }
-            else {
-                acc[key] = val;
-            }
-            return acc;
-        }, {});
-    }
-    equals(obj) {
-        return Object.entries(this).sort().toString() === Object.entries(obj).sort().toString();
-    }
-}
-
-const LocationContext = React.createContext(null);
-const useLocationHistory = () => {
-    const observer = React.useRef();
-    const [history, setHistory] = React.useContext(LocationContext);
-    const setInitHistory = React.useCallback(() => {
-        if (history.list.length > 0)
-            return;
-        setHistory({
-            list: [new LocationVO()],
-            before: null
-        });
-    }, [history]);
-    const addObserver = React.useCallback(() => {
-        const len = history.list.length;
-        let oldHref = document.location.href;
-        if (observer.current)
-            observer.current.disconnect();
-        observer.current = new MutationObserver(() => {
-            if (oldHref !== document.location.href) {
-                oldHref = document.location.href;
-                const newBefore = len > 0 ? history.list[len - 1] : null;
-                const newLocation = new LocationVO();
-                if (len > 1 && history.list[len - 2].href === newLocation.href) {
-                    setHistory({
-                        list: history.list.slice(0, len - 1),
-                        before: newBefore
-                    });
-                }
-                else {
-                    const list = [...history.list, newLocation];
-                    setHistory({
-                        list,
-                        before: newBefore
-                    });
-                }
-            }
-        });
-        observer.current.observe(document.body, { childList: true, subtree: true, attributes: true });
-    }, [history]);
-    React.useEffect(() => {
-        setInitHistory();
-        addObserver();
-    }, [history]);
-    return history;
-};
-const LocaitonHistoryProvider = ({ children }) => {
-    const [history, setHistory] = React.useState({
-        list: [],
-        before: null
-    });
-    const observerTrigger = React.useCallback(() => {
-        document.body.setAttribute('data-lh-update', String(new Date().getTime()));
-    }, []);
-    React.useEffect(() => {
-        window.history.pushState = new Proxy(window.history.pushState, {
-            apply: (target, thisArg, argArray) => {
-                observerTrigger();
-                return target.apply(thisArg, argArray);
-            }
-        });
-        window.addEventListener('popstate', observerTrigger);
-        return () => {
-            window.removeEventListener('popstate', observerTrigger);
-        };
-    }, []);
-    return (jsxRuntime.jsx(LocationContext.Provider, { value: [history, setHistory], children: children }));
-};
-
 function styleInject(css, ref) {
   if ( ref === void 0 ) ref = {};
   var insertAt = ref.insertAt;
@@ -137,7 +32,7 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z = ".hybrid-webview-stack {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  overflow: hidden; }\n\n.hybrid-stack-area {\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  overflow-y: hidden;\n  transition: all 0.3s;\n  transform: translateX(0) scale(1);\n  opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-enter {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-scale-enter-active, .hybrid-stack-area.hybrid-scale-enter-done, .hybrid-stack-area.hybrid-scale-exit {\n    transform: scale(1);\n    opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-exit-active {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-to-left-enter {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-left-enter-active, .hybrid-stack-area.hybrid-to-left-enter-done, .hybrid-stack-area.hybrid-to-left-exit {\n    transform: translateX(0); }\n  .hybrid-stack-area.hybrid-to-left-exit-active {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter {\n    transform: translateY(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter-active, .hybrid-stack-area.hybrid-to-top-enter-done, .hybrid-stack-area.hybrid-to-top-exit {\n    transform: translateY(0); }\n  .hybrid-stack-area.hybrid-to-top-exit-active {\n    transform: translateY(100%); }\n  .hybrid-stack-area[data-before-ani=\"to-left\"] {\n    transform: translateX(-10%); }\n  .hybrid-stack-area[data-before-ani=\"to-top\"] .hybrid-dimmed {\n    opacity: 0; }\n  .hybrid-stack-area[data-before-ani=\"scale\"] {\n    transform: scale(1.05); }\n    .hybrid-stack-area[data-before-ani=\"scale\"] .hybrid-dimmed {\n      opacity: 0; }\n\n.hybrid-dimmed {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: #000;\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.3s;\n  z-index: 9999; }\n  .hybrid-dimmed.prev {\n    opacity: 0.3; }\n    .hybrid-dimmed.prev.active {\n      opacity: 0; }\n  .hybrid-dimmed.active {\n    opacity: 0.3; }\n";
+var css_248z = ".hybrid-webview-stack {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  overflow: hidden; }\n\n.hybrid-stack-area {\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  overflow-y: hidden;\n  transition: all 0.25s;\n  transform: translateX(0) scale(1);\n  opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-enter {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-scale-enter-active, .hybrid-stack-area.hybrid-scale-enter-done, .hybrid-stack-area.hybrid-scale-exit {\n    transform: scale(1);\n    opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-exit-active {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-to-left-enter {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-left-enter-active, .hybrid-stack-area.hybrid-to-left-enter-done, .hybrid-stack-area.hybrid-to-left-exit {\n    transform: translateX(0); }\n  .hybrid-stack-area.hybrid-to-left-exit-active {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter {\n    transform: translateY(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter-active, .hybrid-stack-area.hybrid-to-top-enter-done, .hybrid-stack-area.hybrid-to-top-exit {\n    transform: translateY(0); }\n  .hybrid-stack-area.hybrid-to-top-exit-active {\n    transform: translateY(100%); }\n  .hybrid-stack-area[data-before-ani=\"to-left\"] {\n    transform: translateX(-10%); }\n  .hybrid-stack-area[data-before-ani=\"to-top\"] .hybrid-dimmed {\n    opacity: 0; }\n  .hybrid-stack-area[data-before-ani=\"scale\"] {\n    transform: scale(1.05); }\n    .hybrid-stack-area[data-before-ani=\"scale\"] .hybrid-dimmed {\n      opacity: 0; }\n\n.hybrid-dimmed {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: #000;\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.25s;\n  z-index: 9999; }\n  .hybrid-dimmed.prev {\n    opacity: 0.3; }\n    .hybrid-dimmed.prev.active {\n      opacity: 0; }\n  .hybrid-dimmed.active {\n    opacity: 0.3; }\n";
 styleInject(css_248z);
 
 exports.AnimationType = void 0;
@@ -33707,20 +33602,29 @@ var TransitionGroup$1 = TransitionGroup;
 const HybridStackContext = React.createContext(null);
 const HybridStackProvider = ({ children }) => {
     const stackList = React.useRef([]);
-    const history = useLocationHistory();
-    const [printStack, setPrintStack] = React.useState([]);
-    const [noDimmed, setNoDimmed] = React.useState(false);
+    const [stack, setStack] = React.useState([]);
     const [isAddStack, setAddStack] = React.useState();
     const [isMoveActive, setMoveActive] = React.useState(false);
     const [isMoveAction, setMoveAction] = React.useState(false);
-    React.useEffect(() => {
-        if (history.list.length === 0)
-            return;
-        setAddStack(history.list.length > printStack.length);
-        setPrintStack(history.list.map(({ pathname }) => {
-            return stackList.current.find(({ route }) => route === pathname);
-        }));
-    }, [history]);
+    const [noDimmed, setNoDimmed] = React.useState(false);
+    const addStackList = (data) => {
+        stackList.current = [...stackList.current, data];
+    };
+    const updateStack = React.useCallback((to) => {
+        const isToNumber = typeof to === 'number';
+        setAddStack(!(isToNumber && to < 0));
+        if (isToNumber) {
+            if (to > 0)
+                return;
+            setStack(stack.slice(0, stack.length + to));
+        }
+        else {
+            setStack([...stack, stackList.current.find(({ route }) => route === to)]);
+        }
+    }, [stack]);
+    const historyBackStack = React.useCallback(() => {
+        updateStack(-1);
+    }, [stack]);
     React.useEffect(() => {
         if (isAddStack === null)
             return;
@@ -33730,12 +33634,18 @@ const HybridStackProvider = ({ children }) => {
             setTimeout(() => {
                 setMoveActive(false);
                 setMoveAction(false);
-            }, 300);
+            }, 230);
         }, 20);
-    }, [history]);
-    const addStackList = (data) => {
-        stackList.current = [...stackList.current, data];
-    };
+    }, [stack]);
+    React.useEffect(() => {
+        window.addEventListener('popstate', historyBackStack);
+        return () => {
+            window.removeEventListener('popstate', historyBackStack);
+        };
+    }, [stack]);
+    React.useEffect(() => {
+        updateStack(window.location.pathname);
+    }, []);
     const hybridDimmedClassName = () => {
         const customClassName = ['hybrid-dimmed'];
         customClassName.push(isAddStack ? 'next' : 'prev');
@@ -33749,13 +33659,13 @@ const HybridStackProvider = ({ children }) => {
         setNoDimmed(true);
         setTimeout(() => {
             setNoDimmed(false);
-        }, 300);
+        }, 250);
     };
-    return (jsxRuntime.jsx("div", { className: "hybrid-webview-stack", children: jsxRuntime.jsxs(HybridStackContext.Provider, { value: [addStackList], children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: printStack.map(({ component, animation }, i, arr) => {
+    return (jsxRuntime.jsx("div", { className: "hybrid-webview-stack", children: jsxRuntime.jsxs(HybridStackContext.Provider, { value: [addStackList, updateStack], children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: stack.map(({ component, animation }, i, arr) => {
                         const activePage = arr.length - 2;
                         const activeIdx = arr.length - 1;
                         const nextAnimation = i < activeIdx ? arr[i + 1].animation : false;
-                        return (jsxRuntime.jsx(CSSTransition$1, { timeout: 300, classNames: `hybrid-stack-area hybrid-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), children: jsxRuntime.jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, children: [component, !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsxRuntime.jsx("div", { className: hybridDimmedClassName() }))] }) }, i));
+                        return (jsxRuntime.jsx(CSSTransition$1, { timeout: 250, classNames: `hybrid-stack-area hybrid-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), children: jsxRuntime.jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, children: [component, !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsxRuntime.jsx("div", { className: hybridDimmedClassName() }))] }) }, i));
                     }) })] }) }));
 };
 
@@ -33773,22 +33683,34 @@ const HybridRoute = ({ route, component, animation }) => {
     return null;
 };
 
-const HybridLink = ({ to, target = '_self', state = {}, children }) => {
+const HybridLink = ({ to, target = '_self', children }) => {
+    const [_, setStack] = React.useContext(HybridStackContext);
     const handleClickLink = (e) => {
         if (target === '_blank')
             return;
         e.preventDefault();
-        window.history.pushState(state, "", to);
+        setStack(to);
+        window.history.pushState('', '', to);
     };
     return (jsxRuntime.jsx("a", { href: to, onClick: handleClickLink, target: target, children: children }));
 };
 
 const useHybridRouter = () => {
+    const [_, setStack] = React.useContext(HybridStackContext);
     const [router, setRouter] = React.useState({});
     React.useEffect(() => {
         setRouter({
-            push: (to, state = {}) => {
-                window.history.pushState(state, '', to);
+            push: (to) => {
+                setStack(to);
+                window.history.pushState('', '', to);
+            },
+            go: (to) => {
+                if (typeof to !== 'number' || to >= 0) {
+                    console.error('Currently the go method only supports going back. (negative number)');
+                    return;
+                }
+                setStack(to);
+                window.history.go(to);
             }
         });
     }, []);
@@ -33796,12 +33718,11 @@ const useHybridRouter = () => {
 };
 
 const Index = ({ children }) => {
-    return (jsxRuntime.jsx(LocaitonHistoryProvider, { children: jsxRuntime.jsx(HybridStackProvider, { children: children }) }));
+    return (jsxRuntime.jsx(HybridStackProvider, { children: children }));
 };
 
 exports.HybridLink = HybridLink;
 exports.HybridRoute = HybridRoute;
 exports.default = Index;
 exports.useHybridRouter = useHybridRouter;
-exports.useLocationHistory = useLocationHistory;
 //# sourceMappingURL=index.js.map

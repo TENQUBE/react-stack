@@ -1,5 +1,3 @@
-import LocaitonHistoryProvider, { useLocationHistory, ILocationHistory, ILocationVO } from '@tenqube/location-history'
-
 import './styles/main.scss'
 import { AnimationType } from './interfaces'
 import HybridRoute from './componets/route'
@@ -9,13 +7,11 @@ import useHybridRouter, { IHybridRouter } from './hooks/useHybridRouter'
 
 const Index = ({ children }) => {
   return (
-    <LocaitonHistoryProvider>
-      <HybridStackProvider>
-        {children}
-      </HybridStackProvider>
-    </LocaitonHistoryProvider>
+    <HybridStackProvider>
+      {children}
+    </HybridStackProvider>
   )
 }
 
-export { HybridRoute, HybridLink, AnimationType, useHybridRouter, IHybridRouter, useLocationHistory, ILocationHistory, ILocationVO }
+export { HybridRoute, HybridLink, AnimationType, useHybridRouter, IHybridRouter }
 export default Index
