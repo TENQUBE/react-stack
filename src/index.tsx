@@ -22,7 +22,7 @@ const White = () => {
   return (
     <div style={{...styles}}>
       <h1>white</h1>
-      <HybridLink to="/black">/black</HybridLink>
+      <HybridLink to="/black?id=aa">/black</HybridLink>
     </div>
   )
 }
@@ -31,7 +31,7 @@ const Black = () => {
   const router: any = useHybridRouter()
 
   const handleLinkClick = () => {
-    router.push('/red')
+    router.push('/red#aaa')
   }
 
   return (

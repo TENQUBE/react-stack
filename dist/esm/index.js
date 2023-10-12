@@ -33565,10 +33565,15 @@ TransitionGroup.propTypes = process.env.NODE_ENV !== "production" ? {
 TransitionGroup.defaultProps = defaultProps;
 var TransitionGroup$1 = TransitionGroup;
 
+const parseToRoute = (route) => {
+    return route.split('#')[0].split('?')[0];
+};
+
 const HybridStackContext = createContext(null);
 const HybridStackProvider = ({ children }) => {
     const stackList = useRef([]);
     const beforeHash = useRef('');
+    const beforePathname = useRef('');
     const [stack, setStack] = useState([]);
     const [isAddStack, setAddStack] = useState();
     const [isMoveActive, setMoveActive] = useState(false);
@@ -33584,14 +33589,19 @@ const HybridStackProvider = ({ children }) => {
             setStack(stack.slice(0, stack.length + to));
         }
         else {
-            setStack([...stack, stackList.current.find(({ route }) => route === to)]);
+            setStack([...stack, stackList.current.find(({ route }) => route === parseToRoute(to))]);
         }
     }, [stack]);
-    const historyBackStack = useCallback(() => {
-        if (!window.location.hash && !beforeHash.current)
-            updateStack(-1);
-        beforeHash.current = window.location.hash;
-    }, [stack]);
+    const historyBackStack = () => {
+        const { pathname, hash } = window.location;
+        const bPath = beforePathname.current;
+        const bHash = beforeHash.current;
+        beforeHash.current = hash;
+        beforePathname.current = pathname;
+        if (pathname === bPath && (hash || (!hash && bHash)))
+            return;
+        updateStack(-1);
+    };
     useEffect(() => {
         if (isAddStack === null)
             return;
@@ -33605,6 +33615,7 @@ const HybridStackProvider = ({ children }) => {
         }, 20);
     }, [stack]);
     useEffect(() => {
+        beforePathname.current = window.location.pathname;
         window.addEventListener('popstate', historyBackStack);
         return () => {
             window.removeEventListener('popstate', historyBackStack);

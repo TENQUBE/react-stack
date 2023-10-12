@@ -3,12 +3,14 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group'
 
 import { AnimationClassName, AnimationType } from '../interfaces'
 import { IStack } from '../data/stack'
+import { parseToRoute } from '../utils/parse'
 
 export const HybridStackContext = createContext(null)
 
 const HybridStackProvider = ({ children }) => {
   const stackList = useRef<IStack[]>([])
   const beforeHash = useRef<string>('')
+  const beforePathname = useRef<string>('')
 
   const [stack, setStack] = useState<IStack[]>([])
   const [isAddStack, setAddStack] = useState<boolean>()
@@ -27,14 +29,21 @@ const HybridStackProvider = ({ children }) => {
     if(isToNumber) {
       setStack(stack.slice(0, stack.length + to))
     } else {
-      setStack([...stack, stackList.current.find(({ route }) => route === to)])
+      setStack([...stack, stackList.current.find(({ route }) => route === parseToRoute(to))])
     }
   }, [stack])
 
-  const historyBackStack = useCallback(() => {
-    if(!window.location.hash && !beforeHash.current) updateStack(-1)
-    beforeHash.current = window.location.hash
-  }, [stack])
+  const historyBackStack = () => {
+    const { pathname, hash } = window.location
+    const bPath = beforePathname.current
+    const bHash = beforeHash.current
+    
+    beforeHash.current = hash
+    beforePathname.current = pathname
+    
+    if(pathname === bPath && (hash || (!hash && bHash))) return
+    updateStack(-1)
+  }
 
   useEffect(() => {
     if(isAddStack === null) return
@@ -49,6 +58,7 @@ const HybridStackProvider = ({ children }) => {
   }, [stack])
 
   useEffect(() => {
+    beforePathname.current = window.location.pathname
     window.addEventListener('popstate', historyBackStack)
     return () => {
       window.removeEventListener('popstate', historyBackStack)
