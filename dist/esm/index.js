@@ -1,4 +1,4 @@
-import { jsx, jsxs } from 'react/jsx-runtime';
+import { jsx, Fragment, jsxs } from 'react/jsx-runtime';
 import React, { Children, isValidElement, cloneElement, createContext, useRef, useState, useCallback, useEffect, useContext } from 'react';
 
 var AnimationType;
@@ -33565,9 +33565,19 @@ TransitionGroup.propTypes = process.env.NODE_ENV !== "production" ? {
 TransitionGroup.defaultProps = defaultProps;
 var TransitionGroup$1 = TransitionGroup;
 
+class Stack {
+    constructor({ route, component, animation }) {
+        this.route = route;
+        this.component = component;
+        this.animation = typeof animation === 'undefined' ? AnimationType.None : animation;
+    }
+}
+
 const HybridStackContext = createContext(null);
 const HybridStackProvider = ({ children }) => {
+    const basePathname = useRef('');
     const stackList = useRef([]);
+    const hashStack = useRef([]);
     const [stack, setStack] = useState([]);
     const [isAddStack, setAddStack] = useState();
     const [isMoveActive, setMoveActive] = useState(false);
@@ -33578,17 +33588,31 @@ const HybridStackProvider = ({ children }) => {
     };
     const updateStack = useCallback((to) => {
         const isToNumber = typeof to === 'number';
-        setAddStack(!(isToNumber && to < 0));
+        setAddStack(!isToNumber);
         if (isToNumber) {
-            if (to > 0)
-                return;
             setStack(stack.slice(0, stack.length + to));
         }
         else {
             setStack([...stack, stackList.current.find(({ route }) => route === to)]);
         }
     }, [stack]);
-    const historyBackStack = useCallback(() => {
+    const historyBackStack = useCallback((event) => {
+        const hash = window.location.hash;
+        if (basePathname.current === window.location.pathname && event.state === null && hash) {
+            if (hashStack.current.length === 0 || hashStack.current[hashStack.current.length - 2] !== hash) {
+                event.preventDefault();
+                hashStack.current = [...hashStack.current, hash];
+                setStack([...stack, new Stack({ route: null, component: jsx(Fragment, {}), animation: AnimationType.None })]);
+                return false;
+            }
+            else {
+                hashStack.current = hashStack.current.slice(0, hashStack.current.length - 1);
+                updateStack(-1);
+                return false;
+            }
+        }
+        if (hashStack.current.length)
+            hashStack.current = [];
         updateStack(-1);
     }, [stack]);
     useEffect(() => {
@@ -33604,6 +33628,7 @@ const HybridStackProvider = ({ children }) => {
         }, 20);
     }, [stack]);
     useEffect(() => {
+        basePathname.current = window.location.pathname;
         window.addEventListener('popstate', historyBackStack);
         return () => {
             window.removeEventListener('popstate', historyBackStack);
@@ -33630,18 +33655,10 @@ const HybridStackProvider = ({ children }) => {
     return (jsx("div", { className: "hybrid-webview-stack", children: jsxs(HybridStackContext.Provider, { value: [addStackList, stack, updateStack], children: [children, jsx(TransitionGroup$1, { children: stack.map(({ component, animation }, i, arr) => {
                         const activePage = arr.length - 2;
                         const activeIdx = arr.length - 1;
-                        const nextAnimation = i < activeIdx ? arr[i + 1].animation : false;
-                        return (jsx(CSSTransition$1, { timeout: 250, classNames: `hybrid-stack-area hybrid-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), children: jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, children: [component, !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsx("div", { className: hybridDimmedClassName() }))] }) }, i));
+                        const nextAnimation = (i < activeIdx && arr[i + 1]) ? arr[i + 1].animation : false;
+                        return (jsx(CSSTransition$1, { timeout: 250, classNames: `hybrid-stack-area hybrid-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), children: jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, children: [component, arr[activeIdx].route !== null && !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsx("div", { className: hybridDimmedClassName() }))] }) }, i));
                     }) })] }) }));
 };
-
-class Stack {
-    constructor({ route, component, animation }) {
-        this.route = route;
-        this.component = component;
-        this.animation = typeof animation === 'undefined' ? AnimationType.None : animation;
-    }
-}
 
 const HybridRoute = ({ route, component, animation }) => {
     const [addStackList] = useContext(HybridStackContext);
@@ -33670,13 +33687,13 @@ const useHybridRouter = () => {
                 setStack(to);
                 window.history.pushState('', '', to);
             },
-            go: (to) => {
-                if (typeof to !== 'number' || to >= 0) {
-                    console.error('Currently the go method only supports going back. (negative number)');
+            back: (to = 1) => {
+                if (to <= 0) {
+                    console.error('error');
                     return;
                 }
                 setStack(to);
-                window.history.go(to);
+                window.history.go(to * -1);
             }
         });
     }, []);

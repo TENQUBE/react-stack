@@ -74,8 +74,8 @@ enum AnimationType {
 ## Hooks
 
 ### useHybridRouter
-Currently, push and go methods are provided.  
-The push method is equivalent to 'history.pushState' and the go method is equivalent to 'history.go', but currently only provides negative numbers (going back).
+Currently push and back methods are provided.
+The push method is the same as 'history.pushState' and the back method is similar to 'history.back', but provides the size to move back as a parameter.
 ```ts
 ...
 import { useHybridRouter, IHybridRouter } from '@tenqube/hybrid-webview-stack'
@@ -88,7 +88,7 @@ const White = () => {
   }
 
   const handleClickBack = () => {
-    router.go(-1)
+    router.back()
   }
 
   ...
@@ -97,7 +97,7 @@ const White = () => {
 ```ts
 interface IHybridRouter {
   push: (to: string) => void
-  go: (to: number) => void
+  back: (to: number) => void
 }
 ```
 

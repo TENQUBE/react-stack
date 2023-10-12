@@ -33569,9 +33569,19 @@ TransitionGroup.propTypes = process.env.NODE_ENV !== "production" ? {
 TransitionGroup.defaultProps = defaultProps;
 var TransitionGroup$1 = TransitionGroup;
 
+class Stack {
+    constructor({ route, component, animation }) {
+        this.route = route;
+        this.component = component;
+        this.animation = typeof animation === 'undefined' ? exports.AnimationType.None : animation;
+    }
+}
+
 const HybridStackContext = React.createContext(null);
 const HybridStackProvider = ({ children }) => {
+    const basePathname = React.useRef('');
     const stackList = React.useRef([]);
+    const hashStack = React.useRef([]);
     const [stack, setStack] = React.useState([]);
     const [isAddStack, setAddStack] = React.useState();
     const [isMoveActive, setMoveActive] = React.useState(false);
@@ -33582,17 +33592,31 @@ const HybridStackProvider = ({ children }) => {
     };
     const updateStack = React.useCallback((to) => {
         const isToNumber = typeof to === 'number';
-        setAddStack(!(isToNumber && to < 0));
+        setAddStack(!isToNumber);
         if (isToNumber) {
-            if (to > 0)
-                return;
             setStack(stack.slice(0, stack.length + to));
         }
         else {
             setStack([...stack, stackList.current.find(({ route }) => route === to)]);
         }
     }, [stack]);
-    const historyBackStack = React.useCallback(() => {
+    const historyBackStack = React.useCallback((event) => {
+        const hash = window.location.hash;
+        if (basePathname.current === window.location.pathname && event.state === null && hash) {
+            if (hashStack.current.length === 0 || hashStack.current[hashStack.current.length - 2] !== hash) {
+                event.preventDefault();
+                hashStack.current = [...hashStack.current, hash];
+                setStack([...stack, new Stack({ route: null, component: jsxRuntime.jsx(jsxRuntime.Fragment, {}), animation: exports.AnimationType.None })]);
+                return false;
+            }
+            else {
+                hashStack.current = hashStack.current.slice(0, hashStack.current.length - 1);
+                updateStack(-1);
+                return false;
+            }
+        }
+        if (hashStack.current.length)
+            hashStack.current = [];
         updateStack(-1);
     }, [stack]);
     React.useEffect(() => {
@@ -33608,6 +33632,7 @@ const HybridStackProvider = ({ children }) => {
         }, 20);
     }, [stack]);
     React.useEffect(() => {
+        basePathname.current = window.location.pathname;
         window.addEventListener('popstate', historyBackStack);
         return () => {
             window.removeEventListener('popstate', historyBackStack);
@@ -33634,18 +33659,10 @@ const HybridStackProvider = ({ children }) => {
     return (jsxRuntime.jsx("div", { className: "hybrid-webview-stack", children: jsxRuntime.jsxs(HybridStackContext.Provider, { value: [addStackList, stack, updateStack], children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: stack.map(({ component, animation }, i, arr) => {
                         const activePage = arr.length - 2;
                         const activeIdx = arr.length - 1;
-                        const nextAnimation = i < activeIdx ? arr[i + 1].animation : false;
-                        return (jsxRuntime.jsx(CSSTransition$1, { timeout: 250, classNames: `hybrid-stack-area hybrid-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), children: jsxRuntime.jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, children: [component, !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsxRuntime.jsx("div", { className: hybridDimmedClassName() }))] }) }, i));
+                        const nextAnimation = (i < activeIdx && arr[i + 1]) ? arr[i + 1].animation : false;
+                        return (jsxRuntime.jsx(CSSTransition$1, { timeout: 250, classNames: `hybrid-stack-area hybrid-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), children: jsxRuntime.jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, children: [component, arr[activeIdx].route !== null && !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsxRuntime.jsx("div", { className: hybridDimmedClassName() }))] }) }, i));
                     }) })] }) }));
 };
-
-class Stack {
-    constructor({ route, component, animation }) {
-        this.route = route;
-        this.component = component;
-        this.animation = typeof animation === 'undefined' ? exports.AnimationType.None : animation;
-    }
-}
 
 const HybridRoute = ({ route, component, animation }) => {
     const [addStackList] = React.useContext(HybridStackContext);
@@ -33674,13 +33691,13 @@ const useHybridRouter = () => {
                 setStack(to);
                 window.history.pushState('', '', to);
             },
-            go: (to) => {
-                if (typeof to !== 'number' || to >= 0) {
-                    console.error('Currently the go method only supports going back. (negative number)');
+            back: (to = 1) => {
+                if (to <= 0) {
+                    console.error('error');
                     return;
                 }
                 setStack(to);
-                window.history.go(to);
+                window.history.go(to * -1);
             }
         });
     }, []);

@@ -24,12 +24,12 @@ declare const HybridLink: ({ to, target, children }: IProps) => react_jsx_runtim
 
 interface IHybridRouter {
     push?: (to: string) => void;
-    go?: (to: number) => void;
+    back?: (to: number) => void;
 }
 declare const useHybridRouter: () => IHybridRouter;
 
 interface IStack {
-    readonly route: string;
+    readonly route: string | null;
     readonly component: ReactNode;
     readonly animation: AnimationType;
 }
