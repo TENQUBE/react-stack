@@ -2,14 +2,13 @@ import { createContext, useCallback, useEffect, useRef, useState } from 'react'
 import { CSSTransition, TransitionGroup } from 'react-transition-group'
 
 import { AnimationClassName, AnimationType } from '../interfaces'
-import Stack, { IStack } from '../data/stack'
+import { IStack } from '../data/stack'
 
 export const HybridStackContext = createContext(null)
 
 const HybridStackProvider = ({ children }) => {
-  const basePathname = useRef<string>('')
   const stackList = useRef<IStack[]>([])
-  const hashStack = useRef<string[]>([])
+  const beforeHash = useRef<string>('')
 
   const [stack, setStack] = useState<IStack[]>([])
   const [isAddStack, setAddStack] = useState<boolean>()
@@ -32,22 +31,9 @@ const HybridStackProvider = ({ children }) => {
     }
   }, [stack])
 
-  const historyBackStack = useCallback((event) => {
-    const hash = window.location.hash
-    if(basePathname.current === window.location.pathname && event.state === null && hash) {
-      if(hashStack.current.length === 0 || hashStack.current[hashStack.current.length - 2] !== hash) {
-        event.preventDefault()
-        hashStack.current = [...hashStack.current, hash]
-        setStack([...stack, new Stack({ route: null, component: <></>, animation: AnimationType.None })])
-        return false
-      } else {
-        hashStack.current = hashStack.current.slice(0, hashStack.current.length - 1)
-        updateStack(-1)
-        return false
-      }
-    }
-    if(hashStack.current.length) hashStack.current = []
-    updateStack(-1)
+  const historyBackStack = useCallback(() => {
+    if(!window.location.hash && !beforeHash.current) updateStack(-1)
+    beforeHash.current = window.location.hash
   }, [stack])
 
   useEffect(() => {
@@ -63,7 +49,6 @@ const HybridStackProvider = ({ children }) => {
   }, [stack])
 
   useEffect(() => {
-    basePathname.current = window.location.pathname
     window.addEventListener('popstate', historyBackStack)
     return () => {
       window.removeEventListener('popstate', historyBackStack)

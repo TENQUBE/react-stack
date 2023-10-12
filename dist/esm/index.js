@@ -1,4 +1,4 @@
-import { jsx, Fragment, jsxs } from 'react/jsx-runtime';
+import { jsx, jsxs } from 'react/jsx-runtime';
 import React, { Children, isValidElement, cloneElement, createContext, useRef, useState, useCallback, useEffect, useContext } from 'react';
 
 var AnimationType;
@@ -33565,19 +33565,10 @@ TransitionGroup.propTypes = process.env.NODE_ENV !== "production" ? {
 TransitionGroup.defaultProps = defaultProps;
 var TransitionGroup$1 = TransitionGroup;
 
-class Stack {
-    constructor({ route, component, animation }) {
-        this.route = route;
-        this.component = component;
-        this.animation = typeof animation === 'undefined' ? AnimationType.None : animation;
-    }
-}
-
 const HybridStackContext = createContext(null);
 const HybridStackProvider = ({ children }) => {
-    const basePathname = useRef('');
     const stackList = useRef([]);
-    const hashStack = useRef([]);
+    const beforeHash = useRef('');
     const [stack, setStack] = useState([]);
     const [isAddStack, setAddStack] = useState();
     const [isMoveActive, setMoveActive] = useState(false);
@@ -33596,24 +33587,10 @@ const HybridStackProvider = ({ children }) => {
             setStack([...stack, stackList.current.find(({ route }) => route === to)]);
         }
     }, [stack]);
-    const historyBackStack = useCallback((event) => {
-        const hash = window.location.hash;
-        if (basePathname.current === window.location.pathname && event.state === null && hash) {
-            if (hashStack.current.length === 0 || hashStack.current[hashStack.current.length - 2] !== hash) {
-                event.preventDefault();
-                hashStack.current = [...hashStack.current, hash];
-                setStack([...stack, new Stack({ route: null, component: jsx(Fragment, {}), animation: AnimationType.None })]);
-                return false;
-            }
-            else {
-                hashStack.current = hashStack.current.slice(0, hashStack.current.length - 1);
-                updateStack(-1);
-                return false;
-            }
-        }
-        if (hashStack.current.length)
-            hashStack.current = [];
-        updateStack(-1);
+    const historyBackStack = useCallback(() => {
+        if (!window.location.hash && !beforeHash.current)
+            updateStack(-1);
+        beforeHash.current = window.location.hash;
     }, [stack]);
     useEffect(() => {
         if (isAddStack === null)
@@ -33628,7 +33605,6 @@ const HybridStackProvider = ({ children }) => {
         }, 20);
     }, [stack]);
     useEffect(() => {
-        basePathname.current = window.location.pathname;
         window.addEventListener('popstate', historyBackStack);
         return () => {
             window.removeEventListener('popstate', historyBackStack);
@@ -33660,6 +33636,14 @@ const HybridStackProvider = ({ children }) => {
                     }) })] }) }));
 };
 
+class Stack {
+    constructor({ route, component, animation }) {
+        this.route = route;
+        this.component = component;
+        this.animation = typeof animation === 'undefined' ? AnimationType.None : animation;
+    }
+}
+
 const HybridRoute = ({ route, component, animation }) => {
     const [addStackList] = useContext(HybridStackContext);
     addStackList(new Stack({ route, component, animation }));
@@ -33680,7 +33664,7 @@ const HybridLink = ({ to, target = '_self', children }) => {
 
 const useHybridRouter = () => {
     const [_, __, setStack] = useContext(HybridStackContext);
-    const [router, setRouter] = useState({});
+    const [router, setRouter] = useState();
     useEffect(() => {
         setRouter({
             push: (to) => {
@@ -33688,12 +33672,9 @@ const useHybridRouter = () => {
                 window.history.pushState('', '', to);
             },
             back: (to = 1) => {
-                if (to <= 0) {
-                    console.error('error');
-                    return;
-                }
-                setStack(to);
-                window.history.go(to * -1);
+                const toSize = to <= 0 ? 1 : to;
+                setStack(toSize);
+                window.history.go(toSize * -1);
             }
         });
     }, []);

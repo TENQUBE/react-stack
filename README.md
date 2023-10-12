@@ -97,7 +97,7 @@ const White = () => {
 ```ts
 interface IHybridRouter {
   push: (to: string) => void
-  back: (to: number) => void
+  back: (to?: number) => void
 }
 ```
 

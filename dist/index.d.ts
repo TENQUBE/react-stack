@@ -23,8 +23,8 @@ interface IProps {
 declare const HybridLink: ({ to, target, children }: IProps) => react_jsx_runtime.JSX.Element;
 
 interface IHybridRouter {
-    push?: (to: string) => void;
-    back?: (to: number) => void;
+    push: (to: string) => void;
+    back: (to?: number) => void;
 }
 declare const useHybridRouter: () => IHybridRouter;
 

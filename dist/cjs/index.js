@@ -33569,19 +33569,10 @@ TransitionGroup.propTypes = process.env.NODE_ENV !== "production" ? {
 TransitionGroup.defaultProps = defaultProps;
 var TransitionGroup$1 = TransitionGroup;
 
-class Stack {
-    constructor({ route, component, animation }) {
-        this.route = route;
-        this.component = component;
-        this.animation = typeof animation === 'undefined' ? exports.AnimationType.None : animation;
-    }
-}
-
 const HybridStackContext = React.createContext(null);
 const HybridStackProvider = ({ children }) => {
-    const basePathname = React.useRef('');
     const stackList = React.useRef([]);
-    const hashStack = React.useRef([]);
+    const beforeHash = React.useRef('');
     const [stack, setStack] = React.useState([]);
     const [isAddStack, setAddStack] = React.useState();
     const [isMoveActive, setMoveActive] = React.useState(false);
@@ -33600,24 +33591,10 @@ const HybridStackProvider = ({ children }) => {
             setStack([...stack, stackList.current.find(({ route }) => route === to)]);
         }
     }, [stack]);
-    const historyBackStack = React.useCallback((event) => {
-        const hash = window.location.hash;
-        if (basePathname.current === window.location.pathname && event.state === null && hash) {
-            if (hashStack.current.length === 0 || hashStack.current[hashStack.current.length - 2] !== hash) {
-                event.preventDefault();
-                hashStack.current = [...hashStack.current, hash];
-                setStack([...stack, new Stack({ route: null, component: jsxRuntime.jsx(jsxRuntime.Fragment, {}), animation: exports.AnimationType.None })]);
-                return false;
-            }
-            else {
-                hashStack.current = hashStack.current.slice(0, hashStack.current.length - 1);
-                updateStack(-1);
-                return false;
-            }
-        }
-        if (hashStack.current.length)
-            hashStack.current = [];
-        updateStack(-1);
+    const historyBackStack = React.useCallback(() => {
+        if (!window.location.hash && !beforeHash.current)
+            updateStack(-1);
+        beforeHash.current = window.location.hash;
     }, [stack]);
     React.useEffect(() => {
         if (isAddStack === null)
@@ -33632,7 +33609,6 @@ const HybridStackProvider = ({ children }) => {
         }, 20);
     }, [stack]);
     React.useEffect(() => {
-        basePathname.current = window.location.pathname;
         window.addEventListener('popstate', historyBackStack);
         return () => {
             window.removeEventListener('popstate', historyBackStack);
@@ -33664,6 +33640,14 @@ const HybridStackProvider = ({ children }) => {
                     }) })] }) }));
 };
 
+class Stack {
+    constructor({ route, component, animation }) {
+        this.route = route;
+        this.component = component;
+        this.animation = typeof animation === 'undefined' ? exports.AnimationType.None : animation;
+    }
+}
+
 const HybridRoute = ({ route, component, animation }) => {
     const [addStackList] = React.useContext(HybridStackContext);
     addStackList(new Stack({ route, component, animation }));
@@ -33684,7 +33668,7 @@ const HybridLink = ({ to, target = '_self', children }) => {
 
 const useHybridRouter = () => {
     const [_, __, setStack] = React.useContext(HybridStackContext);
-    const [router, setRouter] = React.useState({});
+    const [router, setRouter] = React.useState();
     React.useEffect(() => {
         setRouter({
             push: (to) => {
@@ -33692,12 +33676,9 @@ const useHybridRouter = () => {
                 window.history.pushState('', '', to);
             },
             back: (to = 1) => {
-                if (to <= 0) {
-                    console.error('error');
-                    return;
-                }
-                setStack(to);
-                window.history.go(to * -1);
+                const toSize = to <= 0 ? 1 : to;
+                setStack(toSize);
+                window.history.go(toSize * -1);
             }
         });
     }, []);
