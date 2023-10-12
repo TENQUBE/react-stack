@@ -46,15 +46,6 @@ const Red = () => {
   return (
     <div style={{...styles}}>
       <h1>Red</h1>
-      <HybridLink to="/blue">/blue</HybridLink>
-    </div>
-  )
-}
-
-const Blue = () => {
-  return (
-    <div style={{...styles}}>
-      <h1>blue</h1>
       <HybridLink to="/">/white</HybridLink>
     </div>
   )
@@ -65,7 +56,6 @@ root.render(
     <HybridRoute route="/" component={<White />} animation={AnimationType.None} />
     <HybridRoute route="/black" component={<Black />} animation={AnimationType.ToLeft} />
     <HybridRoute route="/red" component={<Red />} animation={AnimationType.Scale} />
-    <HybridRoute route="/blue" component={<Blue />} animation={AnimationType.ToTop} />
   </HybridStackProvider>
 )
 ```
@@ -77,7 +67,7 @@ enum AnimationType {
   None,
   ToLeft,
   ToTop,
-  Scale,
+  Scale
 }
 ```
 
@@ -97,7 +87,7 @@ const White = () => {
     router.push('/black')
   }
 
-    const handleClickBack = () => {
+  const handleClickBack = () => {
     router.go(-1)
   }
 
@@ -108,5 +98,29 @@ const White = () => {
 interface IHybridRouter {
   push: (to: string) => void
   go: (to: number) => void
+}
+```
+
+### useHybridStack
+You can see which stack is active.
+```ts
+...
+import { useHybridStack, IStack } from '@tenqube/hybrid-webview-stack'
+
+const White = () => {
+  const stack: IStack = useHybridStack()
+
+  useEffect(() => {
+    console.log(stack)
+  }, [stack])
+
+  ...
+}
+```
+```ts
+interface IStack {
+  readonly route: string
+  readonly component: ReactNode
+  readonly animation: AnimationType
 }
 ```

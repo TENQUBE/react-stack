@@ -28,8 +28,16 @@ interface IHybridRouter {
 }
 declare const useHybridRouter: () => IHybridRouter;
 
+interface IStack {
+    readonly route: string;
+    readonly component: ReactNode;
+    readonly animation: AnimationType;
+}
+
+declare const useHybridStack: () => IStack[];
+
 declare const Index: ({ children }: {
     children: any;
 }) => react_jsx_runtime.JSX.Element;
 
-export { AnimationType, HybridLink, HybridRoute, type IHybridRouter, Index as default, useHybridRouter };
+export { AnimationType, HybridLink, HybridRoute, type IHybridRouter, type IStack, Index as default, useHybridRouter, useHybridStack };

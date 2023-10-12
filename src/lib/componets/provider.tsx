@@ -75,7 +75,7 @@ const HybridStackProvider = ({ children }) => {
   
   return (
     <div className="hybrid-webview-stack">
-      <HybridStackContext.Provider value={[addStackList, updateStack]}>
+      <HybridStackContext.Provider value={[addStackList, stack, updateStack]}>
         {children}
         <TransitionGroup>
           {stack.map(({ component, animation }, i, arr) => {

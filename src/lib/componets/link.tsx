@@ -8,7 +8,7 @@ interface IProps {
 }
 
 const HybridLink = ({ to, target = '_self', children }: IProps) => {
-  const [_, setStack] = useContext(HybridStackContext)
+  const [_, __, setStack] = useContext(HybridStackContext)
 
   const handleClickLink = (e) => {
     if(target === '_blank') return

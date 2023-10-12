@@ -5,36 +5,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var jsxRuntime = require('react/jsx-runtime');
 var React = require('react');
 
-function styleInject(css, ref) {
-  if ( ref === void 0 ) ref = {};
-  var insertAt = ref.insertAt;
-
-  if (!css || typeof document === 'undefined') { return; }
-
-  var head = document.head || document.getElementsByTagName('head')[0];
-  var style = document.createElement('style');
-  style.type = 'text/css';
-
-  if (insertAt === 'top') {
-    if (head.firstChild) {
-      head.insertBefore(style, head.firstChild);
-    } else {
-      head.appendChild(style);
-    }
-  } else {
-    head.appendChild(style);
-  }
-
-  if (style.styleSheet) {
-    style.styleSheet.cssText = css;
-  } else {
-    style.appendChild(document.createTextNode(css));
-  }
-}
-
-var css_248z = ".hybrid-webview-stack {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  overflow: hidden; }\n\n.hybrid-stack-area {\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  overflow-y: hidden;\n  transition: all 0.25s;\n  transform: translateX(0) scale(1);\n  opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-enter {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-scale-enter-active, .hybrid-stack-area.hybrid-scale-enter-done, .hybrid-stack-area.hybrid-scale-exit {\n    transform: scale(1);\n    opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-exit-active {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-to-left-enter {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-left-enter-active, .hybrid-stack-area.hybrid-to-left-enter-done, .hybrid-stack-area.hybrid-to-left-exit {\n    transform: translateX(0); }\n  .hybrid-stack-area.hybrid-to-left-exit-active {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter {\n    transform: translateY(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter-active, .hybrid-stack-area.hybrid-to-top-enter-done, .hybrid-stack-area.hybrid-to-top-exit {\n    transform: translateY(0); }\n  .hybrid-stack-area.hybrid-to-top-exit-active {\n    transform: translateY(100%); }\n  .hybrid-stack-area[data-before-ani=\"to-left\"] {\n    transform: translateX(-10%); }\n  .hybrid-stack-area[data-before-ani=\"to-top\"] .hybrid-dimmed {\n    opacity: 0; }\n  .hybrid-stack-area[data-before-ani=\"scale\"] {\n    transform: scale(1.05); }\n    .hybrid-stack-area[data-before-ani=\"scale\"] .hybrid-dimmed {\n      opacity: 0; }\n\n.hybrid-dimmed {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: #000;\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.25s;\n  z-index: 9999; }\n  .hybrid-dimmed.prev {\n    opacity: 0.3; }\n    .hybrid-dimmed.prev.active {\n      opacity: 0; }\n  .hybrid-dimmed.active {\n    opacity: 0.3; }\n";
-styleInject(css_248z);
-
 exports.AnimationType = void 0;
 (function (AnimationType) {
     AnimationType[AnimationType["None"] = 0] = "None";
@@ -33661,7 +33631,7 @@ const HybridStackProvider = ({ children }) => {
             setNoDimmed(false);
         }, 250);
     };
-    return (jsxRuntime.jsx("div", { className: "hybrid-webview-stack", children: jsxRuntime.jsxs(HybridStackContext.Provider, { value: [addStackList, updateStack], children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: stack.map(({ component, animation }, i, arr) => {
+    return (jsxRuntime.jsx("div", { className: "hybrid-webview-stack", children: jsxRuntime.jsxs(HybridStackContext.Provider, { value: [addStackList, stack, updateStack], children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: stack.map(({ component, animation }, i, arr) => {
                         const activePage = arr.length - 2;
                         const activeIdx = arr.length - 1;
                         const nextAnimation = i < activeIdx ? arr[i + 1].animation : false;
@@ -33684,7 +33654,7 @@ const HybridRoute = ({ route, component, animation }) => {
 };
 
 const HybridLink = ({ to, target = '_self', children }) => {
-    const [_, setStack] = React.useContext(HybridStackContext);
+    const [_, __, setStack] = React.useContext(HybridStackContext);
     const handleClickLink = (e) => {
         if (target === '_blank')
             return;
@@ -33696,7 +33666,7 @@ const HybridLink = ({ to, target = '_self', children }) => {
 };
 
 const useHybridRouter = () => {
-    const [_, setStack] = React.useContext(HybridStackContext);
+    const [_, __, setStack] = React.useContext(HybridStackContext);
     const [router, setRouter] = React.useState({});
     React.useEffect(() => {
         setRouter({
@@ -33717,6 +33687,41 @@ const useHybridRouter = () => {
     return router;
 };
 
+const useHybridStack = () => {
+    const [_, stack] = React.useContext(HybridStackContext);
+    return stack;
+};
+
+function styleInject(css, ref) {
+  if ( ref === void 0 ) ref = {};
+  var insertAt = ref.insertAt;
+
+  if (!css || typeof document === 'undefined') { return; }
+
+  var head = document.head || document.getElementsByTagName('head')[0];
+  var style = document.createElement('style');
+  style.type = 'text/css';
+
+  if (insertAt === 'top') {
+    if (head.firstChild) {
+      head.insertBefore(style, head.firstChild);
+    } else {
+      head.appendChild(style);
+    }
+  } else {
+    head.appendChild(style);
+  }
+
+  if (style.styleSheet) {
+    style.styleSheet.cssText = css;
+  } else {
+    style.appendChild(document.createTextNode(css));
+  }
+}
+
+var css_248z = ".hybrid-webview-stack {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  overflow: hidden; }\n\n.hybrid-stack-area {\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  overflow-y: hidden;\n  transition: all 0.25s;\n  transform: translateX(0) scale(1);\n  opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-enter {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-scale-enter-active, .hybrid-stack-area.hybrid-scale-enter-done, .hybrid-stack-area.hybrid-scale-exit {\n    transform: scale(1);\n    opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-exit-active {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-to-left-enter {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-left-enter-active, .hybrid-stack-area.hybrid-to-left-enter-done, .hybrid-stack-area.hybrid-to-left-exit {\n    transform: translateX(0); }\n  .hybrid-stack-area.hybrid-to-left-exit-active {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter {\n    transform: translateY(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter-active, .hybrid-stack-area.hybrid-to-top-enter-done, .hybrid-stack-area.hybrid-to-top-exit {\n    transform: translateY(0); }\n  .hybrid-stack-area.hybrid-to-top-exit-active {\n    transform: translateY(100%); }\n  .hybrid-stack-area[data-before-ani=\"to-left\"] {\n    transform: translateX(-10%); }\n  .hybrid-stack-area[data-before-ani=\"to-top\"] .hybrid-dimmed {\n    opacity: 0; }\n  .hybrid-stack-area[data-before-ani=\"scale\"] {\n    transform: scale(1.05); }\n    .hybrid-stack-area[data-before-ani=\"scale\"] .hybrid-dimmed {\n      opacity: 0; }\n\n.hybrid-dimmed {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: #000;\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.25s;\n  z-index: 9999; }\n  .hybrid-dimmed.prev {\n    opacity: 0.3; }\n    .hybrid-dimmed.prev.active {\n      opacity: 0; }\n  .hybrid-dimmed.active {\n    opacity: 0.3; }\n";
+styleInject(css_248z);
+
 const Index = ({ children }) => {
     return (jsxRuntime.jsx(HybridStackProvider, { children: children }));
 };
@@ -33725,4 +33730,5 @@ exports.HybridLink = HybridLink;
 exports.HybridRoute = HybridRoute;
 exports.default = Index;
 exports.useHybridRouter = useHybridRouter;
+exports.useHybridStack = useHybridStack;
 //# sourceMappingURL=index.js.map

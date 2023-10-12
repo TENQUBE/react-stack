@@ -7,7 +7,7 @@ export interface IHybridRouter {
 }
 
 const useHybridRouter = (): IHybridRouter => {
-  const [_, setStack] = useContext(HybridStackContext)
+  const [_, __, setStack] = useContext(HybridStackContext)
   const [router, setRouter] = useState({})
 
   useEffect(() => {
