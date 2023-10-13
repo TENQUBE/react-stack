@@ -17,7 +17,8 @@ const White = () => {
 
   useEffect(() => {
     console.log(stack)
-  }, [stack])
+    console.log(totalStack)
+  }, [stack, totalStack])
 
   return (
     <div style={{...styles}}>

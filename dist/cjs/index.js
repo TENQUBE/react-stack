@@ -33579,8 +33579,8 @@ const HybridStackProvider = ({ children }) => {
     const beforeHash = React.useRef('');
     const beforePathname = React.useRef('');
     const checkHistoryGo = React.useRef(false);
-    const hashContainingList = React.useRef([]);
     const [disalbeAni, setDisableAni] = React.useState(false);
+    const [hashStack, setHashStack] = React.useState([]);
     const [stack, setStack] = React.useState([]);
     const [isAddStack, setAddStack] = React.useState();
     const [isMoveActive, setMoveActive] = React.useState(false);
@@ -33597,23 +33597,23 @@ const HybridStackProvider = ({ children }) => {
                 checkHistoryGo.current = true;
                 setDisableAni(true);
                 setTimeout(() => {
-                    const removedTotalStack = hashContainingList.current.slice(hashContainingList.current.length + to, hashContainingList.current.length);
+                    const removedTotalStack = hashStack.slice(hashStack.length + to, hashStack.length);
                     const removedHashSize = removedTotalStack.filter((stack) => typeof stack === 'string').length;
                     setStack(stack.slice(0, stack.length + to + removedHashSize));
-                    hashContainingList.current = hashContainingList.current.slice(0, hashContainingList.current.length + to);
+                    setHashStack(hashStack.slice(0, hashStack.length + to));
                 }, 50);
             }
             else {
                 setStack(stack.slice(0, stack.length - 1));
-                hashContainingList.current = hashContainingList.current.slice(0, hashContainingList.current.length - 1);
+                setHashStack(hashStack.slice(0, hashStack.length - 1));
             }
         }
         else {
             const stackData = stackList.current.find(({ route }) => route === parseToRoute(to));
             setStack([...stack, stackData]);
-            hashContainingList.current = [...hashContainingList.current, stackData];
+            setHashStack([...hashStack, stackData]);
         }
-    }, [stack]);
+    }, [hashStack]);
     const historyBackStack = () => {
         const { pathname, hash } = window.location;
         const bPath = beforePathname.current;
@@ -33630,18 +33630,18 @@ const HybridStackProvider = ({ children }) => {
         }
         if (pathname === bPath) {
             if (hash && !bHash) {
-                hashContainingList.current = [...hashContainingList.current, hash];
+                setHashStack([...hashStack, hash]);
             }
             if (hash && bHash) {
-                if (hashContainingList.current[hashContainingList.current.length - 2] === hash) {
-                    hashContainingList.current = hashContainingList.current.slice(0, hashContainingList.current.length - 1);
+                if (hashStack[hashStack.length - 2] === hash) {
+                    setHashStack(hashStack.slice(0, hashStack.length - 1));
                 }
                 else {
-                    hashContainingList.current = [...hashContainingList.current, hash];
+                    setHashStack([...hashStack, hash]);
                 }
             }
             if (bHash && !hash) {
-                hashContainingList.current = hashContainingList.current.slice(0, hashContainingList.current.length - 1);
+                setHashStack(hashStack.slice(0, hashStack.length - 1));
             }
         }
         if (pathname === bPath && (hash || (!hash && bHash)))
@@ -33666,7 +33666,7 @@ const HybridStackProvider = ({ children }) => {
         return () => {
             window.removeEventListener('popstate', historyBackStack);
         };
-    }, [stack]);
+    }, [stack, hashStack]);
     React.useEffect(() => {
         updateStack(window.location.pathname);
     }, []);
@@ -33685,7 +33685,7 @@ const HybridStackProvider = ({ children }) => {
             setNoDimmed(false);
         }, 250);
     };
-    return (jsxRuntime.jsx("div", { className: "hybrid-webview-stack", children: jsxRuntime.jsxs(HybridStackContext.Provider, { value: [addStackList, stack, updateStack, hashContainingList.current], children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: stack.map(({ component, animation }, i, arr) => {
+    return (jsxRuntime.jsx("div", { className: "hybrid-webview-stack", children: jsxRuntime.jsxs(HybridStackContext.Provider, { value: [addStackList, stack, updateStack, hashStack], children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: stack.map(({ component, animation }, i, arr) => {
                         const activePage = arr.length - 2;
                         const activeIdx = arr.length - 1;
                         const nextAnimation = (i < activeIdx && arr[i + 1]) ? arr[i + 1].animation : false;
