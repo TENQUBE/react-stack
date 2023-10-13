@@ -111,11 +111,12 @@ You can see which stack is active.
 import { useHybridStack, IStack } from '@tenqube/hybrid-webview-stack'
 
 const White = () => {
-  const stack: IStack = useHybridStack()
+  const [stack, totalStack]: [IStack, IStack | string] = useHybridStack()
 
   useEffect(() => {
-    console.log(stack)
-  }, [stack])
+    console.log(stack) // only view component stack
+    console.log(totalStack) // Includes history stack due to hash
+  }, [totalStack])
 
   ...
 }

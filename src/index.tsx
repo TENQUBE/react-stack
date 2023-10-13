@@ -13,7 +13,7 @@ const styles: any = {
 }
 
 const White = () => {
-  const stack = useHybridStack()
+  const [stack, totalStack] = useHybridStack()
 
   useEffect(() => {
     console.log(stack)
@@ -29,9 +29,14 @@ const White = () => {
 
 const Black = () => {
   const router: any = useHybridRouter()
+  const [stack, totalStack] = useHybridStack()
 
   const handleLinkClick = () => {
-    router.push('/red#aaa')
+    if(totalStack.length > 3) {
+      router.back(3)
+    } else {
+      router.push('/red#aaa')
+    }
   }
 
   return (

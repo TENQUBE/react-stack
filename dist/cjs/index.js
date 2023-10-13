@@ -33578,6 +33578,9 @@ const HybridStackProvider = ({ children }) => {
     const stackList = React.useRef([]);
     const beforeHash = React.useRef('');
     const beforePathname = React.useRef('');
+    const checkHistoryGo = React.useRef(false);
+    const hashContainingList = React.useRef([]);
+    const [disalbeAni, setDisableAni] = React.useState(false);
     const [stack, setStack] = React.useState([]);
     const [isAddStack, setAddStack] = React.useState();
     const [isMoveActive, setMoveActive] = React.useState(false);
@@ -33590,18 +33593,57 @@ const HybridStackProvider = ({ children }) => {
         const isToNumber = typeof to === 'number';
         setAddStack(!isToNumber);
         if (isToNumber) {
-            setStack(stack.slice(0, stack.length + to));
+            if (to < -1) {
+                checkHistoryGo.current = true;
+                setDisableAni(true);
+                setTimeout(() => {
+                    const removedTotalStack = hashContainingList.current.slice(hashContainingList.current.length + to, hashContainingList.current.length);
+                    const removedHashSize = removedTotalStack.filter((stack) => typeof stack === 'string').length;
+                    setStack(stack.slice(0, stack.length + to + removedHashSize));
+                    hashContainingList.current = hashContainingList.current.slice(0, hashContainingList.current.length + to);
+                }, 50);
+            }
+            else {
+                setStack(stack.slice(0, stack.length - 1));
+                hashContainingList.current = hashContainingList.current.slice(0, hashContainingList.current.length - 1);
+            }
         }
         else {
-            setStack([...stack, stackList.current.find(({ route }) => route === parseToRoute(to))]);
+            const stackData = stackList.current.find(({ route }) => route === parseToRoute(to));
+            setStack([...stack, stackData]);
+            hashContainingList.current = [...hashContainingList.current, stackData];
         }
     }, [stack]);
     const historyBackStack = () => {
         const { pathname, hash } = window.location;
         const bPath = beforePathname.current;
         const bHash = beforeHash.current;
+        const historyGo = checkHistoryGo.current;
         beforeHash.current = hash;
         beforePathname.current = pathname;
+        checkHistoryGo.current = false;
+        if (historyGo) {
+            setTimeout(() => {
+                setDisableAni(false);
+            }, 200);
+            return;
+        }
+        if (pathname === bPath) {
+            if (hash && !bHash) {
+                hashContainingList.current = [...hashContainingList.current, hash];
+            }
+            if (hash && bHash) {
+                if (hashContainingList.current[hashContainingList.current.length - 2] === hash) {
+                    hashContainingList.current = hashContainingList.current.slice(0, hashContainingList.current.length - 1);
+                }
+                else {
+                    hashContainingList.current = [...hashContainingList.current, hash];
+                }
+            }
+            if (bHash && !hash) {
+                hashContainingList.current = hashContainingList.current.slice(0, hashContainingList.current.length - 1);
+            }
+        }
         if (pathname === bPath && (hash || (!hash && bHash)))
             return;
         updateStack(-1);
@@ -33643,11 +33685,11 @@ const HybridStackProvider = ({ children }) => {
             setNoDimmed(false);
         }, 250);
     };
-    return (jsxRuntime.jsx("div", { className: "hybrid-webview-stack", children: jsxRuntime.jsxs(HybridStackContext.Provider, { value: [addStackList, stack, updateStack], children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: stack.map(({ component, animation }, i, arr) => {
+    return (jsxRuntime.jsx("div", { className: "hybrid-webview-stack", children: jsxRuntime.jsxs(HybridStackContext.Provider, { value: [addStackList, stack, updateStack, hashContainingList.current], children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: stack.map(({ component, animation }, i, arr) => {
                         const activePage = arr.length - 2;
                         const activeIdx = arr.length - 1;
                         const nextAnimation = (i < activeIdx && arr[i + 1]) ? arr[i + 1].animation : false;
-                        return (jsxRuntime.jsx(CSSTransition$1, { timeout: 250, classNames: `hybrid-stack-area hybrid-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), children: jsxRuntime.jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, children: [component, arr[activeIdx].route !== null && !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsxRuntime.jsx("div", { className: hybridDimmedClassName() }))] }) }, i));
+                        return (jsxRuntime.jsx(CSSTransition$1, { timeout: 250, classNames: `hybrid-stack-area hybrid-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), children: jsxRuntime.jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, "data-disable-ani": disalbeAni, children: [component, arr[activeIdx].route !== null && !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsxRuntime.jsx("div", { className: hybridDimmedClassName() }))] }) }, i));
                     }) })] }) }));
 };
 
@@ -33687,9 +33729,11 @@ const useHybridRouter = () => {
                 window.history.pushState('', '', to);
             },
             back: (to = 1) => {
-                const toSize = to <= 0 ? 1 : to;
-                setStack(toSize);
-                window.history.go(toSize * -1);
+                const toSize = to > 0 ? to * -1 : -1;
+                if (toSize < -1) {
+                    setStack(toSize);
+                }
+                window.history.go(toSize);
             }
         });
     }, []);
@@ -33697,8 +33741,8 @@ const useHybridRouter = () => {
 };
 
 const useHybridStack = () => {
-    const [_, stack] = React.useContext(HybridStackContext);
-    return stack;
+    const [_, stack, __, totalStack] = React.useContext(HybridStackContext);
+    return [stack, totalStack];
 };
 
 function styleInject(css, ref) {
@@ -33728,7 +33772,7 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z = ".hybrid-webview-stack {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  overflow: hidden; }\n\n.hybrid-stack-area {\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  overflow-y: hidden;\n  transition: all 0.25s;\n  transform: translateX(0) scale(1);\n  opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-enter {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-scale-enter-active, .hybrid-stack-area.hybrid-scale-enter-done, .hybrid-stack-area.hybrid-scale-exit {\n    transform: scale(1);\n    opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-exit-active {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-to-left-enter {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-left-enter-active, .hybrid-stack-area.hybrid-to-left-enter-done, .hybrid-stack-area.hybrid-to-left-exit {\n    transform: translateX(0); }\n  .hybrid-stack-area.hybrid-to-left-exit-active {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter {\n    transform: translateY(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter-active, .hybrid-stack-area.hybrid-to-top-enter-done, .hybrid-stack-area.hybrid-to-top-exit {\n    transform: translateY(0); }\n  .hybrid-stack-area.hybrid-to-top-exit-active {\n    transform: translateY(100%); }\n  .hybrid-stack-area[data-before-ani=\"to-left\"] {\n    transform: translateX(-10%); }\n  .hybrid-stack-area[data-before-ani=\"to-top\"] .hybrid-dimmed {\n    opacity: 0; }\n  .hybrid-stack-area[data-before-ani=\"scale\"] {\n    transform: scale(1.05); }\n    .hybrid-stack-area[data-before-ani=\"scale\"] .hybrid-dimmed {\n      opacity: 0; }\n\n.hybrid-dimmed {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: #000;\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.25s;\n  z-index: 9999; }\n  .hybrid-dimmed.prev {\n    opacity: 0.3; }\n    .hybrid-dimmed.prev.active {\n      opacity: 0; }\n  .hybrid-dimmed.active {\n    opacity: 0.3; }\n";
+var css_248z = ".hybrid-webview-stack {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  overflow: hidden; }\n\n.hybrid-stack-area {\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  overflow-y: hidden;\n  transition: all 0.25s;\n  transform: translateX(0) scale(1);\n  opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-enter {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-scale-enter-active, .hybrid-stack-area.hybrid-scale-enter-done, .hybrid-stack-area.hybrid-scale-exit {\n    transform: scale(1);\n    opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-exit-active {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-to-left-enter {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-left-enter-active, .hybrid-stack-area.hybrid-to-left-enter-done, .hybrid-stack-area.hybrid-to-left-exit {\n    transform: translateX(0); }\n  .hybrid-stack-area.hybrid-to-left-exit-active {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter {\n    transform: translateY(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter-active, .hybrid-stack-area.hybrid-to-top-enter-done, .hybrid-stack-area.hybrid-to-top-exit {\n    transform: translateY(0); }\n  .hybrid-stack-area.hybrid-to-top-exit-active {\n    transform: translateY(100%); }\n  .hybrid-stack-area[data-before-ani=\"to-left\"] {\n    transform: translateX(-10%); }\n  .hybrid-stack-area[data-before-ani=\"to-top\"] .hybrid-dimmed {\n    opacity: 0; }\n  .hybrid-stack-area[data-before-ani=\"scale\"] {\n    transform: scale(1.05); }\n    .hybrid-stack-area[data-before-ani=\"scale\"] .hybrid-dimmed {\n      opacity: 0; }\n  .hybrid-stack-area[data-disable-ani=\"true\"] {\n    transition: 0s !important;\n    transform: translateX(0) scale(1) !important; }\n\n.hybrid-dimmed {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: #000;\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.25s;\n  z-index: 9999; }\n  .hybrid-dimmed.prev {\n    opacity: 0.3; }\n    .hybrid-dimmed.prev.active {\n      opacity: 0; }\n  .hybrid-dimmed.active {\n    opacity: 0.3; }\n";
 styleInject(css_248z);
 
 const Index = ({ children }) => {

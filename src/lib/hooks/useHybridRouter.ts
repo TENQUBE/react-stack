@@ -17,9 +17,11 @@ const useHybridRouter = (): IHybridRouter => {
         window.history.pushState('', '', to)
       },
       back: (to = 1) => {
-        const toSize = to <= 0 ? 1 : to
-        setStack(toSize)
-        window.history.go(toSize * -1)
+        const toSize = to > 0 ? to * -1 : -1
+        if(toSize < -1) {
+          setStack(toSize)
+        }
+        window.history.go(toSize)
       }
     }) 
   }, [])

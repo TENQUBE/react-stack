@@ -78,6 +78,13 @@
       opacity: 0;
     }
   }
+
+  // History go - disable animation
+  &[data-disable-ani="true"] {
+    transition: 0s !important;
+    transform: translateX(0) scale(1) !important;
+  }
+  
 }
 
 .hybrid-dimmed {

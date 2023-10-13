@@ -34,7 +34,7 @@ interface IStack {
     readonly animation: AnimationType;
 }
 
-declare const useHybridStack: () => IStack[];
+declare const useHybridStack: () => [IStack, IStack | string];
 
 declare const Index: ({ children }: {
     children: any;

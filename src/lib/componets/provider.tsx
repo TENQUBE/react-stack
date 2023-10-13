@@ -11,6 +11,10 @@ const HybridStackProvider = ({ children }) => {
   const stackList = useRef<IStack[]>([])
   const beforeHash = useRef<string>('')
   const beforePathname = useRef<string>('')
+  const checkHistoryGo = useRef<boolean>(false)
+  const hashContainingList = useRef<Array<IStack | string>>([])
+
+  const [disalbeAni, setDisableAni] = useState(false)
 
   const [stack, setStack] = useState<IStack[]>([])
   const [isAddStack, setAddStack] = useState<boolean>()
@@ -27,9 +31,24 @@ const HybridStackProvider = ({ children }) => {
     const isToNumber = typeof to === 'number'
     setAddStack(!isToNumber)
     if(isToNumber) {
-      setStack(stack.slice(0, stack.length + to))
+      if(to < -1) {
+        checkHistoryGo.current = true
+        setDisableAni(true)
+        setTimeout(() => {
+          const removedTotalStack = hashContainingList.current.slice(hashContainingList.current.length + to, hashContainingList.current.length)
+          const removedHashSize = removedTotalStack.filter((stack) => typeof stack === 'string').length
+
+          setStack(stack.slice(0, stack.length + to + removedHashSize))
+          hashContainingList.current = hashContainingList.current.slice(0, hashContainingList.current.length + to)  
+        }, 50)
+      } else {
+        setStack(stack.slice(0, stack.length - 1))
+        hashContainingList.current = hashContainingList.current.slice(0, hashContainingList.current.length - 1)
+      }
     } else {
-      setStack([...stack, stackList.current.find(({ route }) => route === parseToRoute(to))])
+      const stackData = stackList.current.find(({ route }) => route === parseToRoute(to))
+      setStack([...stack, stackData])
+      hashContainingList.current = [...hashContainingList.current, stackData]
     }
   }, [stack])
 
@@ -37,9 +56,34 @@ const HybridStackProvider = ({ children }) => {
     const { pathname, hash } = window.location
     const bPath = beforePathname.current
     const bHash = beforeHash.current
+    const historyGo = checkHistoryGo.current
     
     beforeHash.current = hash
     beforePathname.current = pathname
+    checkHistoryGo.current = false
+    
+    if(historyGo) {
+      setTimeout(() => {
+        setDisableAni(false)
+      }, 200)
+      return
+    }
+
+    if(pathname === bPath) {
+      if(hash && !bHash) {
+        hashContainingList.current = [...hashContainingList.current, hash]
+      }
+      if(hash && bHash) {
+        if(hashContainingList.current[hashContainingList.current.length - 2] === hash) {
+          hashContainingList.current = hashContainingList.current.slice(0, hashContainingList.current.length - 1)
+        } else {
+          hashContainingList.current = [...hashContainingList.current, hash]
+        }
+      }
+      if(bHash && !hash) {
+        hashContainingList.current = hashContainingList.current.slice(0, hashContainingList.current.length - 1)
+      }
+    }
     
     if(pathname === bPath && (hash || (!hash && bHash))) return
     updateStack(-1)
@@ -86,7 +130,7 @@ const HybridStackProvider = ({ children }) => {
   
   return (
     <div className="hybrid-webview-stack">
-      <HybridStackContext.Provider value={[addStackList, stack, updateStack]}>
+      <HybridStackContext.Provider value={[addStackList, stack, updateStack, hashContainingList.current]}>
         {children}
         <TransitionGroup>
           {stack.map(({ component, animation }, i, arr) => {
@@ -101,7 +145,10 @@ const HybridStackProvider = ({ children }) => {
                 classNames={`hybrid-stack-area hybrid-${AnimationClassName[animation]}`}
                 onExit={() => checkDimmed(animation)}
               >
-                <div data-before-ani={nextAnimation !== false ? AnimationClassName[nextAnimation] : false}>
+                <div 
+                  data-before-ani={nextAnimation !== false ? AnimationClassName[nextAnimation] : false}
+                  data-disable-ani={disalbeAni}
+                >
                   { component }
                   {arr[activeIdx].route !== null && !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (
                     <div className={hybridDimmedClassName()} />
