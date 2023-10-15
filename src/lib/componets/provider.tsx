@@ -1,9 +1,10 @@
-import { createContext, useCallback, useEffect, useRef, useState } from 'react'
+import { createContext, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CSSTransition, TransitionGroup } from 'react-transition-group'
 
 import { AnimationClassName, AnimationType } from '../interfaces'
 import { IStack } from '../data/stack'
 import { parseToRoute } from '../utils/parse'
+import { ANIMATION_DURATION, STORAGE_KEY_NAME } from '../constants'
 
 export const HybridStackContext = createContext(null)
 
@@ -65,7 +66,7 @@ const HybridStackProvider = ({ children }) => {
     if(historyGo) {
       setTimeout(() => {
         setDisableAni(false)
-      }, 200)
+      }, ANIMATION_DURATION - 50)
       return
     }
 
@@ -89,6 +90,38 @@ const HybridStackProvider = ({ children }) => {
     updateStack(-1)
   }
 
+  const initStorageStackData = () => {
+    const { pathname, hash } = window.location
+    const storageData = JSON.parse(window.sessionStorage.getItem(STORAGE_KEY_NAME))
+    if(!storageData || storageData.length === 0) return
+
+    const cacheRouteStack = storageData.filter((d: IStack | string) => typeof d !== 'string')
+    const cacheStack = cacheRouteStack.map(({ route }) => {
+      return stackList.current.find(({ route: CompRoute }) => CompRoute === parseToRoute(route))
+    })
+    const hashStack = storageData.filter((d: IStack | string) => typeof d === 'string')
+
+    const isMatchStack = (() => {
+      if(!cacheStack[cacheStack.length - 1]) return true
+      if(cacheStack[cacheStack.length - 1].route === pathname) return true
+    })()
+
+    const isMatchHashStack = (() => {
+      if(!hashStack[hashStack.length - 1]) return true
+      if(hashStack[hashStack.length - 1] === hash) return true
+    })()
+
+    if(!isMatchStack || !isMatchHashStack)  return false
+    
+    setHashStack(storageData)
+    setStack(cacheStack)
+    setDisableAni(true)
+    setTimeout(() => {
+      setDisableAni(false)
+    }, ANIMATION_DURATION - 50)
+    return true
+  }
+
   useEffect(() => {
     if(isAddStack === null) return
     setMoveActive(true)
@@ -97,9 +130,14 @@ const HybridStackProvider = ({ children }) => {
       setTimeout(() => {
         setMoveActive(false)
         setMoveAction(false)
-      }, 230)
+      }, ANIMATION_DURATION)
     }, 20)
   }, [stack])
+
+  useEffect(() => {
+    const storageData = hashStack.map((d) => typeof d === 'string' ? d : { route: d.route })
+    window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData))
+  }, [hashStack])
 
   useEffect(() => {
     beforePathname.current = window.location.pathname
@@ -107,9 +145,10 @@ const HybridStackProvider = ({ children }) => {
     return () => {
       window.removeEventListener('popstate', historyBackStack)
     }
-  }, [stack, hashStack])
+  }, [hashStack])
   
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if(initStorageStackData()) return
     updateStack(window.location.pathname)
   }, [])
 
@@ -125,7 +164,7 @@ const HybridStackProvider = ({ children }) => {
     setNoDimmed(true)
     setTimeout(() => {
       setNoDimmed(false)
-    }, 250)
+    }, ANIMATION_DURATION)
   }
   
   return (
@@ -141,9 +180,12 @@ const HybridStackProvider = ({ children }) => {
             return (
               <CSSTransition 
                 key={i} 
-                timeout={250} 
+                timeout={ANIMATION_DURATION + 20} 
                 classNames={`hybrid-stack-area hybrid-${AnimationClassName[animation]}`}
                 onExit={() => checkDimmed(animation)}
+                style={{
+                  'transition': `all ${ANIMATION_DURATION/1000}s`
+                }}
               >
                 <div 
                   data-before-ani={nextAnimation !== false ? AnimationClassName[nextAnimation] : false}
@@ -151,7 +193,12 @@ const HybridStackProvider = ({ children }) => {
                 >
                   { component }
                   {arr[activeIdx].route !== null && !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (
-                    <div className={hybridDimmedClassName()} />
+                    <div 
+                      className={hybridDimmedClassName()} 
+                      style={{
+                        'transition': `all ${ANIMATION_DURATION/1000}s`
+                      }}
+                    />
                   )}
                 </div>
               </CSSTransition>

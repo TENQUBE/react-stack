@@ -1,6 +1,6 @@
 {
   "name": "@tenqube/hybrid-webview-stack",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "A library that helps with screen stack routing and transition animation in webviews of hybrid apps. (for React)",
   "keywords": [
     "react",

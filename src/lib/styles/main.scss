@@ -13,6 +13,7 @@
   transition: all 0.25s;
   transform: translateX(0) scale(1);
   opacity: 1;
+  will-change: transform, opacity;
 
 
   // Animation - scale
@@ -83,6 +84,9 @@
   &[data-disable-ani="true"] {
     transition: 0s !important;
     transform: translateX(0) scale(1) !important;
+    .hybrid-dimmed {
+      opacity: 0;
+    }
   }
   
 }
@@ -98,13 +102,13 @@
   will-change: opacity;
   transition: opacity 0.25s;
   z-index: 9999;
+  &.active {
+    opacity: 0.5;
+  }
   &.prev {
-    opacity: 0.3;
+    opacity: 0.2;
     &.active {
       opacity: 0;
     }
-  }
-  &.active {
-    opacity: 0.3;
   }
 }
