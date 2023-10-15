@@ -1,5 +1,5 @@
 import { jsx, jsxs } from 'react/jsx-runtime';
-import React, { Children, isValidElement, cloneElement, createContext, useRef, useState, useCallback, useEffect, useContext } from 'react';
+import React, { Children, isValidElement, cloneElement, createContext, useRef, useState, useCallback, useEffect, useLayoutEffect, useContext } from 'react';
 
 var AnimationType;
 (function (AnimationType) {
@@ -33569,6 +33569,9 @@ const parseToRoute = (route) => {
     return route.split('#')[0].split('?')[0];
 };
 
+const STORAGE_KEY_NAME = 'hybrid-webview-total-stack';
+const ANIMATION_DURATION = 250;
+
 const HybridStackContext = createContext(null);
 const HybridStackProvider = ({ children }) => {
     const stackList = useRef([]);
@@ -33621,7 +33624,7 @@ const HybridStackProvider = ({ children }) => {
         if (historyGo) {
             setTimeout(() => {
                 setDisableAni(false);
-            }, 200);
+            }, ANIMATION_DURATION - 50);
             return;
         }
         if (pathname === bPath) {
@@ -33644,6 +33647,38 @@ const HybridStackProvider = ({ children }) => {
             return;
         updateStack(-1);
     };
+    const initStorageStackData = () => {
+        const { pathname, hash } = window.location;
+        const storageData = JSON.parse(window.sessionStorage.getItem(STORAGE_KEY_NAME));
+        if (!storageData || storageData.length === 0)
+            return;
+        const cacheRouteStack = storageData.filter((d) => typeof d !== 'string');
+        const cacheStack = cacheRouteStack.map(({ route }) => {
+            return stackList.current.find(({ route: CompRoute }) => CompRoute === parseToRoute(route));
+        });
+        const hashStack = storageData.filter((d) => typeof d === 'string');
+        const isMatchStack = (() => {
+            if (!cacheStack[cacheStack.length - 1])
+                return true;
+            if (cacheStack[cacheStack.length - 1].route === pathname)
+                return true;
+        })();
+        const isMatchHashStack = (() => {
+            if (!hashStack[hashStack.length - 1])
+                return true;
+            if (hashStack[hashStack.length - 1] === hash)
+                return true;
+        })();
+        if (!isMatchStack || !isMatchHashStack)
+            return false;
+        setHashStack(storageData);
+        setStack(cacheStack);
+        setDisableAni(true);
+        setTimeout(() => {
+            setDisableAni(false);
+        }, ANIMATION_DURATION - 50);
+        return true;
+    };
     useEffect(() => {
         if (isAddStack === null)
             return;
@@ -33653,17 +33688,23 @@ const HybridStackProvider = ({ children }) => {
             setTimeout(() => {
                 setMoveActive(false);
                 setMoveAction(false);
-            }, 230);
+            }, ANIMATION_DURATION);
         }, 20);
     }, [stack]);
+    useEffect(() => {
+        const storageData = hashStack.map((d) => typeof d === 'string' ? d : { route: d.route });
+        window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData));
+    }, [hashStack]);
     useEffect(() => {
         beforePathname.current = window.location.pathname;
         window.addEventListener('popstate', historyBackStack);
         return () => {
             window.removeEventListener('popstate', historyBackStack);
         };
-    }, [stack, hashStack]);
-    useEffect(() => {
+    }, [hashStack]);
+    useLayoutEffect(() => {
+        if (initStorageStackData())
+            return;
         updateStack(window.location.pathname);
     }, []);
     const hybridDimmedClassName = () => {
@@ -33679,13 +33720,17 @@ const HybridStackProvider = ({ children }) => {
         setNoDimmed(true);
         setTimeout(() => {
             setNoDimmed(false);
-        }, 250);
+        }, ANIMATION_DURATION);
     };
     return (jsx("div", { className: "hybrid-webview-stack", children: jsxs(HybridStackContext.Provider, { value: [addStackList, stack, updateStack, hashStack], children: [children, jsx(TransitionGroup$1, { children: stack.map(({ component, animation }, i, arr) => {
                         const activePage = arr.length - 2;
                         const activeIdx = arr.length - 1;
                         const nextAnimation = (i < activeIdx && arr[i + 1]) ? arr[i + 1].animation : false;
-                        return (jsx(CSSTransition$1, { timeout: 250, classNames: `hybrid-stack-area hybrid-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), children: jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, "data-disable-ani": disalbeAni, children: [component, arr[activeIdx].route !== null && !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsx("div", { className: hybridDimmedClassName() }))] }) }, i));
+                        return (jsx(CSSTransition$1, { timeout: ANIMATION_DURATION + 20, classNames: `hybrid-stack-area hybrid-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), style: {
+                                'transition': `all ${ANIMATION_DURATION / 1000}s`
+                            }, children: jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, "data-disable-ani": disalbeAni, children: [component, arr[activeIdx].route !== null && !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsx("div", { className: hybridDimmedClassName(), style: {
+                                            'transition': `all ${ANIMATION_DURATION / 1000}s`
+                                        } }))] }) }, i));
                     }) })] }) }));
 };
 
@@ -33768,7 +33813,7 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z = ".hybrid-webview-stack {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  overflow: hidden; }\n\n.hybrid-stack-area {\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  overflow-y: hidden;\n  transition: all 0.25s;\n  transform: translateX(0) scale(1);\n  opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-enter {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-scale-enter-active, .hybrid-stack-area.hybrid-scale-enter-done, .hybrid-stack-area.hybrid-scale-exit {\n    transform: scale(1);\n    opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-exit-active {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-to-left-enter {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-left-enter-active, .hybrid-stack-area.hybrid-to-left-enter-done, .hybrid-stack-area.hybrid-to-left-exit {\n    transform: translateX(0); }\n  .hybrid-stack-area.hybrid-to-left-exit-active {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter {\n    transform: translateY(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter-active, .hybrid-stack-area.hybrid-to-top-enter-done, .hybrid-stack-area.hybrid-to-top-exit {\n    transform: translateY(0); }\n  .hybrid-stack-area.hybrid-to-top-exit-active {\n    transform: translateY(100%); }\n  .hybrid-stack-area[data-before-ani=\"to-left\"] {\n    transform: translateX(-10%); }\n  .hybrid-stack-area[data-before-ani=\"to-top\"] .hybrid-dimmed {\n    opacity: 0; }\n  .hybrid-stack-area[data-before-ani=\"scale\"] {\n    transform: scale(1.05); }\n    .hybrid-stack-area[data-before-ani=\"scale\"] .hybrid-dimmed {\n      opacity: 0; }\n  .hybrid-stack-area[data-disable-ani=\"true\"] {\n    transition: 0s !important;\n    transform: translateX(0) scale(1) !important; }\n\n.hybrid-dimmed {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: #000;\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.25s;\n  z-index: 9999; }\n  .hybrid-dimmed.prev {\n    opacity: 0.3; }\n    .hybrid-dimmed.prev.active {\n      opacity: 0; }\n  .hybrid-dimmed.active {\n    opacity: 0.3; }\n";
+var css_248z = ".hybrid-webview-stack {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  overflow: hidden; }\n\n.hybrid-stack-area {\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  overflow-y: hidden;\n  transition: all 0.25s;\n  transform: translateX(0) scale(1);\n  opacity: 1;\n  will-change: transform, opacity; }\n  .hybrid-stack-area.hybrid-scale-enter {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-scale-enter-active, .hybrid-stack-area.hybrid-scale-enter-done, .hybrid-stack-area.hybrid-scale-exit {\n    transform: scale(1);\n    opacity: 1; }\n  .hybrid-stack-area.hybrid-scale-exit-active {\n    transform: scale(0.95);\n    opacity: 0; }\n  .hybrid-stack-area.hybrid-to-left-enter {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-left-enter-active, .hybrid-stack-area.hybrid-to-left-enter-done, .hybrid-stack-area.hybrid-to-left-exit {\n    transform: translateX(0); }\n  .hybrid-stack-area.hybrid-to-left-exit-active {\n    transform: translateX(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter {\n    transform: translateY(100%); }\n  .hybrid-stack-area.hybrid-to-top-enter-active, .hybrid-stack-area.hybrid-to-top-enter-done, .hybrid-stack-area.hybrid-to-top-exit {\n    transform: translateY(0); }\n  .hybrid-stack-area.hybrid-to-top-exit-active {\n    transform: translateY(100%); }\n  .hybrid-stack-area[data-before-ani=\"to-left\"] {\n    transform: translateX(-10%); }\n  .hybrid-stack-area[data-before-ani=\"to-top\"] .hybrid-dimmed {\n    opacity: 0; }\n  .hybrid-stack-area[data-before-ani=\"scale\"] {\n    transform: scale(1.05); }\n    .hybrid-stack-area[data-before-ani=\"scale\"] .hybrid-dimmed {\n      opacity: 0; }\n  .hybrid-stack-area[data-disable-ani=\"true\"] {\n    transition: 0s !important;\n    transform: translateX(0) scale(1) !important; }\n    .hybrid-stack-area[data-disable-ani=\"true\"] .hybrid-dimmed {\n      opacity: 0; }\n\n.hybrid-dimmed {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: #000;\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.25s;\n  z-index: 9999; }\n  .hybrid-dimmed.active {\n    opacity: 0.5; }\n  .hybrid-dimmed.prev {\n    opacity: 0.2; }\n    .hybrid-dimmed.prev.active {\n      opacity: 0; }\n";
 styleInject(css_248z);
 
 const Index = ({ children }) => {
