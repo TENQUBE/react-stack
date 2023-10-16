@@ -59,9 +59,10 @@ const HybridStackProvider = ({ children }) => {
     const { state } = window.history
     if (!state) window.history.replaceState.call(history, { index: historyIdx + 1 }, document.title)
     const index = state ? state.index : historyIdx + 1
+    const isForward = index > historyIdx
     setHistoryIdx(index)
 
-    return index > historyIdx
+    return isForward
   }
 
   const historyBackStack = () => {
@@ -152,7 +153,7 @@ const HybridStackProvider = ({ children }) => {
     }, 20)
   }, [stack])
 
-  useEffect(() => {
+  useEffect(() => { 
     const storageData = hashStack.map((d) => typeof d === 'string' ? d : { route: d.route })
     window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData))
   }, [hashStack])
@@ -163,11 +164,14 @@ const HybridStackProvider = ({ children }) => {
     return () => {
       window.removeEventListener('popstate', historyBackStack)
     }
-  }, [hashStack])
+  }, [hashStack, historyIdx])
   
   useEffect(() => {
-    if (!history.state || !('index' in history.state)) {
-      history.replaceState({ index: 0, state: history.state }, document.title)
+    const index = window.history?.state?.index
+    if(index) {
+      setHistoryIdx(index)
+    } else {
+      history.replaceState({ index: 0 }, document.title)
     }
   }, [])
 

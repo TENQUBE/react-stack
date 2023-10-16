@@ -33623,8 +33623,9 @@ const HybridStackProvider = ({ children }) => {
         if (!state)
             window.history.replaceState.call(history, { index: historyIdx + 1 }, document.title);
         const index = state ? state.index : historyIdx + 1;
+        const isForward = index > historyIdx;
         setHistoryIdx(index);
-        return index > historyIdx;
+        return isForward;
     };
     const historyBackStack = () => {
         const { pathname, hash } = window.location;
@@ -33719,10 +33720,15 @@ const HybridStackProvider = ({ children }) => {
         return () => {
             window.removeEventListener('popstate', historyBackStack);
         };
-    }, [hashStack]);
+    }, [hashStack, historyIdx]);
     React.useEffect(() => {
-        if (!history.state || !('index' in history.state)) {
-            history.replaceState({ index: 0, state: history.state }, document.title);
+        var _a, _b;
+        const index = (_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index;
+        if (index) {
+            setHistoryIdx(index);
+        }
+        else {
+            history.replaceState({ index: 0 }, document.title);
         }
     }, []);
     React.useLayoutEffect(() => {
