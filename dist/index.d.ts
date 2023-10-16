@@ -24,6 +24,7 @@ declare const HybridLink: ({ to, target, children }: IProps) => react_jsx_runtim
 
 interface IHybridRouter {
     push: (to: string) => void;
+    replaceState: (to: string) => void;
     back: (to?: number) => void;
 }
 declare const useHybridRouter: () => IHybridRouter;
