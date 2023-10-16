@@ -19,6 +19,7 @@ const HybridStackProvider = ({ children }) => {
   const [hashStack, setHashStack] = useState<Array<IStack | string>>([])
   const [stack, setStack] = useState<IStack[]>([])
   const [isAddStack, setAddStack] = useState<boolean>()
+  const [historyIdx, setHistoryIdx] = useState<number>(0)
 
   const [isMoveActive, setMoveActive] = useState<boolean>(false)
   const [isMoveAction, setMoveAction] = useState<boolean>(false)
@@ -53,6 +54,16 @@ const HybridStackProvider = ({ children }) => {
     }
   }, [hashStack])
 
+
+  const checkIsForward = () => {
+    const { state } = window.history
+    if (!state) window.history.replaceState.call(history, { index: historyIdx + 1 }, document.title)
+    const index = state ? state.index : historyIdx + 1
+    setHistoryIdx(index)
+
+    return index > historyIdx
+  }
+
   const historyBackStack = () => {
     const { pathname, hash } = window.location
     const bPath = beforePathname.current
@@ -66,7 +77,7 @@ const HybridStackProvider = ({ children }) => {
     if(historyGo) {
       setTimeout(() => {
         setDisableAni(false)
-      }, ANIMATION_DURATION - 50)
+      }, ANIMATION_DURATION)
       return
     }
 
@@ -87,7 +98,8 @@ const HybridStackProvider = ({ children }) => {
     }
     
     if(pathname === bPath && (hash || (!hash && bHash))) return
-    updateStack(-1)
+
+    updateStack(checkIsForward() ? window.location.pathname : -1)
   }
 
   const initStorageStackData = () => {
@@ -98,6 +110,11 @@ const HybridStackProvider = ({ children }) => {
     const cacheRouteStack = storageData.filter((d: IStack | string) => typeof d !== 'string')
     const cacheStack = cacheRouteStack.map(({ route }) => {
       return stackList.current.find(({ route: CompRoute }) => CompRoute === parseToRoute(route))
+    })
+    const cacheTotalStack = storageData.map((d: IStack | string) => {
+      return typeof d === 'string'
+        ? d
+        : stackList.current.find(({ route: CompRoute }) => CompRoute === parseToRoute(d.route))
     })
     const hashStack = storageData.filter((d: IStack | string) => typeof d === 'string')
 
@@ -113,12 +130,13 @@ const HybridStackProvider = ({ children }) => {
 
     if(!isMatchStack || !isMatchHashStack)  return false
     
-    setHashStack(storageData)
+    setHashStack(cacheTotalStack)
     setStack(cacheStack)
     setDisableAni(true)
     setTimeout(() => {
       setDisableAni(false)
-    }, ANIMATION_DURATION - 50)
+    }, ANIMATION_DURATION)
+
     return true
   }
 
@@ -147,6 +165,12 @@ const HybridStackProvider = ({ children }) => {
     }
   }, [hashStack])
   
+  useEffect(() => {
+    if (!history.state || !('index' in history.state)) {
+      history.replaceState({ index: 0, state: history.state }, document.title)
+    }
+  }, [])
+
   useLayoutEffect(() => {
     if(initStorageStackData()) return
     updateStack(window.location.pathname)
@@ -169,7 +193,7 @@ const HybridStackProvider = ({ children }) => {
   
   return (
     <div className="hybrid-webview-stack">
-      <HybridStackContext.Provider value={[addStackList, stack, updateStack, hashStack]}>
+      <HybridStackContext.Provider value={[addStackList, stack, updateStack, hashStack, historyIdx, setHistoryIdx]}>
         {children}
         <TransitionGroup>
           {stack.map(({ component, animation }, i, arr) => {
