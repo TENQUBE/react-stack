@@ -34,10 +34,10 @@ const White = () => {
   )
 }
 
-const Black = ({ params }) => {
+const Black = (pathVariable) => {
   const router: any = useHybridRouter()
   const [stack, totalStack] = useHybridStack()
-  console.log(params)
+  console.log(pathVariable.params)
 
   const handleLinkClick = () => {
     // if(totalStack.length > 4) {
