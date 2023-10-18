@@ -1,9 +1,9 @@
-import { createContext, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { cloneElement, createContext, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CSSTransition, TransitionGroup } from 'react-transition-group'
 
 import { AnimationClassName, AnimationType } from '../interfaces'
 import { IStack } from '../data/stack'
-import { parseToRoute } from '../utils/parse'
+import { matchRouteToPathname, matchSingleRoute } from '../utils'
 import { ANIMATION_DURATION, STORAGE_KEY_NAME } from '../constants'
 
 export const HybridStackContext = createContext(null)
@@ -29,7 +29,17 @@ const HybridStackProvider = ({ children }) => {
     stackList.current = [...stackList.current, data]
   }
 
-  const updateStack = useCallback((to: string | number) => {
+  const updateStack = useCallback((to: string | number, isClear = false) => {
+    if(isClear && typeof to === 'string') {
+      checkHistoryGo.current = true
+      setDisableAni(true)
+      const stackData = matchRouteToPathname(stackList.current, to)
+      setTimeout(() => {
+        setStack([stackData])
+        setHashStack([stackData])
+      }, 20)
+      return
+    }
     const isToNumber = typeof to === 'number'
     setAddStack(!isToNumber)
     if(isToNumber) {
@@ -42,13 +52,13 @@ const HybridStackProvider = ({ children }) => {
 
           setStack(stack.slice(0, stack.length + to + removedHashSize))
           setHashStack(hashStack.slice(0, hashStack.length + to))
-        }, 50)
+        }, 20)
       } else {
         setStack(stack.slice(0, stack.length - 1))
         setHashStack(hashStack.slice(0, hashStack.length - 1))
       }
     } else {
-      const stackData = stackList.current.find(({ route }) => route === parseToRoute(to))
+      const stackData = matchRouteToPathname(stackList.current, to)
       setStack([...stack, stackData])
       setHashStack([...hashStack, stackData])
     }
@@ -110,23 +120,25 @@ const HybridStackProvider = ({ children }) => {
 
     const cacheRouteStack = storageData.filter((d: IStack | string) => typeof d !== 'string')
     const cacheStack = cacheRouteStack.map(({ route }) => {
-      return stackList.current.find(({ route: CompRoute }) => CompRoute === parseToRoute(route))
+      return matchRouteToPathname(stackList.current, route)
     })
     const cacheTotalStack = storageData.map((d: IStack | string) => {
       return typeof d === 'string'
         ? d
-        : stackList.current.find(({ route: CompRoute }) => CompRoute === parseToRoute(d.route))
+        : matchRouteToPathname(stackList.current, d.route)
     })
     const hashStack = storageData.filter((d: IStack | string) => typeof d === 'string')
 
     const isMatchStack = (() => {
       if(!cacheStack[cacheStack.length - 1]) return true
-      if(cacheStack[cacheStack.length - 1].route === pathname) return true
+      if(matchSingleRoute(cacheStack[cacheStack.length - 1], pathname)) return true
+      return false
     })()
 
     const isMatchHashStack = (() => {
       if(!hashStack[hashStack.length - 1]) return true
       if(hashStack[hashStack.length - 1] === hash) return true
+      return false
     })()
 
     if(!isMatchStack || !isMatchHashStack)  return false
@@ -200,7 +212,7 @@ const HybridStackProvider = ({ children }) => {
       <HybridStackContext.Provider value={[addStackList, stack, updateStack, hashStack, historyIdx, setHistoryIdx]}>
         {children}
         <TransitionGroup>
-          {stack.map(({ component, animation }, i, arr) => {
+          {stack.map(({ component, animation, pathVariable }, i, arr) => {
             const activePage = arr.length - 2
             const activeIdx = arr.length - 1
             const nextAnimation = (i < activeIdx && arr[i + 1]) ? arr[i + 1].animation : false
@@ -219,7 +231,7 @@ const HybridStackProvider = ({ children }) => {
                   data-before-ani={nextAnimation !== false ? AnimationClassName[nextAnimation] : false}
                   data-disable-ani={disalbeAni}
                 >
-                  { component }
+                  { cloneElement(component, {...{ params: pathVariable }}) }
                   {arr[activeIdx].route !== null && !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (
                     <div 
                       className={hybridDimmedClassName()} 

@@ -33569,8 +33569,81 @@ TransitionGroup.propTypes = process.env.NODE_ENV !== "production" ? {
 TransitionGroup.defaultProps = defaultProps;
 var TransitionGroup$1 = TransitionGroup;
 
-const parseToRoute = (route) => {
-    return route.split('#')[0].split('?')[0];
+var PathSubDirectoryType;
+(function (PathSubDirectoryType) {
+    PathSubDirectoryType[PathSubDirectoryType["Static"] = 0] = "Static";
+    PathSubDirectoryType[PathSubDirectoryType["Dynamic"] = 1] = "Dynamic";
+    PathSubDirectoryType[PathSubDirectoryType["Splat"] = 2] = "Splat";
+    PathSubDirectoryType[PathSubDirectoryType["NotFound"] = 3] = "NotFound";
+})(PathSubDirectoryType || (PathSubDirectoryType = {}));
+class PathSubDirectory {
+    constructor(type, name) {
+        this.type = type;
+        this.name = typeof name === 'undefined' ? null : name;
+    }
+}
+const explodeRouteSegments = (route) => {
+    if (route === '*')
+        return [new PathSubDirectory(PathSubDirectoryType.Splat, '*')];
+    const segments = route.split('/');
+    const segmentNames = segments.slice(1, segments.length);
+    return segmentNames.map((seg) => {
+        if (seg === '*')
+            return new PathSubDirectory(PathSubDirectoryType.Splat, '*');
+        const isDynamic = seg.charAt(0) === ':';
+        const directoryName = seg.replace(/^\:/, '');
+        return new PathSubDirectory(isDynamic ? PathSubDirectoryType.Dynamic : PathSubDirectoryType.Static, directoryName);
+    });
+};
+const matchRoute = (paths, matchData) => {
+    const pathVariable = {};
+    for (let i = 0; i < paths.length; i++) {
+        const match = matchData[i];
+        if (!match) {
+            return {
+                match: false,
+                pathVariable
+            };
+        }
+        if (match.type === PathSubDirectoryType.Splat) {
+            return {
+                match: true,
+                pathVariable
+            };
+        }
+        if (match.type === PathSubDirectoryType.Static && paths[i] !== match.name) {
+            return {
+                match: false,
+                pathVariable
+            };
+        }
+        if (match.type === PathSubDirectoryType.Dynamic) {
+            pathVariable[match.name] = paths[i];
+        }
+    }
+    return {
+        match: true,
+        pathVariable
+    };
+};
+const matchRouteToPathname = (stacks, pathname) => {
+    const matchData = stacks.map(({ route }) => explodeRouteSegments(route));
+    const segments = pathname.split('#')[0].split('?')[0].split('/');
+    const paths = segments.slice(1, segments.length);
+    for (let i = 0; i < matchData.length; i++) {
+        const { match, pathVariable } = matchRoute(paths, matchData[i]);
+        if (match) {
+            stacks[i].setPathVariable(pathVariable);
+            return stacks[i];
+        }
+    }
+};
+const matchSingleRoute = (stack, pathname) => {
+    const matchData = explodeRouteSegments(stack.route);
+    const segments = pathname.split('#')[0].split('?')[0].split('/');
+    const paths = segments.slice(1, segments.length);
+    const { match } = matchRoute(paths, matchData);
+    return match;
 };
 
 const STORAGE_KEY_NAME = 'hybrid-webview-total-stack';
@@ -33593,7 +33666,17 @@ const HybridStackProvider = ({ children }) => {
     const addStackList = (data) => {
         stackList.current = [...stackList.current, data];
     };
-    const updateStack = React.useCallback((to) => {
+    const updateStack = React.useCallback((to, isClear = false) => {
+        if (isClear && typeof to === 'string') {
+            checkHistoryGo.current = true;
+            setDisableAni(true);
+            const stackData = matchRouteToPathname(stackList.current, to);
+            setTimeout(() => {
+                setStack([stackData]);
+                setHashStack([stackData]);
+            }, 20);
+            return;
+        }
         const isToNumber = typeof to === 'number';
         setAddStack(!isToNumber);
         if (isToNumber) {
@@ -33605,7 +33688,7 @@ const HybridStackProvider = ({ children }) => {
                     const removedHashSize = removedTotalStack.filter((stack) => typeof stack === 'string').length;
                     setStack(stack.slice(0, stack.length + to + removedHashSize));
                     setHashStack(hashStack.slice(0, hashStack.length + to));
-                }, 50);
+                }, 20);
             }
             else {
                 setStack(stack.slice(0, stack.length - 1));
@@ -33613,7 +33696,7 @@ const HybridStackProvider = ({ children }) => {
             }
         }
         else {
-            const stackData = stackList.current.find(({ route }) => route === parseToRoute(to));
+            const stackData = matchRouteToPathname(stackList.current, to);
             setStack([...stack, stackData]);
             setHashStack([...hashStack, stackData]);
         }
@@ -33668,25 +33751,27 @@ const HybridStackProvider = ({ children }) => {
             return;
         const cacheRouteStack = storageData.filter((d) => typeof d !== 'string');
         const cacheStack = cacheRouteStack.map(({ route }) => {
-            return stackList.current.find(({ route: CompRoute }) => CompRoute === parseToRoute(route));
+            return matchRouteToPathname(stackList.current, route);
         });
         const cacheTotalStack = storageData.map((d) => {
             return typeof d === 'string'
                 ? d
-                : stackList.current.find(({ route: CompRoute }) => CompRoute === parseToRoute(d.route));
+                : matchRouteToPathname(stackList.current, d.route);
         });
         const hashStack = storageData.filter((d) => typeof d === 'string');
         const isMatchStack = (() => {
             if (!cacheStack[cacheStack.length - 1])
                 return true;
-            if (cacheStack[cacheStack.length - 1].route === pathname)
+            if (matchSingleRoute(cacheStack[cacheStack.length - 1], pathname))
                 return true;
+            return false;
         })();
         const isMatchHashStack = (() => {
             if (!hashStack[hashStack.length - 1])
                 return true;
             if (hashStack[hashStack.length - 1] === hash)
                 return true;
+            return false;
         })();
         if (!isMatchStack || !isMatchHashStack)
             return false;
@@ -33751,13 +33836,13 @@ const HybridStackProvider = ({ children }) => {
             setNoDimmed(false);
         }, ANIMATION_DURATION);
     };
-    return (jsxRuntime.jsx("div", { className: "hybrid-webview-stack", children: jsxRuntime.jsxs(HybridStackContext.Provider, { value: [addStackList, stack, updateStack, hashStack, historyIdx, setHistoryIdx], children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: stack.map(({ component, animation }, i, arr) => {
+    return (jsxRuntime.jsx("div", { className: "hybrid-webview-stack", children: jsxRuntime.jsxs(HybridStackContext.Provider, { value: [addStackList, stack, updateStack, hashStack, historyIdx, setHistoryIdx], children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: stack.map(({ component, animation, pathVariable }, i, arr) => {
                         const activePage = arr.length - 2;
                         const activeIdx = arr.length - 1;
                         const nextAnimation = (i < activeIdx && arr[i + 1]) ? arr[i + 1].animation : false;
                         return (jsxRuntime.jsx(CSSTransition$1, { timeout: ANIMATION_DURATION + 20, classNames: `hybrid-stack-area hybrid-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), style: {
                                 'transition': `all ${ANIMATION_DURATION / 1000}s`
-                            }, children: jsxRuntime.jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, "data-disable-ani": disalbeAni, children: [component, arr[activeIdx].route !== null && !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsxRuntime.jsx("div", { className: hybridDimmedClassName(), style: {
+                            }, children: jsxRuntime.jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, "data-disable-ani": disalbeAni, children: [React.cloneElement(component, Object.assign({ params: pathVariable })), arr[activeIdx].route !== null && !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsxRuntime.jsx("div", { className: hybridDimmedClassName(), style: {
                                             'transition': `all ${ANIMATION_DURATION / 1000}s`
                                         } }))] }) }, i));
                     }) })] }) }));
@@ -33768,12 +33853,18 @@ class Stack {
         this.route = route;
         this.component = component;
         this.animation = typeof animation === 'undefined' ? exports.AnimationType.None : animation;
+        this.pathVariable = {};
+    }
+    setPathVariable(pathVariable) {
+        this.pathVariable = pathVariable;
     }
 }
 
 const HybridRoute = ({ route, component, animation }) => {
     const [addStackList] = React.useContext(HybridStackContext);
-    addStackList(new Stack({ route, component, animation }));
+    React.useLayoutEffect(() => {
+        addStackList(new Stack({ route, component, animation }));
+    }, []);
     return null;
 };
 
@@ -33791,11 +33882,20 @@ const HybridLink = ({ to, target = '_self', children }) => {
 };
 
 const useHybridRouter = () => {
-    const [_, __, updateStack, ___, historyIdx, setHistoryIdx] = React.useContext(HybridStackContext);
+    const [_, stack, updateStack, ___, historyIdx, setHistoryIdx] = React.useContext(HybridStackContext);
     const [router, setRouter] = React.useState();
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         setRouter({
-            push: (to) => {
+            push: (to, state) => {
+                if (state && state.clear) {
+                    setHistoryIdx(1);
+                    updateStack(to, true);
+                    window.history.go((stack.length - 1) * -1);
+                    setTimeout(() => {
+                        window.history.replaceState({ index: 1 }, '', to);
+                    }, 20);
+                    return;
+                }
                 setHistoryIdx(historyIdx + 1);
                 updateStack(to);
                 window.history.pushState({ index: historyIdx + 1 }, '', to);
@@ -33815,7 +33915,7 @@ const useHybridRouter = () => {
                 window.history.go(toSize);
             }
         });
-    }, [historyIdx]);
+    }, [stack, historyIdx]);
     return router;
 };
 

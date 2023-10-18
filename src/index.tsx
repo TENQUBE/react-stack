@@ -24,20 +24,28 @@ const White = () => {
     <div style={{...styles}}>
       <h1>white</h1>
       <HybridLink to="/black?id=aa">/black</HybridLink>
+      <br />
+      {/* <HybridLink to="/black/test/test/test">/*</HybridLink>
+      <br />
+      <HybridLink to="/blue/test/red">/blue/:test/red</HybridLink> */}
+      <br />
+      <HybridLink to="/black/boo/black">/black/:test/black</HybridLink>
     </div>
   )
 }
 
-const Black = () => {
+const Black = ({ params }) => {
   const router: any = useHybridRouter()
   const [stack, totalStack] = useHybridStack()
+  console.log(params)
 
   const handleLinkClick = () => {
-    if(totalStack.length > 3) {
-      router.back(3)
-    } else {
+    // if(totalStack.length > 4) {
+      // router.back(3)
+      // router.push('/blue', { clear: true })
+    // } else {
       router.push('/red#aaa')
-    }
+    // }
   }
 
   return (
@@ -69,8 +77,8 @@ const Blue = () => {
 root.render(
   <HybridStackProvider>
     <HybridRoute route="/" component={<White />} animation={AnimationType.None} />
-    <HybridRoute route="/black" component={<Black />} animation={AnimationType.ToLeft} />
-    <HybridRoute route="/red" component={<Red />} animation={AnimationType.Scale} />
+    <HybridRoute route="/black/:test/black" component={<Black />} animation={AnimationType.ToLeft} />
     <HybridRoute route="/blue" component={<Blue />} animation={AnimationType.ToTop} />
+    <HybridRoute route="/red" component={<Red />} animation={AnimationType.ToTop} />
   </HybridStackProvider>
 )

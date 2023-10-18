@@ -1,4 +1,4 @@
-import { ReactNode, useContext } from 'react'
+import { ReactNode, useContext, useLayoutEffect } from 'react'
 
 import { HybridStackContext } from './provider'
 import Stack from '../data/stack'
@@ -12,8 +12,11 @@ interface IProps {
 
 const HybridRoute = ({ route, component, animation }: IProps) => {
   const [addStackList] = useContext(HybridStackContext)
-  addStackList(new Stack({ route, component, animation }))
-  
+
+  useLayoutEffect(() => {
+    addStackList(new Stack({ route, component, animation }))
+  }, [])
+
   return null
 }
 

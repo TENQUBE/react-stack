@@ -1,19 +1,32 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useLayoutEffect, useState } from 'react'
 import { HybridStackContext } from '../componets/provider'
 
+export interface RoutePushState {
+  clear: boolean
+}
+
 export interface IHybridRouter {
-  push: (to: string) => void
+  push: (to: string, state?: RoutePushState) => void
   replaceState: (to: string) => void
   back: (to?: number) => void
 }
 
 const useHybridRouter = (): IHybridRouter => {
-  const [_, __, updateStack, ___, historyIdx, setHistoryIdx] = useContext(HybridStackContext)
+  const [_, stack, updateStack, ___, historyIdx, setHistoryIdx] = useContext(HybridStackContext)
   const [router, setRouter] = useState<IHybridRouter>()
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setRouter({
-      push: (to: string) => {
+      push: (to: string, state: RoutePushState) => {
+        if(state && state.clear) {
+          setHistoryIdx(1)
+          updateStack(to, true)
+          window.history.go((stack.length - 1) * -1)
+          setTimeout(() => {
+            window.history.replaceState({ index: 1 }, '', to)
+          }, 20)
+          return
+        }
         setHistoryIdx(historyIdx + 1)
         updateStack(to)
         window.history.pushState({ index: historyIdx + 1}, '', to)
@@ -32,7 +45,7 @@ const useHybridRouter = (): IHybridRouter => {
         window.history.go(toSize)
       }
     }) 
-  }, [historyIdx])
+  }, [stack, historyIdx])
 
   return router
 }
