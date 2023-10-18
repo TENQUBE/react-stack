@@ -1,5 +1,5 @@
 import * as react_jsx_runtime from 'react/jsx-runtime';
-import { ReactNode } from 'react';
+import { ReactNode, ReactElement } from 'react';
 
 declare enum AnimationType {
     None = 0,
@@ -22,8 +22,11 @@ interface IProps {
 }
 declare const HybridLink: ({ to, target, children }: IProps) => react_jsx_runtime.JSX.Element;
 
+interface RoutePushState {
+    clear: boolean;
+}
 interface IHybridRouter {
-    push: (to: string) => void;
+    push: (to: string, state?: RoutePushState) => void;
     replaceState: (to: string) => void;
     back: (to?: number) => void;
 }
@@ -31,8 +34,10 @@ declare const useHybridRouter: () => IHybridRouter;
 
 interface IStack {
     readonly route: string | null;
-    readonly component: ReactNode;
+    readonly component: ReactElement;
     readonly animation: AnimationType;
+    pathVariable: unknown;
+    setPathVariable(pathVariable: unknown): void;
 }
 
 declare const useHybridStack: () => [IStack, IStack | string];
