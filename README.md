@@ -61,7 +61,7 @@ root.render(
 )
 ```
 
-## Enum
+## Anumations
 Supports 4 route transition animations.
 ```ts
 enum AnimationType {
@@ -70,6 +70,23 @@ enum AnimationType {
   ToTop,
   Scale
 }
+```
+
+## Route
+
+### Dynamic Routing
+If a route segment starts with : then it becomes a pathvariable.
+```ts
+<ReactStackProvider>
+  <Route route="/black/:color" component={<Black />} animation={AnimationType.ToLeft} />
+</ReactStackProvider>
+```
+The pathvarialbe value can be checked with the component's 'parmas' Props.
+```ts
+// ex. URI path '/color/red'
+const Black = ({ params }) => {
+  console.log(params) // red
+  ...
 ```
 
 ## Hooks
@@ -97,9 +114,17 @@ const White = () => {
   ...
 }
 ```
+
+```ts
+export interface IRoutePushState {
+  clear: boolean
+}
+```
+
 ```ts
 interface IStackRouter {
-  push: (to: string) => void
+  push: (to: string, state?: IRoutePushState) => void
+  replaceState: (to: string) => void
   back: (to?: number) => void
 }
 ```

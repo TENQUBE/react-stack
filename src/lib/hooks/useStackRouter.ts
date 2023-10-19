@@ -1,12 +1,12 @@
 import { useContext, useLayoutEffect, useState } from 'react'
 import { ReactStackContext } from '../componets/provider'
 
-export interface RoutePushState {
+export interface IRoutePushState {
   clear: boolean
 }
 
 export interface IStackRouter {
-  push: (to: string, state?: RoutePushState) => void
+  push: (to: string, state?: IRoutePushState) => void
   replaceState: (to: string) => void
   back: (to?: number) => void
 }
@@ -17,7 +17,7 @@ const useStackRouter = (): IStackRouter => {
 
   useLayoutEffect(() => {
     setRouter({
-      push: (to: string, state: RoutePushState) => {
+      push: (to: string, state: IRoutePushState) => {
         if(state && state.clear) {
           setHistoryIdx(1)
           updateStack(to, true)
