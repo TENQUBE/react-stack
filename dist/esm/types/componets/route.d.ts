@@ -5,5 +5,5 @@ interface IProps {
     component: ReactNode;
     animation?: AnimationType;
 }
-declare const HybridRoute: ({ route, component, animation }: IProps) => any;
-export default HybridRoute;
+declare const Route: ({ route, component, animation }: IProps) => any;
+export default Route;

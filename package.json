@@ -1,6 +1,6 @@
 {
-  "name": "@tenqube/hybrid-webview-stack",
-  "version": "0.0.22",
+  "name": "@tenqube/react-stack",
+  "version": "0.0.24",
   "description": "A library that helps with screen stack routing and transition animation in webviews of hybrid apps. (for React)",
   "keywords": [
     "react",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/tenqube/hybrid-webview-stack.git"
+    "url": "https://github.com/tenqube/react-stack.git"
   },
   "author": "tenqube",
   "license": "MIT",

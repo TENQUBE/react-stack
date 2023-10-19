@@ -1,6 +1,6 @@
 import { ReactNode, useContext, useLayoutEffect } from 'react'
 
-import { HybridStackContext } from './provider'
+import { ReactStackContext } from './provider'
 import Stack from '../data/stack'
 import { AnimationType } from '../interfaces'
 
@@ -10,8 +10,8 @@ interface IProps {
   animation?: AnimationType
 }
 
-const HybridRoute = ({ route, component, animation }: IProps) => {
-  const [addStackList] = useContext(HybridStackContext)
+const Route = ({ route, component, animation }: IProps) => {
+  const [addStackList] = useContext(ReactStackContext)
 
   useLayoutEffect(() => {
     addStackList(new Stack({ route, component, animation }))
@@ -20,4 +20,4 @@ const HybridRoute = ({ route, component, animation }: IProps) => {
   return null
 }
 
-export default HybridRoute
+export default Route

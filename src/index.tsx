@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
-import HybridStackProvider, { AnimationType, HybridRoute, HybridLink, useHybridRouter, useHybridStack } from '../dist/esm/'
+import ReactStackProvider, { Route, Link, AnimationType, useStackRouter, useStacks } from '../dist/esm/'
 
 const container = document.getElementById('wrap') as HTMLElement
 const root = ReactDOM.createRoot(container)
@@ -13,7 +13,7 @@ const styles: any = {
 }
 
 const White = () => {
-  const [stack, totalStack] = useHybridStack()
+  const [stack, totalStack] = useStacks()
 
   useEffect(() => {
     console.log(stack)
@@ -23,20 +23,20 @@ const White = () => {
   return (
     <div style={{...styles}}>
       <h1>white</h1>
-      <HybridLink to="/black?id=aa">/black</HybridLink>
+      <Link to="/black?id=aa">/black</Link>
       <br />
-      {/* <HybridLink to="/black/test/test/test">/*</HybridLink>
+      {/* <Link to="/black/test/test/test">/*</Link>
       <br />
-      <HybridLink to="/blue/test/red">/blue/:test/red</HybridLink> */}
+      <Link to="/blue/test/red">/blue/:test/red</Link> */}
       <br />
-      <HybridLink to="/black/boo/black">/black/:test/black</HybridLink>
+      <Link to="/black/boo/black">/black/:test/black</Link>
     </div>
   )
 }
 
 const Black = (pathVariable) => {
-  const router: any = useHybridRouter()
-  const [stack, totalStack] = useHybridStack()
+  const router: any = useStackRouter()
+  const [stack, totalStack] = useStacks()
   console.log(pathVariable.params)
 
   const handleLinkClick = () => {
@@ -60,7 +60,7 @@ const Red = () => {
   return (
     <div style={{...styles}}>
       <h1>Red</h1>
-      <HybridLink to="/blue">/blue</HybridLink>
+      <Link to="/blue">/blue</Link>
     </div>
   )
 }
@@ -69,16 +69,16 @@ const Blue = () => {
   return (
     <div style={{...styles}}>
       <h1>blue</h1>
-      <HybridLink to="/">/white</HybridLink>
+      <Link to="/">/white</Link>
     </div>
   )
 }
 
 root.render(
-  <HybridStackProvider>
-    <HybridRoute route="/" component={<White />} animation={AnimationType.None} />
-    <HybridRoute route="/black/:test/black" component={<Black />} animation={AnimationType.ToLeft} />
-    <HybridRoute route="/blue" component={<Blue />} animation={AnimationType.ToTop} />
-    <HybridRoute route="/red" component={<Red />} animation={AnimationType.ToTop} />
-  </HybridStackProvider>
+  <ReactStackProvider>
+    <Route route="/" component={<White />} animation={AnimationType.None} />
+    <Route route="/black/:test/black" component={<Black />} animation={AnimationType.ToLeft} />
+    <Route route="/blue" component={<Blue />} animation={AnimationType.ToTop} />
+    <Route route="/red" component={<Red />} animation={AnimationType.ToTop} />
+  </ReactStackProvider>
 )

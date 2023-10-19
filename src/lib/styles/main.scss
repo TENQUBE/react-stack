@@ -1,11 +1,11 @@
-.hybrid-webview-stack {
+.react-stack-area {
   position: absolute;
   width: 100%;
   height: 100%;
   overflow: hidden; 
 }
 
-.hybrid-stack-area {
+.react-stack-box {
   width: 100%;
   height: 100%;
   position: absolute;
@@ -17,50 +17,50 @@
 
 
   // Animation - scale
-  &.hybrid-scale-enter {
+  &.react-stack-scale-enter {
     transform: scale(0.95);
     opacity: 0;
   }
 
-  &.hybrid-scale-enter-active,
-  &.hybrid-scale-enter-done,
-  &.hybrid-scale-exit {
+  &.react-stack-scale-enter-active,
+  &.react-stack-scale-enter-done,
+  &.react-stack-scale-exit {
     transform: scale(1);
     opacity: 1;
   }
 
-  &.hybrid-scale-exit-active {
+  &.react-stack-scale-exit-active {
     transform: scale(0.95);
     opacity: 0;
   }
 
   // Animation - to-left
-  &.hybrid-to-left-enter {
+  &.react-stack-to-left-enter {
     transform: translateX(100%);
   }
 
-  &.hybrid-to-left-enter-active,
-  &.hybrid-to-left-enter-done,
-  &.hybrid-to-left-exit {
+  &.react-stack-to-left-enter-active,
+  &.react-stack-to-left-enter-done,
+  &.react-stack-to-left-exit {
     transform: translateX(0);
   }
 
-  &.hybrid-to-left-exit-active {
+  &.react-stack-to-left-exit-active {
     transform: translateX(100%);
   }
 
   // Animation - to-top
-  &.hybrid-to-top-enter {
+  &.react-stack-to-top-enter {
     transform: translateY(100%);
   }
 
-  &.hybrid-to-top-enter-active,
-  &.hybrid-to-top-enter-done,
-  &.hybrid-to-top-exit {
+  &.react-stack-to-top-enter-active,
+  &.react-stack-to-top-enter-done,
+  &.react-stack-to-top-exit {
     transform: translateY(0);
   }
 
-  &.hybrid-to-top-exit-active {
+  &.react-stack-to-top-exit-active {
     transform: translateY(100%);
   }
 
@@ -69,13 +69,13 @@
     transform: translateX(-10%);
   }
   &[data-before-ani="to-top"] {
-    .hybrid-dimmed {
+    .react-stack-dimmed {
       opacity: 0;
     }
   }
   &[data-before-ani="scale"] {
     transform: scale(1.05);
-    .hybrid-dimmed {
+    .react-stack-dimmed {
       opacity: 0;
     }
   }
@@ -84,14 +84,14 @@
   &[data-disable-ani="true"] {
     transition: 0s !important;
     transform: translateX(0) scale(1) !important;
-    .hybrid-dimmed {
+    .react-stack-dimmed {
       opacity: 0;
     }
   }
   
 }
 
-.hybrid-dimmed {
+.react-stack-dimmed {
   position: fixed;
   top: 0;
   left: 0;

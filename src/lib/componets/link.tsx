@@ -1,5 +1,5 @@
 import { ReactNode, useContext } from 'react'
-import { HybridStackContext } from './provider'
+import { ReactStackContext } from './provider'
 
 interface IProps {
   to: string
@@ -7,8 +7,8 @@ interface IProps {
   children?: ReactNode
 }
 
-const HybridLink = ({ to, target = '_self', children }: IProps) => {
-  const [_, __, updateStack, ___, historyIdx, setHistoryIdx] = useContext(HybridStackContext)
+const Link = ({ to, target = '_self', children }: IProps) => {
+  const [_, __, updateStack, ___, historyIdx, setHistoryIdx] = useContext(ReactStackContext)
 
   const handleClickLink = (e) => {
     if(target === '_blank') return
@@ -24,4 +24,4 @@ const HybridLink = ({ to, target = '_self', children }: IProps) => {
   )
 }
 
-export default HybridLink
+export default Link
