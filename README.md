@@ -1,19 +1,19 @@
 >❗ __The current version is being developed and tested internally.__
 
-# @tenqube/hybrid-webview-stack
+# @tenqube/react-stack
 A library that helps with screen stack routing and transition animation in webviews of hybrid apps.  
 (for React)
 
 ## Installation
 ```sh
-$ npm install @tenqube/hybrid-webview-stack
+$ npm install @tenqube/react-stack
 ```
 
 ## Quick Start
 ```ts
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import HybridStackProvider, { AnimationType, HybridRoute, HybridLink } from '@tenqube/hybrid-webview-stack'
+import ReactStackProvider, { Route, Link, AnimationType } from '@tenqube/react-stack'
 
 const container = document.getElementById('wrap') as HTMLElement
 const root = ReactDOM.createRoot(container)
@@ -29,7 +29,7 @@ const White = () => {
   return (
     <div style={{...styles}}>
       <h1>white</h1>
-      <HybridLink to="/black">/black</HybridLink>
+      <Link to="/black">/black</Link>
     </div>
   )
 }
@@ -38,7 +38,7 @@ const Black = () => {
   return (
     <div style={{...styles}}>
       <h1>black</h1>
-      <HybridLink to="/red">/red</HybridLink>
+      <Link to="/red">/red</Link>
     </div>
   )
 }
@@ -47,17 +47,17 @@ const Red = () => {
   return (
     <div style={{...styles}}>
       <h1>Red</h1>
-      <HybridLink to="/">/white</HybridLink>
+      <Link to="/">/white</Link>
     </div>
   )
 }
 
 root.render(
-  <HybridStackProvider>
-    <HybridRoute route="/" component={<White />} animation={AnimationType.None} />
-    <HybridRoute route="/black" component={<Black />} animation={AnimationType.ToLeft} />
-    <HybridRoute route="/red" component={<Red />} animation={AnimationType.Scale} />
-  </HybridStackProvider>
+  <ReactStackProvider>
+    <Route route="/" component={<White />} animation={AnimationType.None} />
+    <Route route="/black" component={<Black />} animation={AnimationType.ToLeft} />
+    <Route route="/red" component={<Red />} animation={AnimationType.Scale} />
+  </ReactStackProvider>
 )
 ```
 
@@ -74,15 +74,15 @@ enum AnimationType {
 
 ## Hooks
 
-### useHybridRouter
+### useStackRouter
 Currently push and back methods are provided.
 The push method is the same as 'history.pushState' and the back method is similar to 'history.back', but provides the size to move back as a parameter.
 ```ts
 ...
-import { useHybridRouter, IHybridRouter } from '@tenqube/hybrid-webview-stack'
+import { useStackRouter, IStackRouter } from '@tenqube/react-stack'
 
 const White = () => {
-  const router: IHybridRouter = useHybridRouter()
+  const router: IStackRouter = useStackRouter()
 
   const handleClickEvent = () => {
     router.push('/black')
@@ -98,20 +98,20 @@ const White = () => {
 }
 ```
 ```ts
-interface IHybridRouter {
+interface IStackRouter {
   push: (to: string) => void
   back: (to?: number) => void
 }
 ```
 
-### useHybridStack
+### useStacks
 You can see which stack is active.
 ```ts
 ...
-import { useHybridStack, IStack } from '@tenqube/hybrid-webview-stack'
+import { useStacks, IStack } from '@tenqube/react-stack'
 
 const White = () => {
-  const [stack, totalStack]: [IStack, IStack | string] = useHybridStack()
+  const [stack, totalStack]: [IStack, IStack | string] = useStacks()
 
   useEffect(() => {
     console.log(stack) // only view component stack

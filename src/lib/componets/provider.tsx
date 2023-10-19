@@ -6,9 +6,9 @@ import { IStack } from '../data/stack'
 import { matchRouteToPathname, matchSingleRoute } from '../utils'
 import { ANIMATION_DURATION, STORAGE_KEY_NAME } from '../constants'
 
-export const HybridStackContext = createContext(null)
+export const ReactStackContext = createContext(null)
 
-const HybridStackProvider = ({ children }) => {
+const RouterProvider = ({ children }) => {
   const stackList = useRef<IStack[]>([])
   const beforeHash = useRef<string>('')
   const beforePathname = useRef<string>('')
@@ -192,8 +192,8 @@ const HybridStackProvider = ({ children }) => {
     updateStack(window.location.pathname)
   }, [])
 
-  const hybridDimmedClassName = () => {
-    const customClassName = ['hybrid-dimmed']
+  const dimmedClassName = () => {
+    const customClassName = ['react-stack-dimmed']
     customClassName.push(isAddStack ? 'next' : 'prev')
     if(isMoveAction) customClassName.push('active')
     return customClassName.join(' ')
@@ -208,8 +208,8 @@ const HybridStackProvider = ({ children }) => {
   }
   
   return (
-    <div className="hybrid-webview-stack">
-      <HybridStackContext.Provider value={[addStackList, stack, updateStack, hashStack, historyIdx, setHistoryIdx]}>
+    <div className="react-stack-area">
+      <ReactStackContext.Provider value={[addStackList, stack, updateStack, hashStack, historyIdx, setHistoryIdx]}>
         {children}
         <TransitionGroup>
           {stack.map(({ component, animation, pathVariable }, i, arr) => {
@@ -221,7 +221,7 @@ const HybridStackProvider = ({ children }) => {
               <CSSTransition 
                 key={i} 
                 timeout={ANIMATION_DURATION + 20} 
-                classNames={`hybrid-stack-area hybrid-${AnimationClassName[animation]}`}
+                classNames={`react-stack-box react-stack-${AnimationClassName[animation]}`}
                 onExit={() => checkDimmed(animation)}
                 style={{
                   'transition': `all ${ANIMATION_DURATION/1000}s`
@@ -234,7 +234,7 @@ const HybridStackProvider = ({ children }) => {
                   { cloneElement(component, {...{ params: pathVariable }}) }
                   {arr[activeIdx].route !== null && !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (
                     <div 
-                      className={hybridDimmedClassName()} 
+                      className={dimmedClassName()} 
                       style={{
                         'transition': `all ${ANIMATION_DURATION/1000}s`
                       }}
@@ -245,9 +245,9 @@ const HybridStackProvider = ({ children }) => {
             )
           })}
         </TransitionGroup>
-      </HybridStackContext.Provider>
+      </ReactStackContext.Provider>
     </div>
   )
 }
 
-export default HybridStackProvider
+export default RouterProvider

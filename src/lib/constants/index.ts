@@ -1,2 +1,2 @@
-export const STORAGE_KEY_NAME = 'hybrid-webview-total-stack'
+export const STORAGE_KEY_NAME = 'FULL_REACT_STACK_CACHE'
 export const ANIMATION_DURATION = 250

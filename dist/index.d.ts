@@ -13,24 +13,24 @@ interface IProps$1 {
     component: ReactNode;
     animation?: AnimationType;
 }
-declare const HybridRoute: ({ route, component, animation }: IProps$1) => any;
+declare const Route: ({ route, component, animation }: IProps$1) => any;
 
 interface IProps {
     to: string;
     target?: string;
     children?: ReactNode;
 }
-declare const HybridLink: ({ to, target, children }: IProps) => react_jsx_runtime.JSX.Element;
+declare const Link: ({ to, target, children }: IProps) => react_jsx_runtime.JSX.Element;
 
 interface RoutePushState {
     clear: boolean;
 }
-interface IHybridRouter {
+interface IStackRouter {
     push: (to: string, state?: RoutePushState) => void;
     replaceState: (to: string) => void;
     back: (to?: number) => void;
 }
-declare const useHybridRouter: () => IHybridRouter;
+declare const useStackRouter: () => IStackRouter;
 
 interface IStack {
     readonly route: string | null;
@@ -40,10 +40,10 @@ interface IStack {
     setPathVariable(pathVariable: unknown): void;
 }
 
-declare const useHybridStack: () => [IStack, IStack | string];
+declare const useStacks: () => [IStack, IStack | string];
 
 declare const Index: ({ children }: {
     children: any;
 }) => react_jsx_runtime.JSX.Element;
 
-export { AnimationType, HybridLink, HybridRoute, type IHybridRouter, type IStack, Index as default, useHybridRouter, useHybridStack };
+export { AnimationType, type IStack, type IStackRouter, Link, Route, Index as default, useStackRouter, useStacks };

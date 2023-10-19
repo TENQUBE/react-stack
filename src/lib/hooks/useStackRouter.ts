@@ -1,19 +1,19 @@
 import { useContext, useLayoutEffect, useState } from 'react'
-import { HybridStackContext } from '../componets/provider'
+import { ReactStackContext } from '../componets/provider'
 
 export interface RoutePushState {
   clear: boolean
 }
 
-export interface IHybridRouter {
+export interface IStackRouter {
   push: (to: string, state?: RoutePushState) => void
   replaceState: (to: string) => void
   back: (to?: number) => void
 }
 
-const useHybridRouter = (): IHybridRouter => {
-  const [_, stack, updateStack, ___, historyIdx, setHistoryIdx] = useContext(HybridStackContext)
-  const [router, setRouter] = useState<IHybridRouter>()
+const useStackRouter = (): IStackRouter => {
+  const [_, stack, updateStack, ___, historyIdx, setHistoryIdx] = useContext(ReactStackContext)
+  const [router, setRouter] = useState<IStackRouter>()
 
   useLayoutEffect(() => {
     setRouter({
@@ -50,4 +50,4 @@ const useHybridRouter = (): IHybridRouter => {
   return router
 }
 
-export default useHybridRouter
+export default useStackRouter
