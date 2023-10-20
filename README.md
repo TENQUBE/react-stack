@@ -139,20 +139,19 @@ You can see which stack is active.
 import { useStacks } from '@tenqube/react-stack'
 
 const White = () => {
-  const { stack, totalStack } = useStacks()
+  const stacks = useStacks()
 
   useEffect(() => {
-    console.log(stack) // only view component stack
-    console.log(totalStack) // Includes history stack due to hash
-  }, [stack, totalStack])
+    console.log(stacks)
+  }, [stacks])
 
   ...
 }
 ```
 ```ts
 interface IScreen {
-  readonly route: string
-  readonly component: ReactNode
-  readonly animation: AnimationType
+  readonly route?: string
+  readonly component?: ReactNode
+  readonly animation?: AnimationType
 }
 ```

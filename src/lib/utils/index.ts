@@ -1,7 +1,7 @@
 import { IScreen } from '../data/screen'
 
-export const parseToRoute = (route: string): string => {
-  return route.split('#')[0].split('?')[0]
+export const isHashRoute = (route: string): boolean => {
+  return route[0] === '#'
 }
 
 enum PathSubDirectoryType {
@@ -90,8 +90,10 @@ export const matchRouteToPathname = (stacks: IScreen[], pathname: string) => {
   }    
 }
 
-export const matchSingleRoute = (stack: IScreen, pathname: string) => {
-  const matchData = explodeRouteSegments(stack.route)
+export const matchLastSingleRoute = (stacks: IScreen[], pathname: string) => {
+  const notHashStacks = stacks.filter(({ route }) => !isHashRoute(route))
+  const lastStack = notHashStacks[notHashStacks.length - 1]
+  const matchData = explodeRouteSegments(lastStack.route)
   const segments = pathname.split('#')[0].split('?')[0].split('/')
   const paths = segments.slice(1, segments.length)
   const { match } = matchRoute(paths, matchData)

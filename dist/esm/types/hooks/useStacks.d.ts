@@ -1,6 +1,3 @@
 import { IScreen } from '../data/screen';
-declare const useStacks: () => {
-    stacks: IScreen[];
-    allStacks: Array<IScreen | string>;
-};
+declare const useStacks: () => IScreen[];
 export default useStacks;
