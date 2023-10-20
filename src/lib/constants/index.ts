@@ -1,2 +1,2 @@
-export const STORAGE_KEY_NAME = 'FULL_REACT_STACK_CACHE'
+export const STORAGE_KEY_NAME = 'reactAllPrintedScreenStacks'
 export const ANIMATION_DURATION = 250

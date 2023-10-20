@@ -13,7 +13,7 @@ interface IProps$1 {
     component: ReactNode;
     animation?: AnimationType;
 }
-declare const Route: ({ route, component, animation }: IProps$1) => any;
+declare const Screen: ({ route, component, animation }: IProps$1) => any;
 
 interface IProps {
     to: string;
@@ -22,17 +22,17 @@ interface IProps {
 }
 declare const Link: ({ to, target, children }: IProps) => react_jsx_runtime.JSX.Element;
 
-interface RoutePushState {
+interface INavigationPushState {
     clear: boolean;
 }
-interface IStackRouter {
-    push: (to: string, state?: RoutePushState) => void;
-    replaceState: (to: string) => void;
+interface INavigation {
+    push: (to: string, state?: INavigationPushState) => void;
+    replace: (to: string) => void;
     back: (to?: number) => void;
 }
-declare const useStackRouter: () => IStackRouter;
+declare const useNavigaiton: () => INavigation;
 
-interface IStack {
+interface IScreen {
     readonly route: string | null;
     readonly component: ReactElement;
     readonly animation: AnimationType;
@@ -40,10 +40,13 @@ interface IStack {
     setPathVariable(pathVariable: unknown): void;
 }
 
-declare const useStacks: () => [IStack, IStack | string];
+declare const useStacks: () => {
+    stacks: IScreen[];
+    allStacks: Array<IScreen | string>;
+};
 
-declare const Index: ({ children }: {
+declare const ReactStackProvider: ({ children }: {
     children: any;
 }) => react_jsx_runtime.JSX.Element;
 
-export { AnimationType, type IStack, type IStackRouter, Link, Route, Index as default, useStackRouter, useStacks };
+export { AnimationType, type INavigation, type INavigationPushState, type IScreen, Link, Screen, ReactStackProvider as default, useNavigaiton as useNavigation, useStacks };

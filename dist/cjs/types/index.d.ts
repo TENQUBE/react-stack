@@ -1,12 +1,12 @@
 import { AnimationType } from './interfaces';
-import Route from './componets/route';
+import Screen from './componets/screen';
 import Link from './componets/link';
-import useStackRouter, { IStackRouter } from './hooks/useStackRouter';
+import useNavigation, { INavigation, INavigationPushState } from './hooks/useNavigaiton';
 import useStacks from './hooks/useStacks';
-import { IStack } from './data/stack';
+import { IScreen } from './data/screen';
 import './styles/main.scss';
-declare const Index: ({ children }: {
+declare const ReactStackProvider: ({ children }: {
     children: any;
 }) => import("react/jsx-runtime").JSX.Element;
-export { Route, Link, AnimationType, useStackRouter, IStackRouter, useStacks, IStack };
-export default Index;
+export { Screen, Link, AnimationType, useNavigation, INavigation, INavigationPushState, useStacks, IScreen };
+export default ReactStackProvider;

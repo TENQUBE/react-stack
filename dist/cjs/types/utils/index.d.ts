@@ -1,4 +1,4 @@
-import { IStack } from "../data/stack";
+import { IScreen } from '../data/screen';
 export declare const parseToRoute: (route: string) => string;
-export declare const matchRouteToPathname: (stacks: IStack[], pathname: string) => IStack;
-export declare const matchSingleRoute: (stack: IStack, pathname: string) => boolean;
+export declare const matchRouteToPathname: (stacks: IScreen[], pathname: string) => IScreen;
+export declare const matchSingleRoute: (stack: IScreen, pathname: string) => boolean;

@@ -5,5 +5,5 @@ interface IProps {
     component: ReactNode;
     animation?: AnimationType;
 }
-declare const Route: ({ route, component, animation }: IProps) => any;
-export default Route;
+declare const Screen: ({ route, component, animation }: IProps) => any;
+export default Screen;

@@ -1,7 +1,6 @@
 import { ReactNode, useContext, useLayoutEffect } from 'react'
-
 import { ReactStackContext } from './provider'
-import Stack from '../data/stack'
+import ScreenObj from '../data/screen'
 import { AnimationType } from '../interfaces'
 
 interface IProps {
@@ -10,14 +9,14 @@ interface IProps {
   animation?: AnimationType
 }
 
-const Route = ({ route, component, animation }: IProps) => {
-  const [addStackList] = useContext(ReactStackContext)
+const Screen = ({ route, component, animation }: IProps) => {
+  const { addScreen } = useContext(ReactStackContext)
 
   useLayoutEffect(() => {
-    addStackList(new Stack({ route, component, animation }))
+    addScreen(new ScreenObj({ route, component, animation }))
   }, [])
 
   return null
 }
 
-export default Route
+export default Screen

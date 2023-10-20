@@ -1,19 +1,19 @@
 import { AnimationType } from './interfaces'
-import ReactStackProvider from './componets/provider'
-import Route from './componets/route'
+import StackProvider from './componets/provider'
+import Screen from './componets/screen'
 import Link from './componets/link'
-import useStackRouter, { IStackRouter, IRoutePushState } from './hooks/useStackRouter'
+import useNavigation, { INavigation, INavigationPushState } from './hooks/useNavigaiton'
 import useStacks from './hooks/useStacks'
-import { IStack } from './data/stack'
+import { IScreen } from './data/screen'
 import './styles/main.scss'
 
-const Index = ({ children }) => {
+const ReactStackProvider = ({ children }) => {
   return (
-    <ReactStackProvider>
+    <StackProvider>
       {children}
-    </ReactStackProvider>
+    </StackProvider>
   )
 }
 
-export { Route, Link, AnimationType, useStackRouter, IStackRouter, IRoutePushState, useStacks, IStack }
-export default Index
+export { Screen, Link, AnimationType, useNavigation, INavigation, INavigationPushState, useStacks, IScreen }
+export default ReactStackProvider

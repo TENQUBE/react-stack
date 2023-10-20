@@ -1,13 +1,13 @@
-import { ReactElement } from "react";
-import { AnimationType } from "../interfaces";
-export interface IStack {
+import { ReactElement } from 'react';
+import { AnimationType } from '../interfaces';
+export interface IScreen {
     readonly route: string | null;
     readonly component: ReactElement;
     readonly animation: AnimationType;
     pathVariable: unknown;
     setPathVariable(pathVariable: unknown): void;
 }
-declare class Stack implements IStack {
+declare class Screen implements IScreen {
     readonly route: string | null;
     readonly component: ReactElement;
     readonly animation: AnimationType;
@@ -19,4 +19,4 @@ declare class Stack implements IStack {
     });
     setPathVariable(pathVariable: unknown): void;
 }
-export default Stack;
+export default Screen;
