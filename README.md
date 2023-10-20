@@ -139,11 +139,11 @@ You can see which stack is active.
 import { useStacks } from '@tenqube/react-stack'
 
 const White = () => {
-  const stack = useStacks()
+  const stacks = useStacks()
 
   useEffect(() => {
-    console.log(stack)
-  }, [stack])
+    console.log(stacks)
+  }, [stacks])
 
   ...
 }
