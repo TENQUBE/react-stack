@@ -77,14 +77,14 @@ enum AnimationType {
 If a route segment starts with : then it becomes a pathvariable.
 ```ts
 <ReactStackProvider>
-  <Screen route="/black/:color" component={<Black />} animation={AnimationType.ToLeft} />
+  <Screen route="/black/:type" component={<Black />} animation={AnimationType.ToLeft} />
 </ReactStackProvider>
 ```
 The pathvarialbe value can be checked with the component's 'parmas' Props.
 ```ts
-// ex. URI path '/color/red'
+// ex. URI path '/black/color'
 const Black = ({ params }) => {
-  console.log(params) // red
+  console.log(params) // { type: color }
   ...
 ```
 
