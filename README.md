@@ -1,8 +1,7 @@
 >❗ __The current version is being developed and tested internally.__
 
 # @tenqube/react-stack
-A library that helps with screen stack routing and transition animation in webviews of hybrid apps.  
-(for React)
+A library that helps with screen stack routing and transition animation in webviews of hybrid apps.
 
 ## Installation
 ```sh
