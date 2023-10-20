@@ -1,7 +1,7 @@
-import { ReactElement } from "react"
-import { AnimationType } from "../interfaces"
+import { ReactElement } from 'react'
+import { AnimationType } from '../interfaces'
 
-export interface IStack {
+export interface IScreen {
   readonly route: string | null
   readonly component: ReactElement
   readonly animation: AnimationType
@@ -9,7 +9,7 @@ export interface IStack {
   setPathVariable(pathVariable: unknown): void
 }
 
-class Stack implements IStack {
+class Screen implements IScreen {
   readonly route: string | null
   readonly component: ReactElement
   readonly animation: AnimationType
@@ -27,4 +27,4 @@ class Stack implements IStack {
   }
 }
 
-export default Stack
+export default Screen

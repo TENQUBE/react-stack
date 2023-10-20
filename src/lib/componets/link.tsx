@@ -8,17 +8,17 @@ interface IProps {
 }
 
 const Link = ({ to, target = '_self', children }: IProps) => {
-  const [_, __, updateStack, ___, historyIdx, setHistoryIdx] = useContext(ReactStackContext)
+  const { updateStacks, historyIdx, setHistoryIdx } = useContext(ReactStackContext)
 
-  const handleClickLink = (e) => {
+  const handleClickPush = (e) => {
     if(target === '_blank') return
     e.preventDefault()
     setHistoryIdx(historyIdx + 1)
-    updateStack(to)
+    updateStacks(to)
     window.history.pushState({ index: historyIdx + 1}, '', to)
   }
   return (
-    <a href={to} onClick={handleClickLink} target={target}>
+    <a href={to} onClick={handleClickPush} target={target}>
       {children}
     </a>
   )

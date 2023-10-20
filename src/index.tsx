@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
-import ReactStackProvider, { Route, Link, AnimationType, useStackRouter, useStacks } from '../dist/esm/'
+import ReactStackProvider, { Screen, Link, AnimationType, useNavigation, useStacks } from '../dist/esm/'
 
 const container = document.getElementById('wrap') as HTMLElement
 const root = ReactDOM.createRoot(container)
@@ -13,12 +13,12 @@ const styles: any = {
 }
 
 const White = () => {
-  const [stack, totalStack] = useStacks()
+  const { stacks, allStacks } = useStacks()
 
   useEffect(() => {
-    console.log(stack)
-    console.log(totalStack)
-  }, [stack, totalStack])
+    console.log(stacks)
+    console.log(allStacks)
+  }, [stacks, allStacks])
 
   return (
     <div style={{...styles}}>
@@ -34,17 +34,16 @@ const White = () => {
   )
 }
 
-const Black = (pathVariable) => {
-  const router: any = useStackRouter()
-  const [stack, totalStack] = useStacks()
-  console.log(pathVariable.params)
+const Black = () => {
+  const navigation: any = useNavigation()
+  const { allStacks } = useStacks()
 
   const handleLinkClick = () => {
-    // if(totalStack.length > 4) {
-      // router.back(3)
-      // router.push('/blue', { clear: true })
+    // if(allStacks.length > 4) {
+      // history.back(3)
+      // history.push('/', { clear: true })
     // } else {
-      router.push('/red#aaa')
+      navigation.back()
     // }
   }
 
@@ -76,9 +75,9 @@ const Blue = () => {
 
 root.render(
   <ReactStackProvider>
-    <Route route="/" component={<White />} animation={AnimationType.None} />
-    <Route route="/black/:test/black" component={<Black />} animation={AnimationType.ToLeft} />
-    <Route route="/blue" component={<Blue />} animation={AnimationType.ToTop} />
-    <Route route="/red" component={<Red />} animation={AnimationType.ToTop} />
+    <Screen route="/" component={<White />} animation={AnimationType.None} />
+    <Screen route="/black/:test/black" component={<Black />} animation={AnimationType.ToLeft} />
+    <Screen route="/blue" component={<Blue />} animation={AnimationType.ToTop} />
+    <Screen route="/red" component={<Red />} animation={AnimationType.ToTop} />
   </ReactStackProvider>
 )

@@ -1,8 +1,7 @@
 >❗ __The current version is being developed and tested internally.__
 
 # @tenqube/react-stack
-A library that helps with screen stack routing and transition animation in webviews of hybrid apps.  
-(for React)
+A library that helps with screen stack routing and transition animation in webviews of hybrid apps.
 
 ## Installation
 ```sh
@@ -13,7 +12,7 @@ $ npm install @tenqube/react-stack
 ```ts
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import ReactStackProvider, { Route, Link, AnimationType } from '@tenqube/react-stack'
+import ReactStackProvider, { Screen, Link, AnimationType } from '@tenqube/react-stack'
 
 const container = document.getElementById('wrap') as HTMLElement
 const root = ReactDOM.createRoot(container)
@@ -54,9 +53,9 @@ const Red = () => {
 
 root.render(
   <ReactStackProvider>
-    <Route route="/" component={<White />} animation={AnimationType.None} />
-    <Route route="/black" component={<Black />} animation={AnimationType.ToLeft} />
-    <Route route="/red" component={<Red />} animation={AnimationType.Scale} />
+    <Screen route="/" component={<White />} animation={AnimationType.None} />
+    <Screen route="/black" component={<Black />} animation={AnimationType.ToLeft} />
+    <Screen route="/red" component={<Red />} animation={AnimationType.Scale} />
   </ReactStackProvider>
 )
 ```
@@ -78,7 +77,7 @@ enum AnimationType {
 If a route segment starts with : then it becomes a pathvariable.
 ```ts
 <ReactStackProvider>
-  <Route route="/black/:color" component={<Black />} animation={AnimationType.ToLeft} />
+  <Screen route="/black/:color" component={<Black />} animation={AnimationType.ToLeft} />
 </ReactStackProvider>
 ```
 The pathvarialbe value can be checked with the component's 'parmas' Props.
@@ -91,24 +90,28 @@ const Black = ({ params }) => {
 
 ## Hooks
 
-### useStackRouter
-Currently push and back methods are provided.
-The push method is the same as 'history.pushState' and the back method is similar to 'history.back', but provides the size to move back as a parameter.
+### useNavigation
+The push and replace methods operate the same as 'window.history.pushState' and 'window.history.replaceState'. The back method is similar to 'window.history.back', but provides the size to move back to as a parameter.
+> If you use 'window.history.pushState' or 'window.history.replaceState' directly, there may be issues with stack history management. Please use a hook.
 ```ts
 ...
-import { useStackRouter, IStackRouter } from '@tenqube/react-stack'
+import { useNavigation } from '@tenqube/react-stack'
 
 const White = () => {
-  const router: IStackRouter = useStackRouter()
+  const navigation = useNavigation()
 
-  const handleClickEvent = () => {
-    router.push('/black')
+  const handleClickPushEvent = () => {
+    navigation.push('/black')
+  }
+
+  const handleClickReplaceEvent = () => {
+    navigation.replace('/black')
   }
 
   const handleClickBack = () => {
-    router.back()
+    navigation.back()
     // Go back one step
-    // router.back(2) - Go back two steps
+    // history.back(2) - Go back two steps
   }
 
   ...
@@ -116,16 +119,16 @@ const White = () => {
 ```
 
 ```ts
-export interface IRoutePushState {
-  clear: boolean
+interface INavigation {
+  push: (to: string, state?: INavigationPushState) => void
+  replace: (to: string) => void
+  back: (to?: number) => void
 }
 ```
 
 ```ts
-interface IStackRouter {
-  push: (to: string, state?: IRoutePushState) => void
-  replaceState: (to: string) => void
-  back: (to?: number) => void
+interface INavigationPushState {
+  clear: boolean
 }
 ```
 
@@ -133,21 +136,21 @@ interface IStackRouter {
 You can see which stack is active.
 ```ts
 ...
-import { useStacks, IStack } from '@tenqube/react-stack'
+import { useStacks } from '@tenqube/react-stack'
 
 const White = () => {
-  const [stack, totalStack]: [IStack, IStack | string] = useStacks()
+  const { stack, totalStack } = useStacks()
 
   useEffect(() => {
     console.log(stack) // only view component stack
     console.log(totalStack) // Includes history stack due to hash
-  }, [totalStack])
+  }, [stack, totalStack])
 
   ...
 }
 ```
 ```ts
-interface IStack {
+interface IScreen {
   readonly route: string
   readonly component: ReactNode
   readonly animation: AnimationType

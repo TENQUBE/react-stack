@@ -1,4 +1,4 @@
-import { IStack } from "../data/stack"
+import { IScreen } from '../data/screen'
 
 export const parseToRoute = (route: string): string => {
   return route.split('#')[0].split('?')[0]
@@ -76,7 +76,7 @@ const matchRoute = (paths: string[], matchData: IPathSubDirectory[]): { match: b
   }
 }
 
-export const matchRouteToPathname = (stacks: IStack[], pathname: string) => {
+export const matchRouteToPathname = (stacks: IScreen[], pathname: string) => {
   const matchData = stacks.map(({ route }) => explodeRouteSegments(route))
   const segments = pathname.split('#')[0].split('?')[0].split('/')
   const paths = segments.slice(1, segments.length)
@@ -90,7 +90,7 @@ export const matchRouteToPathname = (stacks: IStack[], pathname: string) => {
   }    
 }
 
-export const matchSingleRoute = (stack: IStack, pathname: string) => {
+export const matchSingleRoute = (stack: IScreen, pathname: string) => {
   const matchData = explodeRouteSegments(stack.route)
   const segments = pathname.split('#')[0].split('?')[0].split('/')
   const paths = segments.slice(1, segments.length)

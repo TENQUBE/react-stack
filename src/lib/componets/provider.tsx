@@ -1,133 +1,140 @@
 import { cloneElement, createContext, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CSSTransition, TransitionGroup } from 'react-transition-group'
 
-import { AnimationClassName, AnimationType } from '../interfaces'
-import { IStack } from '../data/stack'
-import { matchRouteToPathname, matchSingleRoute } from '../utils'
 import { ANIMATION_DURATION, STORAGE_KEY_NAME } from '../constants'
+import { AnimationClassName, AnimationType } from '../interfaces'
+import { matchRouteToPathname, matchSingleRoute } from '../utils'
+import { IScreen } from '../data/screen'
 
 export const ReactStackContext = createContext(null)
 
-const RouterProvider = ({ children }) => {
-  const stackList = useRef<IStack[]>([])
+const StackProvider = ({ children }) => {
+  const screenList = useRef<IScreen[]>([])
   const beforeHash = useRef<string>('')
   const beforePathname = useRef<string>('')
   const checkHistoryGo = useRef<boolean>(false)
+  const aniDuration = useRef<number>(ANIMATION_DURATION)
 
-  const [disalbeAni, setDisableAni] = useState(false)
-
-  const [hashStack, setHashStack] = useState<Array<IStack | string>>([])
-  const [stack, setStack] = useState<IStack[]>([])
-  const [isAddStack, setAddStack] = useState<boolean>()
+  const [allStacks, setAllStacks] = useState<Array<IScreen | string>>([])
+  const [stacks, setStacks] = useState<IScreen[]>([])
+  const [isAddStack, setAddStack] = useState<boolean>(null)
   const [historyIdx, setHistoryIdx] = useState<number>(0)
 
   const [isMoveActive, setMoveActive] = useState<boolean>(false)
   const [isMoveAction, setMoveAction] = useState<boolean>(false)
   const [noDimmed, setNoDimmed] = useState(false)
 
-  const addStackList = (data: IStack) => {
-    stackList.current = [...stackList.current, data]
-  }
+  const addScreen = useCallback((data: IScreen) => {
+    screenList.current = [...screenList.current, data]
+  }, [])
 
-  const updateStack = useCallback((to: string | number, isClear = false) => {
+  const breakAnimation = useCallback(() => {
+    aniDuration.current = 0
+    setTimeout(() => {
+      aniDuration.current = ANIMATION_DURATION
+    }, ANIMATION_DURATION)
+  }, [])
+
+  const updateStacks = useCallback((to: string | number, isClear = false) => {
     if(isClear && typeof to === 'string') {
       checkHistoryGo.current = true
-      setDisableAni(true)
-      const stackData = matchRouteToPathname(stackList.current, to)
+      breakAnimation()
+
       setTimeout(() => {
-        setStack([stackData])
-        setHashStack([stackData])
+        const stackData = matchRouteToPathname(screenList.current, to)
+        setStacks([stackData])
+        setAllStacks([stackData])
       }, 20)
       return
     }
+
     const isToNumber = typeof to === 'number'
     setAddStack(!isToNumber)
     if(isToNumber) {
       if(to < -1) {
         checkHistoryGo.current = true
-        setDisableAni(true)
+        breakAnimation()
+
         setTimeout(() => {
-          const removedTotalStack = hashStack.slice(hashStack.length + to, hashStack.length)
+          const removedTotalStack = allStacks.slice(allStacks.length + to, allStacks.length)
           const removedHashSize = removedTotalStack.filter((stack) => typeof stack === 'string').length
 
-          setStack(stack.slice(0, stack.length + to + removedHashSize))
-          setHashStack(hashStack.slice(0, hashStack.length + to))
+          setStacks(stacks.slice(0, stacks.length + to + removedHashSize))
+          setAllStacks(allStacks.slice(0, allStacks.length + to))
         }, 20)
       } else {
-        setStack(stack.slice(0, stack.length - 1))
-        setHashStack(hashStack.slice(0, hashStack.length - 1))
+        setStacks(stacks.slice(0, stacks.length - 1))
+        setAllStacks(allStacks.slice(0, allStacks.length - 1))
       }
     } else {
-      const stackData = matchRouteToPathname(stackList.current, to)
-      setStack([...stack, stackData])
-      setHashStack([...hashStack, stackData])
+      const stackData = matchRouteToPathname(screenList.current, to)
+      setStacks([...stacks, stackData])
+      setAllStacks([...allStacks, stackData])
     }
-  }, [hashStack])
+  }, [stacks, allStacks])
 
 
-  const checkIsForward = () => {
+  const checkIsForward = useCallback(() => {
     const { state } = window.history
-    if (!state) window.history.replaceState.call(history, { index: historyIdx + 1 }, document.title)
+    if (!state) window.history.replaceState({ index: historyIdx + 1 }, '')
+
     const index = state ? state.index : historyIdx + 1
     const isForward = index > historyIdx
     setHistoryIdx(index)
 
     return isForward
-  }
+  }, [historyIdx])
 
-  const historyBackStack = () => {
-    const { pathname, hash } = window.location
-    const bPath = beforePathname.current
-    const bHash = beforeHash.current
-    const historyGo = checkHistoryGo.current
-    
-    beforeHash.current = hash
-    beforePathname.current = pathname
-    checkHistoryGo.current = false
-    
-    if(historyGo) {
-      setTimeout(() => {
-        setDisableAni(false)
-      }, ANIMATION_DURATION)
+  const historyChangeStack = useCallback(() => {
+    if(checkHistoryGo.current) {
+      checkHistoryGo.current = false
       return
     }
 
+    const { pathname, hash } = window.location
+    const bPath = beforePathname.current
+    const bHash = beforeHash.current
+    
+    beforeHash.current = hash
+    beforePathname.current = pathname
+
     if(pathname === bPath) {
       if(hash && !bHash) {
-        setHashStack([...hashStack, hash])
+        setAllStacks([...allStacks, hash])
+        return
       }
       if(hash && bHash) {
-        if(hashStack[hashStack.length - 2] === hash) {
-          setHashStack(hashStack.slice(0, hashStack.length - 1))
+        if(allStacks[allStacks.length - 2] === hash) {
+          setAllStacks(allStacks.slice(0, allStacks.length - 1))
         } else {
-          setHashStack([...hashStack, hash])
+          setAllStacks([...allStacks, hash])
         }
+        return
       }
       if(bHash && !hash) {
-        setHashStack(hashStack.slice(0, hashStack.length - 1))
+        setAllStacks(allStacks.slice(0, allStacks.length - 1))
+        return
       }
     }
     
-    if(pathname === bPath && (hash || (!hash && bHash))) return
+    updateStacks(checkIsForward() ? pathname : -1)
+  }, [allStacks, historyIdx])
 
-    updateStack(checkIsForward() ? window.location.pathname : -1)
-  }
-
-  const initStorageStackData = () => {
+  const initStorageStackData = useCallback(() => {
     const { pathname, hash } = window.location
     const storageData = JSON.parse(window.sessionStorage.getItem(STORAGE_KEY_NAME))
     if(!storageData || storageData.length === 0) return
 
-    const cacheRouteStack = storageData.filter((d: IStack | string) => typeof d !== 'string')
+    const cacheRouteStack = storageData.filter((d: IScreen | string) => typeof d !== 'string')
     const cacheStack = cacheRouteStack.map(({ route }) => {
-      return matchRouteToPathname(stackList.current, route)
+      return matchRouteToPathname(screenList.current, route)
     })
-    const cacheTotalStack = storageData.map((d: IStack | string) => {
+    const cacheTotalStack = storageData.map((d: IScreen | string) => {
       return typeof d === 'string'
         ? d
-        : matchRouteToPathname(stackList.current, d.route)
+        : matchRouteToPathname(screenList.current, d.route)
     })
-    const hashStack = storageData.filter((d: IStack | string) => typeof d === 'string')
+    const allStack = storageData.filter((d: IScreen | string) => typeof d === 'string')
 
     const isMatchStack = (() => {
       if(!cacheStack[cacheStack.length - 1]) return true
@@ -135,23 +142,20 @@ const RouterProvider = ({ children }) => {
       return false
     })()
 
-    const isMatchHashStack = (() => {
-      if(!hashStack[hashStack.length - 1]) return true
-      if(hashStack[hashStack.length - 1] === hash) return true
+    const isMatchallStack = (() => {
+      if(!allStack[allStack.length - 1]) return true
+      if(allStack[allStack.length - 1] === hash) return true
       return false
     })()
 
-    if(!isMatchStack || !isMatchHashStack)  return false
+    if(!isMatchStack || !isMatchallStack)  return false
     
-    setHashStack(cacheTotalStack)
-    setStack(cacheStack)
-    setDisableAni(true)
-    setTimeout(() => {
-      setDisableAni(false)
-    }, ANIMATION_DURATION)
-
+    breakAnimation()
+    setAllStacks(cacheTotalStack)
+    setStacks(cacheStack)
+  
     return true
-  }
+  }, [allStacks, historyIdx])
 
   useEffect(() => {
     if(isAddStack === null) return
@@ -161,58 +165,59 @@ const RouterProvider = ({ children }) => {
       setTimeout(() => {
         setMoveActive(false)
         setMoveAction(false)
-      }, ANIMATION_DURATION)
+      }, aniDuration.current)
     }, 20)
-  }, [stack])
+  }, [stacks])
 
   useEffect(() => { 
-    const storageData = hashStack.map((d) => typeof d === 'string' ? d : { route: d.route })
+    const storageData = allStacks.map((d) => typeof d === 'string' ? d : { route: d.route })
     window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData))
-  }, [hashStack])
+  }, [allStacks])
 
   useEffect(() => {
     beforePathname.current = window.location.pathname
-    window.addEventListener('popstate', historyBackStack)
+    window.addEventListener('popstate', historyChangeStack)
     return () => {
-      window.removeEventListener('popstate', historyBackStack)
+      window.removeEventListener('popstate', historyChangeStack)
     }
-  }, [hashStack, historyIdx])
+  }, [allStacks, historyIdx])
   
   useEffect(() => {
     const index = window.history?.state?.index
     if(index) {
       setHistoryIdx(index)
     } else {
-      history.replaceState({ index: 0 }, document.title)
+      history.replaceState({ index: 0 }, '')
     }
   }, [])
 
   useLayoutEffect(() => {
     if(initStorageStackData()) return
-    updateStack(window.location.pathname)
+    updateStacks(window.location.pathname)
   }, [])
 
-  const dimmedClassName = () => {
+  const dimmedClassName = useCallback(() => {
     const customClassName = ['react-stack-dimmed']
     customClassName.push(isAddStack ? 'next' : 'prev')
     if(isMoveAction) customClassName.push('active')
     return customClassName.join(' ')
-  }
+  }, [isAddStack, isMoveAction])
 
-  const checkDimmed = (animation: AnimationType) => {
+  const checkDimmed = useCallback((animation: AnimationType) => {
     if(animation === AnimationType.ToLeft) return
     setNoDimmed(true)
     setTimeout(() => {
       setNoDimmed(false)
     }, ANIMATION_DURATION)
-  }
+  }, [])
   
   return (
     <div className="react-stack-area">
-      <ReactStackContext.Provider value={[addStackList, stack, updateStack, hashStack, historyIdx, setHistoryIdx]}>
+      <ReactStackContext.Provider value={{addScreen, stacks, allStacks, updateStacks, historyIdx, setHistoryIdx}}>
         {children}
         <TransitionGroup>
-          {stack.map(({ component, animation, pathVariable }, i, arr) => {
+          {stacks.map(({ route, component, animation, pathVariable }, i, arr) => {
+            if(route === '#') return null
             const activePage = arr.length - 2
             const activeIdx = arr.length - 1
             const nextAnimation = (i < activeIdx && arr[i + 1]) ? arr[i + 1].animation : false
@@ -220,23 +225,20 @@ const RouterProvider = ({ children }) => {
             return (
               <CSSTransition 
                 key={i} 
-                timeout={ANIMATION_DURATION + 20} 
+                timeout={aniDuration.current} 
                 classNames={`react-stack-box react-stack-${AnimationClassName[animation]}`}
                 onExit={() => checkDimmed(animation)}
                 style={{
-                  'transition': `all ${ANIMATION_DURATION/1000}s`
+                  'transition': `all ${aniDuration.current/1000}s`
                 }}
               >
-                <div 
-                  data-before-ani={nextAnimation !== false ? AnimationClassName[nextAnimation] : false}
-                  data-disable-ani={disalbeAni}
-                >
+                <div data-before-ani={nextAnimation !== false ? AnimationClassName[nextAnimation] : false}>
                   { cloneElement(component, {...{ params: pathVariable }}) }
                   {arr[activeIdx].route !== null && !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (
                     <div 
                       className={dimmedClassName()} 
                       style={{
-                        'transition': `all ${ANIMATION_DURATION/1000}s`
+                        'transition': `all ${aniDuration.current/1000}s`
                       }}
                     />
                   )}
@@ -250,4 +252,4 @@ const RouterProvider = ({ children }) => {
   )
 }
 
-export default RouterProvider
+export default StackProvider

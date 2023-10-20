@@ -1,11 +1,11 @@
 import { useContext } from 'react'
 import { ReactStackContext } from '../componets/provider'
-import { IStack } from '../data/stack'
+import { IScreen } from '../data/screen'
 
-const useStacks = (): [IStack, IStack | string] => {
-  const [_, stack, __, totalStack] = useContext(ReactStackContext)
+const useStacks = (): { stacks: IScreen[], allStacks: Array<IScreen | string>} => {
+  const { stacks, allStacks } = useContext(ReactStackContext)
   
-  return [stack, totalStack]
+  return { stacks, allStacks }
 }
 
 export default useStacks
