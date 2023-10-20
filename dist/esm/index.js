@@ -33668,7 +33668,6 @@ const StackProvider = ({ children }) => {
     const beforeHash = useRef('');
     const beforePathname = useRef('');
     const checkHistoryGo = useRef(false);
-    // const [allStacks, setAllStacks] = useState<Array<IScreen | string>>([])
     const [stacks, setStacks] = useState([]);
     const [isAddStack, setAddStack] = useState(null);
     const [historyIdx, setHistoryIdx] = useState(0);
@@ -33692,7 +33691,6 @@ const StackProvider = ({ children }) => {
             setTimeout(() => {
                 const stackData = matchRouteToPathname(screenList.current, to);
                 setStacks([stackData]);
-                // setAllStacks([stackData])
             }, 20);
             return;
         }
@@ -33703,21 +33701,16 @@ const StackProvider = ({ children }) => {
                 checkHistoryGo.current = true;
                 breakAnimation();
                 setTimeout(() => {
-                    // const removedTotalStack = allStacks.slice(allStacks.length + to, allStacks.length)
-                    // const removedHashSize = removedTotalStack.filter((stack) => typeof stack === 'string').length
                     setStacks(stacks.slice(0, stacks.length + to));
-                    // setAllStacks(allStacks.slice(0, allStacks.length + to))
                 }, 20);
             }
             else {
                 setStacks(stacks.slice(0, stacks.length - 1));
-                // setAllStacks(allStacks.slice(0, allStacks.length - 1))
             }
         }
         else {
             const stackData = matchRouteToPathname(screenList.current, to);
             setStacks([...stacks, stackData]);
-            // setAllStacks([...allStacks, stackData])
         }
     }, [stacks]);
     const checkIsForward = useCallback(() => {
@@ -33741,26 +33734,20 @@ const StackProvider = ({ children }) => {
         beforePathname.current = pathname;
         if (pathname === bPath) {
             if (hash && !bHash) {
-                // setAllStacks([...allStacks, hash])
                 setStacks([...stacks, new Screen$1({ route: hash })]);
-                return;
             }
             if (hash && bHash) {
                 if (stacks[stacks.length - 2].route === hash) {
                     setStacks(stacks.slice(0, stacks.length - 1));
-                    // setAllStacks(allStacks.slice(0, allStacks.length - 1))
                 }
                 else {
-                    // setAllStacks([...allStacks, hash])
                     setStacks([...stacks, new Screen$1({ route: hash })]);
                 }
-                return;
             }
             if (bHash && !hash) {
                 setStacks(stacks.slice(0, stacks.length - 1));
-                // setAllStacks(allStacks.slice(0, allStacks.length - 1))
-                return;
             }
+            return;
         }
         updateStacks(checkIsForward() ? pathname : -1);
     }, [stacks, historyIdx]);
@@ -33769,18 +33756,11 @@ const StackProvider = ({ children }) => {
         const storageData = JSON.parse(window.sessionStorage.getItem(STORAGE_KEY_NAME));
         if (!storageData || storageData.length === 0)
             return;
-        // const cacheRouteStack = storageData.filter((d: IScreen | string) => typeof d !== 'string')
         const storageStacks = storageData.map((route) => {
             return isHashRoute(route)
                 ? new Screen$1({ route })
                 : matchRouteToPathname(screenList.current, route);
         });
-        // const cacheTotalStack = storageData.map((d: IScreen | string) => {
-        //   return typeof d === 'string'
-        //     ? d
-        //     : matchRouteToPathname(screenList.current, d.route)
-        // })
-        // const allStack = storageData.filter((d: IScreen | string) => typeof d === 'string')
         if (!matchLastSingleRoute(storageStacks, pathname)
             || (hash && storageStacks[storageStacks.length - 1].route !== hash)) {
             return false;
@@ -33842,7 +33822,6 @@ const StackProvider = ({ children }) => {
             setNoDimmed(false);
         }, ANIMATION_DURATION);
     }, []);
-    console.log(aniDuration);
     return (jsx("div", { className: "react-stack-area", children: jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, historyIdx, setHistoryIdx }, children: [children, jsx(TransitionGroup$1, { children: stacks.map(({ route, component, animation, pathVariable }, i, arr) => {
                         if (isHashRoute(route))
                             return null;

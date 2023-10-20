@@ -40,9 +40,7 @@ interface IScreen {
     setPathVariable(pathVariable: unknown): void;
 }
 
-declare const useStacks: () => {
-    stacks: IScreen[];
-};
+declare const useStacks: () => IScreen[];
 
 declare const ReactStackProvider: ({ children }: {
     children: any;
