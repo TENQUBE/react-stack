@@ -13,12 +13,11 @@ const styles: any = {
 }
 
 const White = () => {
-  const { stacks, allStacks } = useStacks()
+  const stacks = useStacks()
 
   useEffect(() => {
     console.log(stacks)
-    console.log(allStacks)
-  }, [stacks, allStacks])
+  }, [stacks])
 
   return (
     <div style={{...styles}}>
@@ -36,7 +35,6 @@ const White = () => {
 
 const Black = () => {
   const navigation: any = useNavigation()
-  const { allStacks } = useStacks()
 
   const handleLinkClick = () => {
     // if(allStacks.length > 4) {

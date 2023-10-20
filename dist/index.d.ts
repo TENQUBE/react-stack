@@ -33,16 +33,15 @@ interface INavigation {
 declare const useNavigaiton: () => INavigation;
 
 interface IScreen {
-    readonly route: string | null;
-    readonly component: ReactElement;
-    readonly animation: AnimationType;
+    readonly route?: string;
+    readonly component?: ReactElement | null;
+    readonly animation?: AnimationType;
     pathVariable: unknown;
     setPathVariable(pathVariable: unknown): void;
 }
 
 declare const useStacks: () => {
     stacks: IScreen[];
-    allStacks: Array<IScreen | string>;
 };
 
 declare const ReactStackProvider: ({ children }: {
