@@ -33689,10 +33689,6 @@ const StackProvider = ({ children }) => {
         }, ANIMATION_DURATION);
     }, []);
     const updateStacks = React.useCallback((to, isClear = false) => {
-        // if(isHashRoute(to)) {
-        //   window.location.hash = to as string
-        //   return
-        // }
         if (isClear && typeof to === 'string') {
             checkHistoryGo.current = true;
             breakAnimation();
@@ -33721,14 +33717,6 @@ const StackProvider = ({ children }) => {
             setStacks([...stacks, stackData]);
         }
     }, [stacks]);
-    // const checkIsForward = useCallback(() => {
-    //   const { state } = window.history
-    //   if (!state) window.history.replaceState({ index: historyIdx + 1 }, '')
-    //   const index = state ? state.index : historyIdx + 1
-    //   const isForward = index > historyIdx
-    //   setHistoryIdx(index)
-    //   return isForward
-    // }, [historyIdx])
     const checkIsForward = React.useCallback(() => {
         const { state } = window.history;
         if (!state)
@@ -33750,33 +33738,9 @@ const StackProvider = ({ children }) => {
         beforeHash.current = hash;
         beforePathname.current = pathname;
         if (pathname === bPath && hash && (!bHash || isForward)) {
-            console.log('aa');
             setStacks([...stacks, new Screen$1({ route: hash })]);
             return;
         }
-        console.log('bb');
-        // if(pathname === bPath) {
-        //   if((hash && !bHash) || ) {
-        //     setStacks([...stacks, new Screen({ route: hash })])
-        //     return
-        //   }
-        //   if(hash && bHash && isForward) {
-        //     if(isForward) {
-        //       setStacks([...stacks, new Screen({ route: hash })])
-        //       return
-        //     } else {
-        //       setStacks(stacks.slice(0, stacks.length - 1))
-        //     }
-        // if(stacks[stacks.length - 2].route === hash) {
-        //   setStacks(stacks.slice(0, stacks.length - 1))
-        // } else {
-        //   setStacks([...stacks, new Screen({ route: hash })])
-        // }
-        // }
-        // if(bHash && !hash) {
-        //   setStacks(stacks.slice(0, stacks.length - 1))
-        // }
-        // }
         updateStacks(isForward ? pathname : -1);
     }, [stacks, historyIdx]);
     const initStorageStackData = React.useCallback(() => {
