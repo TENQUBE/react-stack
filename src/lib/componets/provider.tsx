@@ -63,7 +63,6 @@ const StackProvider = ({ children }) => {
     }
   }, [stacks])
 
-
   const checkIsForward = useCallback(() => {
     const { state } = window.history
     if (!state) window.history.replaceState({ index: historyIdx + 1 }, '')
@@ -81,6 +80,7 @@ const StackProvider = ({ children }) => {
       return
     }
 
+    const isForward = checkIsForward()
     const { pathname, hash } = window.location
     const bPath = beforePathname.current
     const bHash = beforeHash.current
@@ -88,24 +88,12 @@ const StackProvider = ({ children }) => {
     beforeHash.current = hash
     beforePathname.current = pathname
 
-    if(pathname === bPath) {
-      if(hash && !bHash) {
-        setStacks([...stacks, new Screen({ route: hash })])
-      }
-      if(hash && bHash) {
-        if(stacks[stacks.length - 2].route === hash) {
-          setStacks(stacks.slice(0, stacks.length - 1))
-        } else {
-          setStacks([...stacks, new Screen({ route: hash })])
-        }
-      }
-      if(bHash && !hash) {
-        setStacks(stacks.slice(0, stacks.length - 1))
-      }
+    if(pathname === bPath && hash && (!bHash || isForward)) {
+      setStacks([...stacks, new Screen({ route: hash })])
       return
     }
     
-    updateStacks(checkIsForward() ? pathname : -1)
+    updateStacks(isForward ? pathname : -1)
   }, [stacks, historyIdx])
 
   const initStorageStackData = useCallback(() => {
@@ -160,7 +148,7 @@ const StackProvider = ({ children }) => {
     if(index) {
       setHistoryIdx(index)
     } else {
-      history.replaceState({ index: 0 }, '')
+      window.history.replaceState({ index: 0 }, '')
     }
   }, [])
 

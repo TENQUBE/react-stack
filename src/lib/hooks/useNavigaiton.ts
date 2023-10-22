@@ -1,5 +1,6 @@
 import { useContext, useLayoutEffect, useState } from 'react'
 import { ReactStackContext } from '../componets/provider'
+import { isHashRoute } from '../utils'
 
 export interface INavigationPushState {
   clear: boolean
@@ -16,6 +17,10 @@ const useNavigaiton = (): INavigation => {
   
   return {
     push: (to: string, state: INavigationPushState) => {
+      if(isHashRoute(to)) {
+        window.location.hash = String(to)
+        return
+      }
       if(state && state.clear) {
         setHistoryIdx(1)
         updateStacks(to, true)
