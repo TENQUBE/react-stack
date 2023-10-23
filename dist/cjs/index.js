@@ -33573,7 +33573,7 @@ const STORAGE_KEY_NAME = 'reactAllPrintedScreenStacks';
 const ANIMATION_DURATION = 250;
 
 const isHashRoute = (route) => {
-    return route[0] === '#';
+    return typeof route === 'string' && route[0] === '#';
 };
 var PathSubDirectoryType;
 (function (PathSubDirectoryType) {
@@ -33731,29 +33731,17 @@ const StackProvider = ({ children }) => {
             checkHistoryGo.current = false;
             return;
         }
+        const isForward = checkIsForward();
         const { pathname, hash } = window.location;
         const bPath = beforePathname.current;
         const bHash = beforeHash.current;
         beforeHash.current = hash;
         beforePathname.current = pathname;
-        if (pathname === bPath) {
-            if (hash && !bHash) {
-                setStacks([...stacks, new Screen$1({ route: hash })]);
-            }
-            if (hash && bHash) {
-                if (stacks[stacks.length - 2].route === hash) {
-                    setStacks(stacks.slice(0, stacks.length - 1));
-                }
-                else {
-                    setStacks([...stacks, new Screen$1({ route: hash })]);
-                }
-            }
-            if (bHash && !hash) {
-                setStacks(stacks.slice(0, stacks.length - 1));
-            }
+        if (pathname === bPath && hash && (!bHash || isForward)) {
+            setStacks([...stacks, new Screen$1({ route: hash })]);
             return;
         }
-        updateStacks(checkIsForward() ? pathname : -1);
+        updateStacks(isForward ? pathname : -1);
     }, [stacks, historyIdx]);
     const initStorageStackData = React.useCallback(() => {
         const { pathname, hash } = window.location;
@@ -33803,7 +33791,7 @@ const StackProvider = ({ children }) => {
             setHistoryIdx(index);
         }
         else {
-            history.replaceState({ index: 0 }, '');
+            window.history.replaceState({ index: 0 }, '');
         }
     }, []);
     React.useLayoutEffect(() => {
@@ -33854,6 +33842,10 @@ const Link = ({ to, target = '_self', children }) => {
         if (target === '_blank')
             return;
         e.preventDefault();
+        if (isHashRoute(to)) {
+            window.location.hash = String(to);
+            return;
+        }
         setHistoryIdx(historyIdx + 1);
         updateStacks(to);
         window.history.pushState({ index: historyIdx + 1 }, '', to);
@@ -33865,6 +33857,10 @@ const useNavigaiton = () => {
     const { stacks, updateStacks, historyIdx, setHistoryIdx } = React.useContext(ReactStackContext);
     return {
         push: (to, state) => {
+            if (isHashRoute(to)) {
+                window.location.hash = String(to);
+                return;
+            }
             if (state && state.clear) {
                 setHistoryIdx(1);
                 updateStacks(to, true);

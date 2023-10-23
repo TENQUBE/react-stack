@@ -1,7 +1,7 @@
 import { IScreen } from '../data/screen'
 
-export const isHashRoute = (route: string): boolean => {
-  return route[0] === '#'
+export const isHashRoute = (route: string | number): boolean => {
+  return typeof route === 'string' && route[0] === '#'
 }
 
 enum PathSubDirectoryType {

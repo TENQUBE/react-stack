@@ -1,5 +1,6 @@
 import { ReactNode, useContext } from 'react'
 import { ReactStackContext } from './provider'
+import { isHashRoute } from '../utils'
 
 interface IProps {
   to: string
@@ -13,6 +14,10 @@ const Link = ({ to, target = '_self', children }: IProps) => {
   const handleClickPush = (e) => {
     if(target === '_blank') return
     e.preventDefault()
+    if(isHashRoute(to)) {
+      window.location.hash = String(to)
+      return
+    }
     setHistoryIdx(historyIdx + 1)
     updateStacks(to)
     window.history.pushState({ index: historyIdx + 1}, '', to)
