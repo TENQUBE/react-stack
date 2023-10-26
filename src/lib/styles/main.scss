@@ -98,6 +98,11 @@
       opacity: 0;
     }
   }
+  &[data-next-screen-ani="none"] {
+    .react-stack-dimmed {
+      opacity: 0;
+    }
+  }
 
   // History go - disable animation
   &[data-next-screen-ani="true"] {
