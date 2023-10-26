@@ -11,6 +11,7 @@ exports.AnimationType = void 0;
     AnimationType[AnimationType["ToLeft"] = 1] = "ToLeft";
     AnimationType[AnimationType["ToTop"] = 2] = "ToTop";
     AnimationType[AnimationType["Scale"] = 3] = "Scale";
+    AnimationType[AnimationType["FadeIn"] = 4] = "FadeIn";
 })(exports.AnimationType || (exports.AnimationType = {}));
 var AnimationClassName;
 (function (AnimationClassName) {
@@ -18,6 +19,7 @@ var AnimationClassName;
     AnimationClassName[AnimationClassName["to-left"] = 1] = "to-left";
     AnimationClassName[AnimationClassName["to-top"] = 2] = "to-top";
     AnimationClassName[AnimationClassName["scale"] = 3] = "scale";
+    AnimationClassName[AnimationClassName["fade-in"] = 4] = "fade-in";
 })(AnimationClassName || (AnimationClassName = {}));
 
 function _extends() {
@@ -33675,23 +33677,21 @@ const StackProvider = ({ children }) => {
     const [stacks, setStacks] = React.useState([]);
     const [isAddStack, setAddStack] = React.useState(null);
     const [historyIdx, setHistoryIdx] = React.useState(0);
-    const [aniDuration, setAniDuration] = React.useState(ANIMATION_DURATION);
     const [isMoveActive, setMoveActive] = React.useState(false);
     const [isMoveAction, setMoveAction] = React.useState(false);
     const [noDimmed, setNoDimmed] = React.useState(false);
     const addScreen = React.useCallback((data) => {
         screenList.current = [...screenList.current, data];
     }, []);
-    const breakAnimation = React.useCallback(() => {
-        setAniDuration(0);
+    const isActivedDimmed = () => {
+        setNoDimmed(true);
         setTimeout(() => {
-            setAniDuration(ANIMATION_DURATION);
+            setNoDimmed(false);
         }, ANIMATION_DURATION);
-    }, []);
+    };
     const updateStacks = React.useCallback((to, isClear = false) => {
         if (isClear && typeof to === 'string') {
-            checkHistoryGo.current = true;
-            breakAnimation();
+            isActivedDimmed();
             setTimeout(() => {
                 const stackData = matchRouteToPathname(screenList.current, to);
                 setStacks([stackData]);
@@ -33702,8 +33702,7 @@ const StackProvider = ({ children }) => {
         setAddStack(!isToNumber);
         if (isToNumber) {
             if (to < -1) {
-                checkHistoryGo.current = true;
-                breakAnimation();
+                isActivedDimmed();
                 setTimeout(() => {
                     setStacks(stacks.slice(0, stacks.length + to));
                 }, 20);
@@ -33727,6 +33726,7 @@ const StackProvider = ({ children }) => {
         return isForward;
     }, [historyIdx]);
     const historyChangeStack = React.useCallback(() => {
+        // useNavigation 에서 조건문에 따라 설정됨
         if (checkHistoryGo.current) {
             checkHistoryGo.current = false;
             return;
@@ -33737,9 +33737,13 @@ const StackProvider = ({ children }) => {
         const bHash = beforeHash.current;
         beforeHash.current = hash;
         beforePathname.current = pathname;
-        if (pathname === bPath && hash && (!bHash || isForward)) {
-            setStacks([...stacks, new Screen$1({ route: hash })]);
-            return;
+        // 해시가 변했을 때
+        if (pathname === bPath) {
+            isActivedDimmed(); // 해시 변화는 딤을 적용하지 않음
+            if (hash && (!bHash || isForward)) {
+                setStacks([...stacks, new Screen$1({ route: hash })]);
+                return;
+            }
         }
         updateStacks(isForward ? pathname : -1);
     }, [stacks, historyIdx]);
@@ -33757,7 +33761,7 @@ const StackProvider = ({ children }) => {
             || (hash && storageStacks[storageStacks.length - 1].route !== hash)) {
             return false;
         }
-        breakAnimation();
+        isActivedDimmed();
         setStacks(storageStacks);
         return true;
     }, [stacks, historyIdx]);
@@ -33770,9 +33774,9 @@ const StackProvider = ({ children }) => {
             setTimeout(() => {
                 setMoveActive(false);
                 setMoveAction(false);
-            }, aniDuration);
+            }, ANIMATION_DURATION);
         }, 20);
-    }, [stacks, aniDuration]);
+    }, [stacks, ANIMATION_DURATION]);
     React.useEffect(() => {
         const storageData = stacks.map((d) => d.route);
         window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData));
@@ -33809,22 +33813,25 @@ const StackProvider = ({ children }) => {
     const checkDimmed = React.useCallback((animation) => {
         if (animation === exports.AnimationType.ToLeft)
             return;
-        setNoDimmed(true);
-        setTimeout(() => {
-            setNoDimmed(false);
-        }, ANIMATION_DURATION);
+        isActivedDimmed();
     }, []);
-    return (jsxRuntime.jsx("div", { className: "react-stack-area", children: jsxRuntime.jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, historyIdx, setHistoryIdx }, children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: stacks.map(({ route, component, animation, pathVariable }, i, arr) => {
+    return (jsxRuntime.jsx("div", { className: "react-stack-area", children: jsxRuntime.jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, historyIdx, setHistoryIdx, checkHistoryGo }, children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: stacks.map(({ route, component, animation, pathVariable }, i, arr) => {
                         if (isHashRoute(route))
                             return null;
-                        const activePage = arr.length - 2;
-                        const activeIdx = arr.length - 1;
-                        const nextAnimation = (i < activeIdx && arr[i + 1]) ? arr[i + 1].animation : false;
-                        return (jsxRuntime.jsx(CSSTransition$1, { timeout: aniDuration, classNames: `react-stack-box react-stack-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), style: {
-                                'transition': `all ${aniDuration / 1000}s`
-                            }, children: jsxRuntime.jsxs("div", { "data-before-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, children: [React.cloneElement(component, Object.assign({ params: pathVariable })), !isHashRoute(arr[activeIdx].route) && !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (jsxRuntime.jsx("div", { className: dimmedClassName(), style: {
-                                            'transition': `all ${aniDuration / 1000}s`
-                                        } }))] }) }, i));
+                        const idx = i - arr.slice(0, i).filter(({ route }) => isHashRoute(route)).length;
+                        const stackArr = arr.filter(({ route }) => !isHashRoute(route));
+                        const arrLen = stackArr.length;
+                        const activePage = arrLen - 2;
+                        const activeIdx = arrLen - 1;
+                        const nextAnimation = (idx < activeIdx && stackArr[idx + 1]) ? stackArr[idx + 1].animation : false;
+                        return (jsxRuntime.jsx(CSSTransition$1, { timeout: ANIMATION_DURATION, classNames: `react-stack-box react-stack-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), style: {
+                                'transition': `all ${ANIMATION_DURATION / 1000}s`
+                            }, children: jsxRuntime.jsxs("div", { "data-next-screen-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, children: [React.cloneElement(component, Object.assign({ params: pathVariable })), !noDimmed
+                                        && (isAddStack ? activePage === idx : activePage + 1 === idx)
+                                        && isMoveActive
+                                        && (jsxRuntime.jsx("div", { className: dimmedClassName(), style: {
+                                                'transition': `all ${ANIMATION_DURATION / 1000}s`
+                                            } }))] }) }, i));
                     }) })] }) }));
 };
 
@@ -33854,7 +33861,7 @@ const Link = ({ to, target = '_self', children }) => {
 };
 
 const useNavigaiton = () => {
-    const { stacks, updateStacks, historyIdx, setHistoryIdx } = React.useContext(ReactStackContext);
+    const { stacks, updateStacks, historyIdx, setHistoryIdx, checkHistoryGo } = React.useContext(ReactStackContext);
     return {
         push: (to, state) => {
             if (isHashRoute(to)) {
@@ -33862,6 +33869,7 @@ const useNavigaiton = () => {
                 return;
             }
             if (state && state.clear) {
+                checkHistoryGo.current = true;
                 setHistoryIdx(1);
                 updateStacks(to, true);
                 window.history.go((stacks.length - 1) * -1);
@@ -33880,6 +33888,7 @@ const useNavigaiton = () => {
         back: (to = 1) => {
             const toSize = to > 0 ? to * -1 : -1;
             if (toSize < -1) {
+                checkHistoryGo.current = true;
                 setHistoryIdx(historyIdx + toSize);
                 updateStacks(toSize);
             }
@@ -33920,7 +33929,7 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z = ".react-stack-area {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  overflow: hidden; }\n\n.react-stack-box {\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  overflow-y: hidden;\n  transition: all 0.25s;\n  transform: translateX(0) scale(1);\n  opacity: 1;\n  will-change: transform, opacity; }\n  .react-stack-box.react-stack-scale-enter {\n    transform: scale(0.95);\n    opacity: 0; }\n  .react-stack-box.react-stack-scale-enter-active, .react-stack-box.react-stack-scale-enter-done, .react-stack-box.react-stack-scale-exit {\n    transform: scale(1);\n    opacity: 1; }\n  .react-stack-box.react-stack-scale-exit-active {\n    transform: scale(0.95);\n    opacity: 0; }\n  .react-stack-box.react-stack-to-left-enter {\n    transform: translateX(100%); }\n  .react-stack-box.react-stack-to-left-enter-active, .react-stack-box.react-stack-to-left-enter-done, .react-stack-box.react-stack-to-left-exit {\n    transform: translateX(0); }\n  .react-stack-box.react-stack-to-left-exit-active {\n    transform: translateX(100%); }\n  .react-stack-box.react-stack-to-top-enter {\n    transform: translateY(100%); }\n  .react-stack-box.react-stack-to-top-enter-active, .react-stack-box.react-stack-to-top-enter-done, .react-stack-box.react-stack-to-top-exit {\n    transform: translateY(0); }\n  .react-stack-box.react-stack-to-top-exit-active {\n    transform: translateY(100%); }\n  .react-stack-box[data-before-ani=\"to-left\"] {\n    transform: translateX(-10%); }\n  .react-stack-box[data-before-ani=\"to-top\"] .react-stack-dimmed {\n    opacity: 0; }\n  .react-stack-box[data-before-ani=\"scale\"] {\n    transform: scale(1.05); }\n    .react-stack-box[data-before-ani=\"scale\"] .react-stack-dimmed {\n      opacity: 0; }\n  .react-stack-box[data-disable-ani=\"true\"] {\n    transition: 0s !important;\n    transform: translateX(0) scale(1) !important; }\n    .react-stack-box[data-disable-ani=\"true\"] .react-stack-dimmed {\n      opacity: 0; }\n\n.react-stack-dimmed {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: #000;\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.25s;\n  z-index: 9999; }\n  .react-stack-dimmed.active {\n    opacity: 0.5; }\n  .react-stack-dimmed.prev {\n    opacity: 0.2; }\n    .react-stack-dimmed.prev.active {\n      opacity: 0; }\n";
+var css_248z = ".react-stack-area {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  overflow: hidden; }\n\n.react-stack-box {\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  overflow-y: hidden;\n  transition: all 0.25s;\n  transform: translateX(0) scale(1);\n  opacity: 1;\n  will-change: transform, opacity; }\n  .react-stack-box.react-stack-fade-in-enter {\n    opacity: 0; }\n  .react-stack-box.react-stack-fade-in-enter-active, .react-stack-box.react-stack-fade-in-enter-done, .react-stack-box.react-stack-fade-in-exit {\n    opacity: 1; }\n  .react-stack-box.react-stack-fade-in-exit-active {\n    opacity: 0; }\n  .react-stack-box.react-stack-scale-enter {\n    transform: scale(0.95);\n    opacity: 0; }\n  .react-stack-box.react-stack-scale-enter-active, .react-stack-box.react-stack-scale-enter-done, .react-stack-box.react-stack-scale-exit {\n    transform: scale(1);\n    opacity: 1; }\n  .react-stack-box.react-stack-scale-exit-active {\n    transform: scale(0.95);\n    opacity: 0; }\n  .react-stack-box.react-stack-to-left-enter {\n    transform: translateX(100%); }\n  .react-stack-box.react-stack-to-left-enter-active, .react-stack-box.react-stack-to-left-enter-done, .react-stack-box.react-stack-to-left-exit {\n    transform: translateX(0); }\n  .react-stack-box.react-stack-to-left-exit-active {\n    transform: translateX(100%); }\n  .react-stack-box.react-stack-to-top-enter {\n    transform: translateY(100%); }\n  .react-stack-box.react-stack-to-top-enter-active, .react-stack-box.react-stack-to-top-enter-done, .react-stack-box.react-stack-to-top-exit {\n    transform: translateY(0); }\n  .react-stack-box.react-stack-to-top-exit-active {\n    transform: translateY(100%); }\n  .react-stack-box[data-next-screen-ani=\"to-left\"] {\n    transform: translateX(-10%); }\n  .react-stack-box[data-next-screen-ani=\"to-top\"] .react-stack-dimmed {\n    opacity: 0; }\n  .react-stack-box[data-next-screen-ani=\"fade-in\"] .react-stack-dimmed {\n    opacity: 0; }\n  .react-stack-box[data-next-screen-ani=\"scale\"] {\n    transform: scale(1.05); }\n    .react-stack-box[data-next-screen-ani=\"scale\"] .react-stack-dimmed {\n      opacity: 0; }\n  .react-stack-box[data-next-screen-ani=\"true\"] {\n    transition: 0s !important;\n    transform: translateX(0) scale(1) !important; }\n    .react-stack-box[data-next-screen-ani=\"true\"] .react-stack-dimmed {\n      opacity: 0; }\n\n.react-stack-dimmed {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: #000;\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.25s;\n  z-index: 9999; }\n  .react-stack-dimmed.active {\n    opacity: 0.5; }\n  .react-stack-dimmed.prev {\n    opacity: 0.2; }\n    .react-stack-dimmed.prev.active {\n      opacity: 0; }\n";
 styleInject(css_248z);
 
 const ReactStackProvider = ({ children }) => {
