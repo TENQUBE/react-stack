@@ -18,7 +18,6 @@ const StackProvider = ({ children }) => {
   const [isAddStack, setAddStack] = useState<boolean>(null)
   const [historyIdx, setHistoryIdx] = useState<number>(0)
 
-  const [aniDuration, setAniDuration] = useState<number>(ANIMATION_DURATION)
   const [isMoveActive, setMoveActive] = useState<boolean>(false)
   const [isMoveAction, setMoveAction] = useState<boolean>(false)
   const [noDimmed, setNoDimmed] = useState(false)
@@ -27,17 +26,16 @@ const StackProvider = ({ children }) => {
     screenList.current = [...screenList.current, data]
   }, [])
 
-  const breakAnimation = useCallback(() => {
-    setAniDuration(0)
+  const isActivedDimmed = () => {
+    setNoDimmed(true)
     setTimeout(() => {
-      setAniDuration(ANIMATION_DURATION)
+      setNoDimmed(false)
     }, ANIMATION_DURATION)
-  }, [])
+  }
 
   const updateStacks = useCallback((to: string | number, isClear = false) => {
     if(isClear && typeof to === 'string') {
-      checkHistoryGo.current = true
-      breakAnimation()
+      isActivedDimmed()
       setTimeout(() => {
         const stackData = matchRouteToPathname(screenList.current, to)
         setStacks([stackData])
@@ -49,8 +47,7 @@ const StackProvider = ({ children }) => {
     setAddStack(!isToNumber)
     if(isToNumber) {
       if(to < -1) {
-        checkHistoryGo.current = true
-        breakAnimation()
+        isActivedDimmed()
         setTimeout(() => {
           setStacks(stacks.slice(0, stacks.length + to))
         }, 20)
@@ -75,6 +72,7 @@ const StackProvider = ({ children }) => {
   }, [historyIdx])
 
   const historyChangeStack = useCallback(() => {
+    // useNavigation 에서 조건문에 따라 설정됨
     if(checkHistoryGo.current) {
       checkHistoryGo.current = false
       return
@@ -88,9 +86,13 @@ const StackProvider = ({ children }) => {
     beforeHash.current = hash
     beforePathname.current = pathname
 
-    if(pathname === bPath && hash && (!bHash || isForward)) {
-      setStacks([...stacks, new Screen({ route: hash })])
-      return
+    // 해시가 변했을 때
+    if(pathname === bPath) {
+      isActivedDimmed() // 해시 변화는 딤을 적용하지 않음
+      if(hash && (!bHash || isForward)) {
+        setStacks([...stacks, new Screen({ route: hash })])
+        return
+      }
     }
     
     updateStacks(isForward ? pathname : -1)
@@ -112,7 +114,7 @@ const StackProvider = ({ children }) => {
         return false
     }
 
-    breakAnimation()
+    isActivedDimmed()
     setStacks(storageStacks)
   
     return true
@@ -126,9 +128,9 @@ const StackProvider = ({ children }) => {
       setTimeout(() => {
         setMoveActive(false)
         setMoveAction(false)
-      }, aniDuration)
+      }, ANIMATION_DURATION)
     }, 20)
-  }, [stacks, aniDuration])
+  }, [stacks, ANIMATION_DURATION])
 
   useEffect(() => { 
     const storageData = stacks.map((d) => d.route)
@@ -166,42 +168,45 @@ const StackProvider = ({ children }) => {
 
   const checkDimmed = useCallback((animation: AnimationType) => {
     if(animation === AnimationType.ToLeft) return
-    setNoDimmed(true)
-    setTimeout(() => {
-      setNoDimmed(false)
-    }, ANIMATION_DURATION)
+    isActivedDimmed()
   }, [])
 
   return (
     <div className="react-stack-area">
-      <ReactStackContext.Provider value={{addScreen, stacks, updateStacks, historyIdx, setHistoryIdx}}>
+      <ReactStackContext.Provider value={{addScreen, stacks, updateStacks, historyIdx, setHistoryIdx, checkHistoryGo}}>
         {children}
         <TransitionGroup>
           {stacks.map(({ route, component, animation, pathVariable }, i, arr) => {
             if(isHashRoute(route)) return null
-            const activePage = arr.length - 2
-            const activeIdx = arr.length - 1
-            const nextAnimation = (i < activeIdx && arr[i + 1]) ? arr[i + 1].animation : false
+            const idx = i - arr.slice(0, i).filter(({ route }) => isHashRoute(route)).length
+            const stackArr = arr.filter(({ route }) => !isHashRoute(route))
+            const arrLen = stackArr.length
+            const activePage = arrLen - 2
+            const activeIdx = arrLen - 1
+            const nextAnimation = (idx < activeIdx && stackArr[idx + 1]) ? stackArr[idx + 1].animation : false
 
             return (
               <CSSTransition 
                 key={i} 
-                timeout={aniDuration} 
+                timeout={ANIMATION_DURATION} 
                 classNames={`react-stack-box react-stack-${AnimationClassName[animation]}`}
                 onExit={() => checkDimmed(animation)}
                 style={{
-                  'transition': `all ${aniDuration/1000}s`
+                  'transition': `all ${ANIMATION_DURATION/1000}s`
                 }}
               >
-                <div data-before-ani={nextAnimation !== false ? AnimationClassName[nextAnimation] : false}>
+                <div data-next-screen-ani={nextAnimation !== false ? AnimationClassName[nextAnimation] : false}>
                   { cloneElement(component, {...{ params: pathVariable }}) }
-                  {!isHashRoute(arr[activeIdx].route) && !noDimmed && (isAddStack ? activePage === i : activePage + 1 === i) && isMoveActive && (
-                    <div 
-                      className={dimmedClassName()} 
-                      style={{
-                        'transition': `all ${aniDuration/1000}s`
-                      }}
-                    />
+                  {!noDimmed 
+                    && (isAddStack ? activePage === idx : activePage + 1 === idx) 
+                    && isMoveActive 
+                    && (
+                      <div 
+                        className={dimmedClassName()} 
+                        style={{
+                          'transition': `all ${ANIMATION_DURATION/1000}s`
+                        }}
+                      />
                   )}
                 </div>
               </CSSTransition>

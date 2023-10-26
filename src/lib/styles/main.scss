@@ -15,6 +15,20 @@
   opacity: 1;
   will-change: transform, opacity;
 
+  // Animation - fade-in
+  &.react-stack-fade-in-enter {
+    opacity: 0;
+  }
+
+  &.react-stack-fade-in-enter-active,
+  &.react-stack-fade-in-enter-done,
+  &.react-stack-fade-in-exit {
+    opacity: 1;
+  }
+
+  &.react-stack-fade-in-exit-active {
+    opacity: 0;
+  }
 
   // Animation - scale
   &.react-stack-scale-enter {
@@ -65,15 +79,20 @@
   }
 
   // Animation - before elements
-  &[data-before-ani="to-left"] {
+  &[data-next-screen-ani="to-left"] {
     transform: translateX(-10%);
   }
-  &[data-before-ani="to-top"] {
+  &[data-next-screen-ani="to-top"] {
     .react-stack-dimmed {
       opacity: 0;
     }
   }
-  &[data-before-ani="scale"] {
+  &[data-next-screen-ani="fade-in"] {
+    .react-stack-dimmed {
+      opacity: 0;
+    }
+  }
+  &[data-next-screen-ani="scale"] {
     transform: scale(1.05);
     .react-stack-dimmed {
       opacity: 0;
@@ -81,7 +100,7 @@
   }
 
   // History go - disable animation
-  &[data-disable-ani="true"] {
+  &[data-next-screen-ani="true"] {
     transition: 0s !important;
     transform: translateX(0) scale(1) !important;
     .react-stack-dimmed {

@@ -3,6 +3,7 @@ export enum AnimationType {
   ToLeft,
   ToTop,
   Scale,
+  FadeIn
 }
 
 
@@ -10,5 +11,6 @@ export enum AnimationClassName {
   'none',
   'to-left',
   'to-top',
-  'scale'
+  'scale',
+  'fade-in'
 }

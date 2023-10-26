@@ -52,6 +52,10 @@ const Black = () => {
   return (
     <div style={{...styles}}>
       <h1>black</h1>
+      <Link to="#aaa">#aaa</Link>
+      <br />
+      <Link to="#bbb">#bbb</Link>
+      <br />
       <p onClick={handleLinkClick}>/red</p>
       <br />
       <Link to="/red#bbb">/red#bbb</Link>
@@ -63,6 +67,10 @@ const Red = () => {
   return (
     <div style={{...styles}}>
       <h1>Red</h1>
+      <Link to="#aaa">#aaa</Link>
+      <br />
+      <Link to="#bbb">#bbb</Link>
+      <br />
       <Link to="/blue">/blue</Link>
     </div>
   )
@@ -72,6 +80,10 @@ const Blue = () => {
   return (
     <div style={{...styles}}>
       <h1>blue</h1>
+      <Link to="#aaa">#aaa</Link>
+      <br />
+      <Link to="#bbb">#bbb</Link>
+      <br />
       <Link to="/">/white</Link>
     </div>
   )
