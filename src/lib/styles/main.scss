@@ -15,18 +15,18 @@
   opacity: 1;
   will-change: transform, opacity;
 
-  // Animation - fade-in
-  &.react-stack-fade-in-enter {
+  // Animation - fade
+  &.react-stack-fade-enter {
     opacity: 0;
   }
 
-  &.react-stack-fade-in-enter-active,
-  &.react-stack-fade-in-enter-done,
-  &.react-stack-fade-in-exit {
+  &.react-stack-fade-enter-active,
+  &.react-stack-fade-enter-done,
+  &.react-stack-fade-exit {
     opacity: 1;
   }
 
-  &.react-stack-fade-in-exit-active {
+  &.react-stack-fade-exit-active {
     opacity: 0;
   }
 
@@ -87,7 +87,7 @@
       opacity: 0;
     }
   }
-  &[data-next-screen-ani="fade-in"] {
+  &[data-next-screen-ani="fade"] {
     .react-stack-dimmed {
       opacity: 0;
     }

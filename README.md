@@ -61,13 +61,14 @@ root.render(
 ```
 
 ## Anumations
-Supports 4 route transition animations.
+Supports 5 route transition animations.
 ```ts
 enum AnimationType {
   None,
   ToLeft,
   ToTop,
-  Scale
+  Scale,
+  Fade
 }
 ```
 

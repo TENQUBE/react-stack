@@ -6,7 +6,7 @@ declare enum AnimationType {
     ToLeft = 1,
     ToTop = 2,
     Scale = 3,
-    FadeIn = 4
+    Fade = 4
 }
 
 interface IProps$1 {
