@@ -33778,6 +33778,8 @@ const StackProvider = ({ children }) => {
         }, 20);
     }, [stacks, ANIMATION_DURATION]);
     React.useEffect(() => {
+        if (stacks.length === 0)
+            return;
         const storageData = stacks.map((d) => d.route);
         window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData));
     }, [stacks]);

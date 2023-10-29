@@ -26,7 +26,7 @@ const White = () => {
       <br />
       <Link to="#bbb">#bbb</Link>
       <br />
-      <Link to="/black?id=aa">/black</Link>
+      <Link to="/black">/black</Link>
       <br />
       {/* <Link to="/black/test/test/test">/*</Link>
       <br />
@@ -58,7 +58,7 @@ const Black = () => {
       <br />
       <p onClick={handleLinkClick}>/red</p>
       <br />
-      <Link to="/red#bbb">/red#bbb</Link>
+      <Link to="/red">/red#bbb</Link>
     </div>
   )
 }
