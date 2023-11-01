@@ -1,11 +1,11 @@
-import { ReactNode, useContext, useLayoutEffect } from 'react'
+import { ReactElement, useContext, useLayoutEffect } from 'react'
 import { ReactStackContext } from './provider'
 import ScreenObj from '../data/screen'
 import { AnimationType } from '../interfaces'
 
 interface IProps {
   route: string
-  component: ReactNode
+  component: ReactElement
   animation?: AnimationType
 }
 

@@ -1,5 +1,5 @@
 import * as react_jsx_runtime from 'react/jsx-runtime';
-import { ReactNode, ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 
 declare enum AnimationType {
     None = 0,
@@ -11,7 +11,7 @@ declare enum AnimationType {
 
 interface IProps$1 {
     route: string;
-    component: ReactNode;
+    component: ReactElement;
     animation?: AnimationType;
 }
 declare const Screen: ({ route, component, animation }: IProps$1) => any;
