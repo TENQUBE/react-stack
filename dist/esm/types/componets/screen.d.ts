@@ -1,8 +1,8 @@
-import { ReactNode } from 'react';
+import { ReactElement } from 'react';
 import { AnimationType } from '../interfaces';
 interface IProps {
     route: string;
-    component: ReactNode;
+    component: ReactElement;
     animation?: AnimationType;
 }
 declare const Screen: ({ route, component, animation }: IProps) => any;

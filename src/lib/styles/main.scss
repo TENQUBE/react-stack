@@ -11,7 +11,7 @@
   position: absolute;
   overflow-y: hidden;
   transition: all 0.25s;
-  transform: translateX(0) scale(1);
+  transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
   opacity: 1;
   will-change: transform, opacity;
 
@@ -32,55 +32,55 @@
 
   // Animation - scale
   &.react-stack-scale-enter {
-    transform: scale(0.95);
+    transform: scale3d(0.95, 0.95, 0.95);
     opacity: 0;
   }
 
   &.react-stack-scale-enter-active,
   &.react-stack-scale-enter-done,
   &.react-stack-scale-exit {
-    transform: scale(1);
+    transform: scale3d(1, 1, 1);
     opacity: 1;
   }
 
   &.react-stack-scale-exit-active {
-    transform: scale(0.95);
+    transform: scale3d(0.95, 0.95, 0.95);
     opacity: 0;
   }
 
   // Animation - to-left
   &.react-stack-to-left-enter {
-    transform: translateX(100%);
+    transform: translate3d(100%, 0, 0);
   }
 
   &.react-stack-to-left-enter-active,
   &.react-stack-to-left-enter-done,
   &.react-stack-to-left-exit {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 
   &.react-stack-to-left-exit-active {
-    transform: translateX(100%);
+    transform: translate3d(100%, 0, 0);
   }
 
   // Animation - to-top
   &.react-stack-to-top-enter {
-    transform: translateY(100%);
+    transform: translate3d(0, 100%, 0);
   }
 
   &.react-stack-to-top-enter-active,
   &.react-stack-to-top-enter-done,
   &.react-stack-to-top-exit {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 
   &.react-stack-to-top-exit-active {
-    transform: translateY(100%);
+    transform: translate3d(0, 100%, 0)
   }
 
   // Animation - before elements
   &[data-next-screen-ani="to-left"] {
-    transform: translateX(-10%);
+    transform: translate3d(-10%, 0, 0)
   }
   &[data-next-screen-ani="to-top"] {
     .react-stack-dimmed {
@@ -93,7 +93,7 @@
     }
   }
   &[data-next-screen-ani="scale"] {
-    transform: scale(1.05);
+    transform: scale3d(1.05, 1.05, 1.05);
     .react-stack-dimmed {
       opacity: 0;
     }
@@ -107,7 +107,7 @@
   // History go - disable animation
   &[data-next-screen-ani="true"] {
     transition: 0s !important;
-    transform: translateX(0) scale(1) !important;
+    transform: translate3d(0, 0, 0) scale3d(1, 1, 1) !important;
     .react-stack-dimmed {
       opacity: 0;
     }
@@ -121,16 +121,16 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: #000;
+  background: #555555;
   opacity: 0;
   will-change: opacity;
   transition: opacity 0.25s;
   z-index: 9999;
   &.active {
-    opacity: 0.5;
+    opacity: 0.6;
   }
   &.prev {
-    opacity: 0.2;
+    opacity: 0.4;
     &.active {
       opacity: 0;
     }

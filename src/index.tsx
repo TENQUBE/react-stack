@@ -65,7 +65,7 @@ const Black = () => {
 
 const Red = () => {
   return (
-    <div style={{...styles, opacity: 0.5}}>
+    <div style={{...styles}}>
       <h1>Red</h1>
       <Link to="#aaa">#aaa</Link>
       <br />
@@ -92,8 +92,8 @@ const Blue = () => {
 root.render(
   <ReactStackProvider>
     <Screen route="/" component={<White />} animation={AnimationType.None} />
-    <Screen route="/black/:test/black" component={<Black />} animation={AnimationType.Scale} />
-    <Screen route="/blue" component={<Blue />} animation={AnimationType.None} />
-    <Screen route="/red" component={<Red />} animation={AnimationType.None} />
+    <Screen route="/black/:test/black" component={<Black />} animation={AnimationType.ToLeft} />
+    <Screen route="/blue" component={<Blue />} animation={AnimationType.Scale} />
+    <Screen route="/red" component={<Red />} animation={AnimationType.ToTop} />
   </ReactStackProvider>
 )
