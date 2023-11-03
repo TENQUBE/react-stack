@@ -5,6 +5,7 @@ import { ANIMATION_DURATION, STORAGE_KEY_NAME } from '../constants'
 import { AnimationClassName, AnimationType } from '../interfaces'
 import { isHashRoute, matchLastSingleRoute, matchRouteToPathname } from '../utils'
 import Screen, { IScreen } from '../data/screen'
+import View from './view'
 
 export const ReactStackContext = createContext(null)
 
@@ -120,6 +121,19 @@ const StackProvider = ({ children }) => {
     return true
   }, [stacks, historyIdx])
 
+  const dimmedClassName = useCallback(() => {
+    const customClassName = ['react-stack-dimmed']
+    customClassName.push(isAddStack ? 'next' : 'prev')
+    if(isMoveAction) customClassName.push('active')
+    return customClassName.join(' ')
+  }, [isAddStack, isMoveAction])
+
+  const checkDimmed = useCallback((animation: AnimationType) => {
+    if(animation === AnimationType.ToLeft) return
+    isActivedDimmed()
+  }, [])
+
+  // dimmed animation
   useEffect(() => {
     if(isAddStack === null) return
     setMoveActive(true)
@@ -132,12 +146,14 @@ const StackProvider = ({ children }) => {
     }, 20)
   }, [stacks, ANIMATION_DURATION])
 
+  // init storage data
   useEffect(() => { 
     if(stacks.length === 0) return
     const storageData = stacks.map((d) => d.route)
     window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData))
   }, [stacks])
 
+  // add popstate event listener
   useEffect(() => {
     beforePathname.current = window.location.pathname
     window.addEventListener('popstate', historyChangeStack)
@@ -146,6 +162,7 @@ const StackProvider = ({ children }) => {
     }
   }, [stacks, historyIdx])
   
+  // set base history index
   useEffect(() => {
     const index = window.history?.state?.index
     if(index) {
@@ -155,21 +172,10 @@ const StackProvider = ({ children }) => {
     }
   }, [])
 
+  // init stacks
   useLayoutEffect(() => {
     if(initStorageStackData()) return
     updateStacks(window.location.pathname)
-  }, [])
-
-  const dimmedClassName = useCallback(() => {
-    const customClassName = ['react-stack-dimmed']
-    customClassName.push(isAddStack ? 'next' : 'prev')
-    if(isMoveAction) customClassName.push('active')
-    return customClassName.join(' ')
-  }, [isAddStack, isMoveAction])
-
-  const checkDimmed = useCallback((animation: AnimationType) => {
-    if(animation === AnimationType.ToLeft) return
-    isActivedDimmed()
   }, [])
 
   return (
@@ -197,18 +203,20 @@ const StackProvider = ({ children }) => {
                 }}
               >
                 <div data-next-screen-ani={nextAnimation !== false ? AnimationClassName[nextAnimation] : false}>
-                  { cloneElement(component, {...{ params: pathVariable }}) }
-                  {!noDimmed 
-                    && (isAddStack ? activePage === idx : activePage + 1 === idx) 
-                    && isMoveActive 
-                    && (
-                      <div 
-                        className={dimmedClassName()} 
-                        style={{
-                          'transition': `all ${ANIMATION_DURATION/1000}s`
-                        }}
-                      />
-                  )}
+                  <View>
+                    { cloneElement(component, {...{ params: pathVariable }}) }
+                    {!noDimmed 
+                      && (isAddStack ? activePage === idx : activePage + 1 === idx) 
+                      && isMoveActive 
+                      && (
+                        <div 
+                          className={dimmedClassName()} 
+                          style={{
+                            'transition': `all ${ANIMATION_DURATION/1000}s`
+                          }}
+                        />
+                    )}
+                  </View>
                 </div>
               </CSSTransition>
             )

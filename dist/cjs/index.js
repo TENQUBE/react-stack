@@ -33668,6 +33668,17 @@ let Screen$1 = class Screen {
     }
 };
 
+const View = ({ children }) => {
+    const [isMount, setMount] = React.useState(false);
+    React.useEffect(() => {
+        setMount(true);
+        return () => {
+            setMount(false);
+        };
+    }, []);
+    return (jsxRuntime.jsx("div", { className: isMount ? 'react-stack-screen mount' : 'react-stack-screen', children: children }));
+};
+
 const ReactStackContext = React.createContext(null);
 const StackProvider = ({ children }) => {
     const screenList = React.useRef([]);
@@ -33765,46 +33776,6 @@ const StackProvider = ({ children }) => {
         setStacks(storageStacks);
         return true;
     }, [stacks, historyIdx]);
-    React.useEffect(() => {
-        if (isAddStack === null)
-            return;
-        setMoveActive(true);
-        setTimeout(() => {
-            setMoveAction(true);
-            setTimeout(() => {
-                setMoveActive(false);
-                setMoveAction(false);
-            }, ANIMATION_DURATION);
-        }, 20);
-    }, [stacks, ANIMATION_DURATION]);
-    React.useEffect(() => {
-        if (stacks.length === 0)
-            return;
-        const storageData = stacks.map((d) => d.route);
-        window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData));
-    }, [stacks]);
-    React.useEffect(() => {
-        beforePathname.current = window.location.pathname;
-        window.addEventListener('popstate', historyChangeStack);
-        return () => {
-            window.removeEventListener('popstate', historyChangeStack);
-        };
-    }, [stacks, historyIdx]);
-    React.useEffect(() => {
-        var _a, _b;
-        const index = (_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index;
-        if (index) {
-            setHistoryIdx(index);
-        }
-        else {
-            window.history.replaceState({ index: 0 }, '');
-        }
-    }, []);
-    React.useLayoutEffect(() => {
-        if (initStorageStackData())
-            return;
-        updateStacks(window.location.pathname);
-    }, []);
     const dimmedClassName = React.useCallback(() => {
         const customClassName = ['react-stack-dimmed'];
         customClassName.push(isAddStack ? 'next' : 'prev');
@@ -33817,6 +33788,51 @@ const StackProvider = ({ children }) => {
             return;
         isActivedDimmed();
     }, []);
+    // dimmed animation
+    React.useEffect(() => {
+        if (isAddStack === null)
+            return;
+        setMoveActive(true);
+        setTimeout(() => {
+            setMoveAction(true);
+            setTimeout(() => {
+                setMoveActive(false);
+                setMoveAction(false);
+            }, ANIMATION_DURATION);
+        }, 20);
+    }, [stacks, ANIMATION_DURATION]);
+    // init storage data
+    React.useEffect(() => {
+        if (stacks.length === 0)
+            return;
+        const storageData = stacks.map((d) => d.route);
+        window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData));
+    }, [stacks]);
+    // add popstate event listener
+    React.useEffect(() => {
+        beforePathname.current = window.location.pathname;
+        window.addEventListener('popstate', historyChangeStack);
+        return () => {
+            window.removeEventListener('popstate', historyChangeStack);
+        };
+    }, [stacks, historyIdx]);
+    // set base history index
+    React.useEffect(() => {
+        var _a, _b;
+        const index = (_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index;
+        if (index) {
+            setHistoryIdx(index);
+        }
+        else {
+            window.history.replaceState({ index: 0 }, '');
+        }
+    }, []);
+    // init stacks
+    React.useLayoutEffect(() => {
+        if (initStorageStackData())
+            return;
+        updateStacks(window.location.pathname);
+    }, []);
     return (jsxRuntime.jsx("div", { className: "react-stack-area", children: jsxRuntime.jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, historyIdx, setHistoryIdx, checkHistoryGo }, children: [children, jsxRuntime.jsx(TransitionGroup$1, { children: stacks.map(({ route, component, animation, pathVariable }, i, arr) => {
                         if (isHashRoute(route))
                             return null;
@@ -33828,12 +33844,12 @@ const StackProvider = ({ children }) => {
                         const nextAnimation = (idx < activeIdx && stackArr[idx + 1]) ? stackArr[idx + 1].animation : false;
                         return (jsxRuntime.jsx(CSSTransition$1, { timeout: ANIMATION_DURATION, classNames: `react-stack-box react-stack-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), style: {
                                 'transition': `all ${ANIMATION_DURATION / 1000}s`
-                            }, children: jsxRuntime.jsxs("div", { "data-next-screen-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, children: [React.cloneElement(component, Object.assign({ params: pathVariable })), !noDimmed
-                                        && (isAddStack ? activePage === idx : activePage + 1 === idx)
-                                        && isMoveActive
-                                        && (jsxRuntime.jsx("div", { className: dimmedClassName(), style: {
-                                                'transition': `all ${ANIMATION_DURATION / 1000}s`
-                                            } }))] }) }, i));
+                            }, children: jsxRuntime.jsx("div", { "data-next-screen-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, children: jsxRuntime.jsxs(View, { children: [React.cloneElement(component, Object.assign({ params: pathVariable })), !noDimmed
+                                            && (isAddStack ? activePage === idx : activePage + 1 === idx)
+                                            && isMoveActive
+                                            && (jsxRuntime.jsx("div", { className: dimmedClassName(), style: {
+                                                    'transition': `all ${ANIMATION_DURATION / 1000}s`
+                                                } }))] }) }) }, i));
                     }) })] }) }));
 };
 
@@ -33931,7 +33947,7 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z = ".react-stack-area {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  overflow: hidden; }\n\n.react-stack-box {\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  overflow-y: hidden;\n  transition: all 0.25s;\n  transform: translate3d(0, 0, 0) scale3d(1, 1, 1);\n  opacity: 1;\n  will-change: transform, opacity; }\n  .react-stack-box.react-stack-fade-enter {\n    opacity: 0; }\n  .react-stack-box.react-stack-fade-enter-active, .react-stack-box.react-stack-fade-enter-done, .react-stack-box.react-stack-fade-exit {\n    opacity: 1; }\n  .react-stack-box.react-stack-fade-exit-active {\n    opacity: 0; }\n  .react-stack-box.react-stack-scale-enter {\n    transform: scale3d(0.95, 0.95, 0.95);\n    opacity: 0; }\n  .react-stack-box.react-stack-scale-enter-active, .react-stack-box.react-stack-scale-enter-done, .react-stack-box.react-stack-scale-exit {\n    transform: scale3d(1, 1, 1);\n    opacity: 1; }\n  .react-stack-box.react-stack-scale-exit-active {\n    transform: scale3d(0.95, 0.95, 0.95);\n    opacity: 0; }\n  .react-stack-box.react-stack-to-left-enter {\n    transform: translate3d(100%, 0, 0); }\n  .react-stack-box.react-stack-to-left-enter-active, .react-stack-box.react-stack-to-left-enter-done, .react-stack-box.react-stack-to-left-exit {\n    transform: translate3d(0, 0, 0); }\n  .react-stack-box.react-stack-to-left-exit-active {\n    transform: translate3d(100%, 0, 0); }\n  .react-stack-box.react-stack-to-top-enter {\n    transform: translate3d(0, 100%, 0); }\n  .react-stack-box.react-stack-to-top-enter-active, .react-stack-box.react-stack-to-top-enter-done, .react-stack-box.react-stack-to-top-exit {\n    transform: translate3d(0, 0, 0); }\n  .react-stack-box.react-stack-to-top-exit-active {\n    transform: translate3d(0, 100%, 0); }\n  .react-stack-box[data-next-screen-ani=\"to-left\"] {\n    transform: translate3d(-10%, 0, 0); }\n  .react-stack-box[data-next-screen-ani=\"to-top\"] .react-stack-dimmed {\n    opacity: 0; }\n  .react-stack-box[data-next-screen-ani=\"fade\"] .react-stack-dimmed {\n    opacity: 0; }\n  .react-stack-box[data-next-screen-ani=\"scale\"] {\n    transform: scale3d(1.05, 1.05, 1.05); }\n    .react-stack-box[data-next-screen-ani=\"scale\"] .react-stack-dimmed {\n      opacity: 0; }\n  .react-stack-box[data-next-screen-ani=\"none\"] .react-stack-dimmed {\n    opacity: 0; }\n  .react-stack-box[data-next-screen-ani=\"true\"] {\n    transition: 0s !important;\n    transform: translate3d(0, 0, 0) scale3d(1, 1, 1) !important; }\n    .react-stack-box[data-next-screen-ani=\"true\"] .react-stack-dimmed {\n      opacity: 0; }\n\n.react-stack-dimmed {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: #555555;\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.25s;\n  z-index: 9999; }\n  .react-stack-dimmed.active {\n    opacity: 0.6; }\n  .react-stack-dimmed.prev {\n    opacity: 0.4; }\n    .react-stack-dimmed.prev.active {\n      opacity: 0; }\n";
+var css_248z = ".react-stack-area {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  overflow: hidden; }\n\n.react-stack-box .react-stack-screen {\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  overflow-y: hidden;\n  transition: all 0.25s;\n  transform: translate3d(0, 0, 0) scale3d(1, 1, 1);\n  opacity: 1;\n  will-change: transform, opacity; }\n\n.react-stack-box.react-stack-fade-enter .react-stack-screen {\n  opacity: 0; }\n\n.react-stack-box.react-stack-fade-enter-active .react-stack-screen.mount, .react-stack-box.react-stack-fade-enter-done .react-stack-screen.mount, .react-stack-box.react-stack-fade-exit .react-stack-screen.mount {\n  opacity: 1; }\n\n.react-stack-box.react-stack-fade-exit-active .react-stack-screen.mount {\n  opacity: 0; }\n\n.react-stack-box.react-stack-scale-enter .react-stack-screen {\n  transform: scale3d(0.95, 0.95, 0.95);\n  opacity: 0; }\n\n.react-stack-box.react-stack-scale-enter-active .react-stack-screen.mount, .react-stack-box.react-stack-scale-enter-done .react-stack-screen.mount, .react-stack-box.react-stack-scale-exit .react-stack-screen.mount {\n  transform: scale3d(1, 1, 1);\n  opacity: 1; }\n\n.react-stack-box.react-stack-scale-exit-active .react-stack-screen.mount {\n  transform: scale3d(0.95, 0.95, 0.95);\n  opacity: 0; }\n\n.react-stack-box.react-stack-to-left-enter .react-stack-screen {\n  transform: translate3d(100%, 0, 0); }\n\n.react-stack-box.react-stack-to-left-enter-active .react-stack-screen.mount, .react-stack-box.react-stack-to-left-enter-done .react-stack-screen.mount, .react-stack-box.react-stack-to-left-exit .react-stack-screen.mount {\n  transform: translate3d(0, 0, 0); }\n\n.react-stack-box.react-stack-to-left-exit-active .react-stack-screen.mount {\n  transform: translate3d(100%, 0, 0); }\n\n.react-stack-box.react-stack-to-top-enter .react-stack-screen {\n  transform: translate3d(0, 100%, 0); }\n\n.react-stack-box.react-stack-to-top-enter-active .react-stack-screen.mount, .react-stack-box.react-stack-to-top-enter-done .react-stack-screen.mount, .react-stack-box.react-stack-to-top-exit .react-stack-screen.mount {\n  transform: translate3d(0, 0, 0); }\n\n.react-stack-box.react-stack-to-top-exit-active .react-stack-screen.mount {\n  transform: translate3d(0, 100%, 0); }\n\n.react-stack-box[data-next-screen-ani=\"to-left\"] .react-stack-screen {\n  transform: translate3d(-10%, 0, 0); }\n\n.react-stack-box[data-next-screen-ani=\"to-top\"] .react-stack-screen .react-stack-dimmed {\n  opacity: 0; }\n\n.react-stack-box[data-next-screen-ani=\"fade\"] .react-stack-screen .react-stack-dimmed {\n  opacity: 0; }\n\n.react-stack-box[data-next-screen-ani=\"scale\"] .react-stack-screen {\n  transform: scale3d(1.05, 1.05, 1.05); }\n  .react-stack-box[data-next-screen-ani=\"scale\"] .react-stack-screen .react-stack-dimmed {\n    opacity: 0; }\n\n.react-stack-box[data-next-screen-ani=\"none\"] .react-stack-screen .react-stack-dimmed {\n  opacity: 0; }\n\n.react-stack-box[data-next-screen-ani=\"true\"] .react-stack-screen {\n  transition: 0s !important;\n  transform: translate3d(0, 0, 0) scale3d(1, 1, 1) !important; }\n  .react-stack-box[data-next-screen-ani=\"true\"] .react-stack-screen .react-stack-dimmed {\n    opacity: 0; }\n\n.react-stack-dimmed {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: #555555;\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.25s;\n  z-index: 9999; }\n  .react-stack-dimmed.active {\n    opacity: 0.6; }\n  .react-stack-dimmed.prev {\n    opacity: 0.4; }\n    .react-stack-dimmed.prev.active {\n      opacity: 0; }\n\n.react-stack-pre-print-screen {\n  position: fixed;\n  width: 100%;\n  height: 100%;\n  opacity: 0;\n  transform: translate3d(-100%, 0, 0); }\n";
 styleInject(css_248z);
 
 const ReactStackProvider = ({ children }) => {
