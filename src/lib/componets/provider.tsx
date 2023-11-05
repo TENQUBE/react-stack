@@ -36,6 +36,8 @@ const StackProvider = ({ duration, children }: IStackProvider) => {
     const { state } = window.history
     if (!state) window.history.replaceState({ index: historyIdx + 1 }, '')
 
+    console.log(state.index, historyIdx)
+
     const index = state ? state.index : historyIdx + 1
     const isForward = index > historyIdx
     setHistoryIdx(index)

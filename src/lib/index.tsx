@@ -10,7 +10,7 @@ import './styles/main.scss'
 
 interface IStackProvider {
   duration?: number
-  children: ReactElement
+  children: any
 }
 
 const ReactStackProvider = ({ duration, children }: IStackProvider) => {

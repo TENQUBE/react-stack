@@ -45,7 +45,7 @@ declare const useStacks: () => IScreen[];
 
 interface IStackProvider {
     duration?: number;
-    children: ReactElement;
+    children: any;
 }
 declare const ReactStackProvider: ({ duration, children }: IStackProvider) => react_jsx_runtime.JSX.Element;
 

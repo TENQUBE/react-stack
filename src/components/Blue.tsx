@@ -8,7 +8,6 @@ const styles: any = {
 }
 
 export default () => {
-
   const navigation = useNavigation()
 
   return (
@@ -16,10 +15,12 @@ export default () => {
       <h1>blue</h1>
       <Link to="#aaa">#aaa</Link>
       <br />
-      <Link to="#bbb">#bbb</Link>
+      <p onClick={() => {
+        navigation.back()
+      }}>back</p>
       <br />
       <p onClick={() => {
-        navigation.back(3)
+        navigation.push('/', { clear: true })
       }}>/yellow</p>
     </div>
   )

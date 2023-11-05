@@ -1,4 +1,3 @@
-import { ReactElement } from 'react';
 import { AnimationType } from './interfaces';
 import Screen from './componets/screen';
 import Link from './componets/link';
@@ -8,7 +7,7 @@ import { IScreen } from './data/screen';
 import './styles/main.scss';
 interface IStackProvider {
     duration?: number;
-    children: ReactElement;
+    children: any;
 }
 declare const ReactStackProvider: ({ duration, children }: IStackProvider) => import("react/jsx-runtime").JSX.Element;
 export { IStackProvider, Screen, Link, AnimationType, useNavigation, INavigation, INavigationPushState, useStacks, IScreen };
