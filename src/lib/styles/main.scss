@@ -14,7 +14,7 @@
   opacity: 1;
   will-change: transform, opacity;
 
-  // Animation - to-left
+  // Animation: to-left
   &.react-stack-box-to-left {
     .react-stack-dimmed-area {
       transform: translate3d(-100vw, 0, 0);
@@ -44,11 +44,7 @@
     }
   }
 
-  &[data-after-animation="to-left"] {
-    transform: translate3d(-3rem, 0, 0)
-  }
-
-  // Animation - fade
+  // Animation: fade
   &.react-stack-box-fade {
     &.react-stack-box-enter {
         opacity: 0;    
@@ -65,7 +61,7 @@
     }
   }
 
-  // Animation - scale
+  // Animation: scale
   &.react-stack-box-scale {
     &.react-stack-box-enter {
       transform: scale3d(0.95, 0.95, 0.95);
@@ -85,11 +81,7 @@
     }
   }
 
-  &[data-after-animation="scale"] {
-    transform: scale3d(1.05, 1.05, 1.05);
-  }
-
-  // Animation - to-top
+  // Animation: to-top
   &.react-stack-box-to-top {
     &.react-stack-box-enter {
       transform: translate3d(0, 100vh, 0);
@@ -102,10 +94,24 @@
     }
 
     &.react-stack-box-exit-active {
-      transform: translate3d(0, 100vh, 0)
+      transform: translate3d(0, 100vh, 0);
     }
   }
 }
+
+// Animation: before screen
+.react-stack-area {
+  .react-stack-box {
+    &[data-after-animation="to-left"] {
+      transform: translate3d(-3rem, 0, 0);
+    }
+  
+    &[data-after-animation="scale"] {
+      transform: scale3d(1.05, 1.05, 1.05);
+    }
+  }
+}
+
 
 .react-stack-dimmed-area {
   position: fixed;

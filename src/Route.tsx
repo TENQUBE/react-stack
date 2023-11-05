@@ -37,9 +37,9 @@ export default () => {
   return (
     <ReactStackProvider duration={300}>
       <Screen route="/" component={<White />} animation={AnimationType.None} />
-      <Screen route="/black/:test/black" component={<Black />} animation={AnimationType.ToLeft} />
-      <Screen route="/blue" component={<Blue />} animation={AnimationType.Scale} />
-      <Screen route="/red" component={<Red />} animation={AnimationType.Fade} />
+      <Screen route="/black/:test/black" component={<Black />} animation={AnimationType.Scale} />
+      <Screen route="/blue" component={<Blue />} animation={AnimationType.ToLeft} />
+      <Screen route="/red" component={<Red />} animation={AnimationType.Scale} />
       <Screen route="/yellow" component={<Yellow />} animation={AnimationType.ToTop} />
     </ReactStackProvider>
   )
