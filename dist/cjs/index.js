@@ -33779,7 +33779,8 @@ const StackProvider = ({ duration, children }) => {
         window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData));
     }, [stacks]);
     // 초기 히스토리 인덱스 설정
-    React.useEffect(() => {
+    // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
+    React.useLayoutEffect(() => {
         var _a, _b;
         const index = (_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index;
         if (index) {
@@ -33788,9 +33789,6 @@ const StackProvider = ({ duration, children }) => {
         else {
             window.history.replaceState({ index: 0 }, '');
         }
-    }, []);
-    // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
-    React.useLayoutEffect(() => {
         if (initStorageStackData())
             return;
         updateStacks(window.location.pathname);

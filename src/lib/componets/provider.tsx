@@ -105,19 +105,16 @@ const StackProvider = ({ duration, children }: IStackProvider) => {
     const storageData = stacks.map((d) => d.route)
     window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData))
   }, [stacks])
-  
+
   // 초기 히스토리 인덱스 설정
-  useEffect(() => {
+  // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
+  useLayoutEffect(() => {
     const index = window.history?.state?.index
     if(index) {
       setHistoryIdx(index)
     } else {
       window.history.replaceState({ index: 0 }, '')
     }
-  }, [])
-
-  // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
-  useLayoutEffect(() => {
     if(initStorageStackData()) return
     updateStacks(window.location.pathname)
   }, [])
