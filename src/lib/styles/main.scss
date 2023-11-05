@@ -1,184 +1,120 @@
 .react-stack-area {
   position: absolute;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden; 
 }
 
 .react-stack-box {
-  .react-stack-screen {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    overflow-y: hidden;
-    transition: all 0.25s;
-    transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
-    opacity: 1;
-    will-change: transform, opacity;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  transition: transform 0.3s, opacity 0.3s;
+  transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+  opacity: 1;
+  will-change: transform, opacity;
+
+  // Animation - to-left
+  &.react-stack-box-to-left {
+    .react-stack-dimmed-area {
+      transform: translate3d(-100vw, 0, 0);
+    }
+
+    &.react-stack-box-enter {
+      transform: translate3d(100vw, 0, 0);
+      .react-stack-dimmed-area {
+        opacity: 0;
+      }
+    }
+
+    &.react-stack-box-enter-active,
+    &.react-stack-box-enter-done,
+    &.react-stack-box-exit {
+      transform: translate3d(0, 0, 0);
+      .react-stack-dimmed-area {
+        opacity: 1;
+      }
+    }
+  
+    &.react-stack-box-exit-active {
+      transform: translate3d(100vw, 0, 0);
+      .react-stack-dimmed-area {
+        opacity: 0;
+      }
+    }
+  }
+
+  &[data-after-animation="to-left"] {
+    transform: translate3d(-3rem, 0, 0)
   }
 
   // Animation - fade
-  &.react-stack-fade-enter {
-    .react-stack-screen {
-      opacity: 0;
+  &.react-stack-box-fade {
+    &.react-stack-box-enter {
+        opacity: 0;    
     }
-  }
 
-  &.react-stack-fade-enter-active,
-  &.react-stack-fade-enter-done,
-  &.react-stack-fade-exit {
-    .react-stack-screen.mount {
+    &.react-stack-box-enter-active,
+    &.react-stack-box-enter-done,
+    &.react-stack-box-exit {
       opacity: 1;
     }
-  }
 
-  &.react-stack-fade-exit-active {
-    .react-stack-screen.mount {
+    &.react-stack-box-exit-active {
       opacity: 0;
     }
   }
 
   // Animation - scale
-  &.react-stack-scale-enter {
-    .react-stack-screen {
+  &.react-stack-box-scale {
+    &.react-stack-box-enter {
       transform: scale3d(0.95, 0.95, 0.95);
       opacity: 0;
     }
-  }
 
-  &.react-stack-scale-enter-active,
-  &.react-stack-scale-enter-done,
-  &.react-stack-scale-exit {
-    .react-stack-screen.mount {
+    &.react-stack-box-enter-active,
+    &.react-stack-box-enter-done,
+    &.react-stack-box-exit {
       transform: scale3d(1, 1, 1);
       opacity: 1;
     }
-  }
 
-  &.react-stack-scale-exit-active {
-    .react-stack-screen.mount {
+    &.react-stack-box-exit-active {
       transform: scale3d(0.95, 0.95, 0.95);
       opacity: 0;
     }
   }
 
-  // Animation - to-left
-  &.react-stack-to-left-enter {
-    .react-stack-screen {
-      transform: translate3d(100%, 0, 0);
-    }
-  }
-
-  &.react-stack-to-left-enter-active,
-  &.react-stack-to-left-enter-done,
-  &.react-stack-to-left-exit {
-    .react-stack-screen.mount {
-      transform: translate3d(0, 0, 0);
-    }
-  }
-
-  &.react-stack-to-left-exit-active {
-    .react-stack-screen.mount {
-      transform: translate3d(100%, 0, 0);
-    }
+  &[data-after-animation="scale"] {
+    transform: scale3d(1.05, 1.05, 1.05);
   }
 
   // Animation - to-top
-  &.react-stack-to-top-enter {
-    .react-stack-screen {
-      transform: translate3d(0, 100%, 0);
+  &.react-stack-box-to-top {
+    &.react-stack-box-enter {
+      transform: translate3d(0, 100vh, 0);
     }
-  }
 
-  &.react-stack-to-top-enter-active,
-  &.react-stack-to-top-enter-done,
-  &.react-stack-to-top-exit {
-    .react-stack-screen.mount {
+    &.react-stack-box-enter-active,
+    &.react-stack-box-enter-done,
+    &.react-stack-box-exit {
       transform: translate3d(0, 0, 0);
     }
-  }
 
-  &.react-stack-to-top-exit-active {
-    .react-stack-screen.mount {
-      transform: translate3d(0, 100%, 0)
+    &.react-stack-box-exit-active {
+      transform: translate3d(0, 100vh, 0)
     }
   }
-
-  // Animation - before elements
-  &[data-next-screen-ani="to-left"] {
-    .react-stack-screen {
-      transform: translate3d(-10%, 0, 0)
-    }
-  }
-  &[data-next-screen-ani="to-top"] {
-    .react-stack-screen {
-      .react-stack-dimmed {
-        opacity: 0;
-      }
-    }
-  }
-  &[data-next-screen-ani="fade"] {
-    .react-stack-screen {
-      .react-stack-dimmed {
-        opacity: 0;
-      }
-    }
-  }
-  &[data-next-screen-ani="scale"] {
-    .react-stack-screen {
-      transform: scale3d(1.05, 1.05, 1.05);
-      .react-stack-dimmed {
-        opacity: 0;
-      }
-    }
-  }
-  &[data-next-screen-ani="none"] {
-    .react-stack-screen {
-      .react-stack-dimmed {
-        opacity: 0;
-      }
-    }
-  }
-
-  // History go - disable animation
-  &[data-next-screen-ani="true"] {
-    .react-stack-screen {
-      transition: 0s !important;
-      transform: translate3d(0, 0, 0) scale3d(1, 1, 1) !important;
-      .react-stack-dimmed {
-        opacity: 0;
-      }
-    }
-  }
-  
 }
 
-.react-stack-dimmed {
+.react-stack-dimmed-area {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: #555555;
+  background: rgba(0, 0, 0, 0.2);
   opacity: 0;
   will-change: opacity;
-  transition: opacity 0.25s;
-  z-index: 9999;
-  &.active {
-    opacity: 0.6;
-  }
-  &.prev {
-    opacity: 0.4;
-    &.active {
-      opacity: 0;
-    }
-  }
-}
-
-.react-stack-pre-print-screen {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transform: translate3d(-100%, 0, 0);
+  transition: opacity 0.3s;
 }

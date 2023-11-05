@@ -3,6 +3,7 @@ import ReactStackProvider, { AnimationType, Screen, useNavigation, useStacks } f
 import Black from './components/Black'
 import Blue from './components/Blue'
 import Red from './components/Red'
+import Yellow from './components/Yellow'
 
 const styles: any = {
   background: '#fff',
@@ -34,11 +35,12 @@ const White = () => {
 
 export default () => {
   return (
-    <ReactStackProvider>
+    <ReactStackProvider duration={300}>
       <Screen route="/" component={<White />} animation={AnimationType.None} />
       <Screen route="/black/:test/black" component={<Black />} animation={AnimationType.ToLeft} />
       <Screen route="/blue" component={<Blue />} animation={AnimationType.Scale} />
-      <Screen route="/red" component={<Red />} animation={AnimationType.ToTop} />
+      <Screen route="/red" component={<Red />} animation={AnimationType.Fade} />
+      <Screen route="/yellow" component={<Yellow />} animation={AnimationType.ToTop} />
     </ReactStackProvider>
   )
 }

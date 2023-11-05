@@ -1,5 +1,5 @@
 import { jsx, jsxs } from 'react/jsx-runtime';
-import React, { Children, isValidElement, cloneElement, useState, useEffect, createContext, useRef, useCallback, useLayoutEffect, useContext } from 'react';
+import React, { Children, isValidElement, cloneElement, useContext, createContext, useRef, useState, useCallback, useEffect, useLayoutEffect } from 'react';
 
 var AnimationType;
 (function (AnimationType) {
@@ -17,6 +17,103 @@ var AnimationClassName;
     AnimationClassName[AnimationClassName["scale"] = 3] = "scale";
     AnimationClassName[AnimationClassName["fade"] = 4] = "fade";
 })(AnimationClassName || (AnimationClassName = {}));
+
+const STORAGE_KEY_NAME = 'reactAllPrintedScreenStacks';
+const ANIMATION_DURATION = 300;
+
+const isHashRoute = (route) => {
+    return typeof route === 'string' && route[0] === '#';
+};
+var PathSubDirectoryType;
+(function (PathSubDirectoryType) {
+    PathSubDirectoryType[PathSubDirectoryType["Static"] = 0] = "Static";
+    PathSubDirectoryType[PathSubDirectoryType["Dynamic"] = 1] = "Dynamic";
+    PathSubDirectoryType[PathSubDirectoryType["Splat"] = 2] = "Splat";
+    PathSubDirectoryType[PathSubDirectoryType["NotFound"] = 3] = "NotFound";
+})(PathSubDirectoryType || (PathSubDirectoryType = {}));
+class PathSubDirectory {
+    constructor(type, name) {
+        this.type = type;
+        this.name = typeof name === 'undefined' ? null : name;
+    }
+}
+const explodeRouteSegments = (route) => {
+    if (route === '*')
+        return [new PathSubDirectory(PathSubDirectoryType.Splat, '*')];
+    const segments = route.split('/');
+    const segmentNames = segments.slice(1, segments.length);
+    return segmentNames.map((seg) => {
+        if (seg === '*')
+            return new PathSubDirectory(PathSubDirectoryType.Splat, '*');
+        const isDynamic = seg.charAt(0) === ':';
+        const directoryName = seg.replace(/^\:/, '');
+        return new PathSubDirectory(isDynamic ? PathSubDirectoryType.Dynamic : PathSubDirectoryType.Static, directoryName);
+    });
+};
+const matchRoute = (paths, matchData) => {
+    const pathVariable = {};
+    for (let i = 0; i < paths.length; i++) {
+        const match = matchData[i];
+        if (!match) {
+            return {
+                match: false,
+                pathVariable
+            };
+        }
+        if (match.type === PathSubDirectoryType.Splat) {
+            return {
+                match: true,
+                pathVariable
+            };
+        }
+        if (match.type === PathSubDirectoryType.Static && paths[i] !== match.name) {
+            return {
+                match: false,
+                pathVariable
+            };
+        }
+        if (match.type === PathSubDirectoryType.Dynamic) {
+            pathVariable[match.name] = paths[i];
+        }
+    }
+    return {
+        match: true,
+        pathVariable
+    };
+};
+const matchRouteToPathname = (stacks, pathname) => {
+    const matchData = stacks.map(({ route }) => explodeRouteSegments(route));
+    const segments = pathname.split('#')[0].split('?')[0].split('/');
+    const paths = segments.slice(1, segments.length);
+    for (let i = 0; i < matchData.length; i++) {
+        const { match, pathVariable } = matchRoute(paths, matchData[i]);
+        if (match) {
+            stacks[i].setPathVariable(pathVariable);
+            return stacks[i];
+        }
+    }
+};
+const matchLastSingleRoute = (stacks, pathname) => {
+    const notHashStacks = stacks.filter(({ route }) => !isHashRoute(route));
+    const lastStack = notHashStacks[notHashStacks.length - 1];
+    const matchData = explodeRouteSegments(lastStack.route);
+    const segments = pathname.split('#')[0].split('?')[0].split('/');
+    const paths = segments.slice(1, segments.length);
+    const { match } = matchRoute(paths, matchData);
+    return match;
+};
+
+let Screen$1 = class Screen {
+    constructor({ route, component, animation }) {
+        this.route = route ? route : '*';
+        this.component = component ? component : null;
+        this.animation = typeof animation === 'undefined' ? AnimationType.None : animation;
+        this.pathVariable = {};
+    }
+    setPathVariable(pathVariable) {
+        this.pathVariable = pathVariable;
+    }
+};
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -33567,160 +33664,53 @@ TransitionGroup.propTypes = process.env.NODE_ENV !== "production" ? {
 TransitionGroup.defaultProps = defaultProps;
 var TransitionGroup$1 = TransitionGroup;
 
-const STORAGE_KEY_NAME = 'reactAllPrintedScreenStacks';
-const ANIMATION_DURATION = 250;
-
-const isHashRoute = (route) => {
-    return typeof route === 'string' && route[0] === '#';
-};
-var PathSubDirectoryType;
-(function (PathSubDirectoryType) {
-    PathSubDirectoryType[PathSubDirectoryType["Static"] = 0] = "Static";
-    PathSubDirectoryType[PathSubDirectoryType["Dynamic"] = 1] = "Dynamic";
-    PathSubDirectoryType[PathSubDirectoryType["Splat"] = 2] = "Splat";
-    PathSubDirectoryType[PathSubDirectoryType["NotFound"] = 3] = "NotFound";
-})(PathSubDirectoryType || (PathSubDirectoryType = {}));
-class PathSubDirectory {
-    constructor(type, name) {
-        this.type = type;
-        this.name = typeof name === 'undefined' ? null : name;
-    }
-}
-const explodeRouteSegments = (route) => {
-    if (route === '*')
-        return [new PathSubDirectory(PathSubDirectoryType.Splat, '*')];
-    const segments = route.split('/');
-    const segmentNames = segments.slice(1, segments.length);
-    return segmentNames.map((seg) => {
-        if (seg === '*')
-            return new PathSubDirectory(PathSubDirectoryType.Splat, '*');
-        const isDynamic = seg.charAt(0) === ':';
-        const directoryName = seg.replace(/^\:/, '');
-        return new PathSubDirectory(isDynamic ? PathSubDirectoryType.Dynamic : PathSubDirectoryType.Static, directoryName);
-    });
-};
-const matchRoute = (paths, matchData) => {
-    const pathVariable = {};
-    for (let i = 0; i < paths.length; i++) {
-        const match = matchData[i];
-        if (!match) {
-            return {
-                match: false,
-                pathVariable
-            };
-        }
-        if (match.type === PathSubDirectoryType.Splat) {
-            return {
-                match: true,
-                pathVariable
-            };
-        }
-        if (match.type === PathSubDirectoryType.Static && paths[i] !== match.name) {
-            return {
-                match: false,
-                pathVariable
-            };
-        }
-        if (match.type === PathSubDirectoryType.Dynamic) {
-            pathVariable[match.name] = paths[i];
-        }
-    }
-    return {
-        match: true,
-        pathVariable
+const Stacks = ({ duration }) => {
+    const animationDuration = typeof duration === 'number' ? duration : ANIMATION_DURATION;
+    const { stacks } = useContext(ReactStackContext);
+    // 현재 출력된 전체 스크린 배열
+    const allPrintScreenArr = stacks.filter(({ route }) => !isHashRoute(route));
+    // 현재 출력된 마지막 스크린의 인덱스
+    const activeScreenIdx = allPrintScreenArr.length - 1;
+    // 다음 스크린의 애니메이션 값 호출
+    const getAfterAnimation = (idx) => {
+        if (idx >= activeScreenIdx || !allPrintScreenArr[idx + 1])
+            return 'none';
+        return AnimationClassName[allPrintScreenArr[idx + 1].animation];
     };
-};
-const matchRouteToPathname = (stacks, pathname) => {
-    const matchData = stacks.map(({ route }) => explodeRouteSegments(route));
-    const segments = pathname.split('#')[0].split('?')[0].split('/');
-    const paths = segments.slice(1, segments.length);
-    for (let i = 0; i < matchData.length; i++) {
-        const { match, pathVariable } = matchRoute(paths, matchData[i]);
-        if (match) {
-            stacks[i].setPathVariable(pathVariable);
-            return stacks[i];
-        }
-    }
-};
-const matchLastSingleRoute = (stacks, pathname) => {
-    const notHashStacks = stacks.filter(({ route }) => !isHashRoute(route));
-    const lastStack = notHashStacks[notHashStacks.length - 1];
-    const matchData = explodeRouteSegments(lastStack.route);
-    const segments = pathname.split('#')[0].split('?')[0].split('/');
-    const paths = segments.slice(1, segments.length);
-    const { match } = matchRoute(paths, matchData);
-    return match;
-};
-
-let Screen$1 = class Screen {
-    constructor({ route, component, animation }) {
-        this.route = route ? route : '*';
-        this.component = component ? component : null;
-        this.animation = typeof animation === 'undefined' ? AnimationType.None : animation;
-        this.pathVariable = {};
-    }
-    setPathVariable(pathVariable) {
-        this.pathVariable = pathVariable;
-    }
-};
-
-const View = ({ children }) => {
-    const [isMount, setMount] = useState(false);
-    useEffect(() => {
-        setMount(true);
-        return () => {
-            setMount(false);
-        };
-    }, []);
-    return (jsx("div", { className: isMount ? 'react-stack-screen mount' : 'react-stack-screen', children: children }));
+    return (jsx(TransitionGroup$1, { children: stacks.map(({ route, component, animation, pathVariable }, i, arr) => {
+            // 해시로 추가된 히스토리는 스크린을 출력하지 않음
+            if (isHashRoute(route))
+                return null;
+            // 출력된 각각의 스크린 인덱스
+            const idx = i - arr.slice(0, i).filter(({ route }) => isHashRoute(route)).length;
+            return (jsx(CSSTransition$1, { timeout: animationDuration, classNames: `react-stack-box react-stack-box-${AnimationClassName[animation]} react-stack-box`, style: {
+                    transition: `transform ${animationDuration / 1000}s, opacity ${animationDuration / 1000}s`,
+                    display: activeScreenIdx > idx + 1 ? 'none' : 'block'
+                }, children: jsxs("div", { "data-after-animation": getAfterAnimation(idx), children: [jsx("div", { className: 'react-stack-dimmed-area', style: {
+                                'transition': `opacity ${animationDuration / 1000}s`
+                            } }), cloneElement(component, Object.assign({ params: pathVariable }))] }) }, i));
+        }) }));
 };
 
 const ReactStackContext = createContext(null);
-const StackProvider = ({ children }) => {
+const StackProvider = ({ duration, children }) => {
     const screenList = useRef([]);
     const beforeHash = useRef('');
     const beforePathname = useRef('');
     const checkHistoryGo = useRef(false);
     const [stacks, setStacks] = useState([]);
-    const [isAddStack, setAddStack] = useState(null);
     const [historyIdx, setHistoryIdx] = useState(0);
-    const [isMoveActive, setMoveActive] = useState(false);
-    const [isMoveAction, setMoveAction] = useState(false);
-    const [noDimmed, setNoDimmed] = useState(false);
     const addScreen = useCallback((data) => {
         screenList.current = [...screenList.current, data];
     }, []);
-    const isActivedDimmed = () => {
-        setNoDimmed(true);
-        setTimeout(() => {
-            setNoDimmed(false);
-        }, ANIMATION_DURATION);
-    };
     const updateStacks = useCallback((to, isClear = false) => {
-        if (isClear && typeof to === 'string') {
-            isActivedDimmed();
-            setTimeout(() => {
-                const stackData = matchRouteToPathname(screenList.current, to);
-                setStacks([stackData]);
-            }, 20);
-            return;
-        }
-        const isToNumber = typeof to === 'number';
-        setAddStack(!isToNumber);
-        if (isToNumber) {
-            if (to < -1) {
-                isActivedDimmed();
-                setTimeout(() => {
-                    setStacks(stacks.slice(0, stacks.length + to));
-                }, 20);
-            }
-            else {
-                setStacks(stacks.slice(0, stacks.length - 1));
-            }
+        const isToNo = typeof to === 'number';
+        if (isToNo) {
+            setStacks(stacks.slice(0, stacks.length + to));
         }
         else {
             const stackData = matchRouteToPathname(screenList.current, to);
-            setStacks([...stacks, stackData]);
+            setStacks(isClear ? [stackData] : [...stacks, stackData]);
         }
     }, [stacks]);
     const checkIsForward = useCallback(() => {
@@ -33744,13 +33734,10 @@ const StackProvider = ({ children }) => {
         const bHash = beforeHash.current;
         beforeHash.current = hash;
         beforePathname.current = pathname;
-        // 해시가 변했을 때
-        if (pathname === bPath) {
-            isActivedDimmed(); // 해시 변화는 딤을 적용하지 않음
-            if (hash && (!bHash || isForward)) {
-                setStacks([...stacks, new Screen$1({ route: hash })]);
-                return;
-            }
+        // 패스는 같고 해시만 변했을 때
+        if (pathname === bPath && hash && (!bHash || isForward)) {
+            setStacks([...stacks, new Screen$1({ route: hash })]);
+            return;
         }
         updateStacks(isForward ? pathname : -1);
     }, [stacks, historyIdx]);
@@ -33768,43 +33755,10 @@ const StackProvider = ({ children }) => {
             || (hash && storageStacks[storageStacks.length - 1].route !== hash)) {
             return false;
         }
-        isActivedDimmed();
         setStacks(storageStacks);
         return true;
     }, [stacks, historyIdx]);
-    const dimmedClassName = useCallback(() => {
-        const customClassName = ['react-stack-dimmed'];
-        customClassName.push(isAddStack ? 'next' : 'prev');
-        if (isMoveAction)
-            customClassName.push('active');
-        return customClassName.join(' ');
-    }, [isAddStack, isMoveAction]);
-    const checkDimmed = useCallback((animation) => {
-        if (animation === AnimationType.ToLeft)
-            return;
-        isActivedDimmed();
-    }, []);
-    // dimmed animation
-    useEffect(() => {
-        if (isAddStack === null)
-            return;
-        setMoveActive(true);
-        setTimeout(() => {
-            setMoveAction(true);
-            setTimeout(() => {
-                setMoveActive(false);
-                setMoveAction(false);
-            }, ANIMATION_DURATION);
-        }, 20);
-    }, [stacks, ANIMATION_DURATION]);
-    // init storage data
-    useEffect(() => {
-        if (stacks.length === 0)
-            return;
-        const storageData = stacks.map((d) => d.route);
-        window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData));
-    }, [stacks]);
-    // add popstate event listener
+    // 히스토리 변화에 대한 이벤트 등록
     useEffect(() => {
         beforePathname.current = window.location.pathname;
         window.addEventListener('popstate', historyChangeStack);
@@ -33812,7 +33766,14 @@ const StackProvider = ({ children }) => {
             window.removeEventListener('popstate', historyChangeStack);
         };
     }, [stacks, historyIdx]);
-    // set base history index
+    // 스택 변경 시 스토리지에 스택 정보 저장
+    useEffect(() => {
+        if (stacks.length === 0)
+            return;
+        const storageData = stacks.map((d) => d.route);
+        window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData));
+    }, [stacks]);
+    // 초기 히스토리 인덱스 설정
     useEffect(() => {
         var _a, _b;
         const index = (_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index;
@@ -33823,30 +33784,13 @@ const StackProvider = ({ children }) => {
             window.history.replaceState({ index: 0 }, '');
         }
     }, []);
-    // init stacks
+    // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
     useLayoutEffect(() => {
         if (initStorageStackData())
             return;
         updateStacks(window.location.pathname);
     }, []);
-    return (jsx("div", { className: "react-stack-area", children: jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, historyIdx, setHistoryIdx, checkHistoryGo }, children: [children, jsx(TransitionGroup$1, { children: stacks.map(({ route, component, animation, pathVariable }, i, arr) => {
-                        if (isHashRoute(route))
-                            return null;
-                        const idx = i - arr.slice(0, i).filter(({ route }) => isHashRoute(route)).length;
-                        const stackArr = arr.filter(({ route }) => !isHashRoute(route));
-                        const arrLen = stackArr.length;
-                        const activePage = arrLen - 2;
-                        const activeIdx = arrLen - 1;
-                        const nextAnimation = (idx < activeIdx && stackArr[idx + 1]) ? stackArr[idx + 1].animation : false;
-                        return (jsx(CSSTransition$1, { timeout: ANIMATION_DURATION, classNames: `react-stack-box react-stack-${AnimationClassName[animation]}`, onExit: () => checkDimmed(animation), style: {
-                                'transition': `all ${ANIMATION_DURATION / 1000}s`
-                            }, children: jsx("div", { "data-next-screen-ani": nextAnimation !== false ? AnimationClassName[nextAnimation] : false, children: jsxs(View, { children: [cloneElement(component, Object.assign({ params: pathVariable })), !noDimmed
-                                            && (isAddStack ? activePage === idx : activePage + 1 === idx)
-                                            && isMoveActive
-                                            && (jsx("div", { className: dimmedClassName(), style: {
-                                                    'transition': `all ${ANIMATION_DURATION / 1000}s`
-                                                } }))] }) }) }, i));
-                    }) })] }) }));
+    return (jsx("div", { className: "react-stack-area", children: jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, historyIdx, setHistoryIdx, checkHistoryGo }, children: [children, jsx(Stacks, { duration: duration })] }) }));
 };
 
 const Screen = ({ route, component, animation }) => {
@@ -33943,11 +33887,11 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z = ".react-stack-area {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  overflow: hidden; }\n\n.react-stack-box .react-stack-screen {\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  overflow-y: hidden;\n  transition: all 0.25s;\n  transform: translate3d(0, 0, 0) scale3d(1, 1, 1);\n  opacity: 1;\n  will-change: transform, opacity; }\n\n.react-stack-box.react-stack-fade-enter .react-stack-screen {\n  opacity: 0; }\n\n.react-stack-box.react-stack-fade-enter-active .react-stack-screen.mount, .react-stack-box.react-stack-fade-enter-done .react-stack-screen.mount, .react-stack-box.react-stack-fade-exit .react-stack-screen.mount {\n  opacity: 1; }\n\n.react-stack-box.react-stack-fade-exit-active .react-stack-screen.mount {\n  opacity: 0; }\n\n.react-stack-box.react-stack-scale-enter .react-stack-screen {\n  transform: scale3d(0.95, 0.95, 0.95);\n  opacity: 0; }\n\n.react-stack-box.react-stack-scale-enter-active .react-stack-screen.mount, .react-stack-box.react-stack-scale-enter-done .react-stack-screen.mount, .react-stack-box.react-stack-scale-exit .react-stack-screen.mount {\n  transform: scale3d(1, 1, 1);\n  opacity: 1; }\n\n.react-stack-box.react-stack-scale-exit-active .react-stack-screen.mount {\n  transform: scale3d(0.95, 0.95, 0.95);\n  opacity: 0; }\n\n.react-stack-box.react-stack-to-left-enter .react-stack-screen {\n  transform: translate3d(100%, 0, 0); }\n\n.react-stack-box.react-stack-to-left-enter-active .react-stack-screen.mount, .react-stack-box.react-stack-to-left-enter-done .react-stack-screen.mount, .react-stack-box.react-stack-to-left-exit .react-stack-screen.mount {\n  transform: translate3d(0, 0, 0); }\n\n.react-stack-box.react-stack-to-left-exit-active .react-stack-screen.mount {\n  transform: translate3d(100%, 0, 0); }\n\n.react-stack-box.react-stack-to-top-enter .react-stack-screen {\n  transform: translate3d(0, 100%, 0); }\n\n.react-stack-box.react-stack-to-top-enter-active .react-stack-screen.mount, .react-stack-box.react-stack-to-top-enter-done .react-stack-screen.mount, .react-stack-box.react-stack-to-top-exit .react-stack-screen.mount {\n  transform: translate3d(0, 0, 0); }\n\n.react-stack-box.react-stack-to-top-exit-active .react-stack-screen.mount {\n  transform: translate3d(0, 100%, 0); }\n\n.react-stack-box[data-next-screen-ani=\"to-left\"] .react-stack-screen {\n  transform: translate3d(-10%, 0, 0); }\n\n.react-stack-box[data-next-screen-ani=\"to-top\"] .react-stack-screen .react-stack-dimmed {\n  opacity: 0; }\n\n.react-stack-box[data-next-screen-ani=\"fade\"] .react-stack-screen .react-stack-dimmed {\n  opacity: 0; }\n\n.react-stack-box[data-next-screen-ani=\"scale\"] .react-stack-screen {\n  transform: scale3d(1.05, 1.05, 1.05); }\n  .react-stack-box[data-next-screen-ani=\"scale\"] .react-stack-screen .react-stack-dimmed {\n    opacity: 0; }\n\n.react-stack-box[data-next-screen-ani=\"none\"] .react-stack-screen .react-stack-dimmed {\n  opacity: 0; }\n\n.react-stack-box[data-next-screen-ani=\"true\"] .react-stack-screen {\n  transition: 0s !important;\n  transform: translate3d(0, 0, 0) scale3d(1, 1, 1) !important; }\n  .react-stack-box[data-next-screen-ani=\"true\"] .react-stack-screen .react-stack-dimmed {\n    opacity: 0; }\n\n.react-stack-dimmed {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: #555555;\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.25s;\n  z-index: 9999; }\n  .react-stack-dimmed.active {\n    opacity: 0.6; }\n  .react-stack-dimmed.prev {\n    opacity: 0.4; }\n    .react-stack-dimmed.prev.active {\n      opacity: 0; }\n\n.react-stack-pre-print-screen {\n  position: fixed;\n  width: 100%;\n  height: 100%;\n  opacity: 0;\n  transform: translate3d(-100%, 0, 0); }\n";
+var css_248z = ".react-stack-area {\n  position: absolute;\n  width: 100vw;\n  height: 100vh;\n  overflow: hidden; }\n\n.react-stack-box {\n  width: 100vw;\n  height: 100vh;\n  position: absolute;\n  transition: transform 0.3s, opacity 0.3s;\n  transform: translate3d(0, 0, 0) scale3d(1, 1, 1);\n  opacity: 1;\n  will-change: transform, opacity; }\n  .react-stack-box.react-stack-box-to-left .react-stack-dimmed-area {\n    transform: translate3d(-100vw, 0, 0); }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-enter {\n    transform: translate3d(100vw, 0, 0); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-enter .react-stack-dimmed-area {\n      opacity: 0; }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active, .react-stack-box.react-stack-box-to-left.react-stack-box-enter-done, .react-stack-box.react-stack-box-to-left.react-stack-box-exit {\n    transform: translate3d(0, 0, 0); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active .react-stack-dimmed-area, .react-stack-box.react-stack-box-to-left.react-stack-box-enter-done .react-stack-dimmed-area, .react-stack-box.react-stack-box-to-left.react-stack-box-exit .react-stack-dimmed-area {\n      opacity: 1; }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-exit-active {\n    transform: translate3d(100vw, 0, 0); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-exit-active .react-stack-dimmed-area {\n      opacity: 0; }\n  .react-stack-box[data-after-animation=\"to-left\"] {\n    transform: translate3d(-3rem, 0, 0); }\n  .react-stack-box.react-stack-box-fade.react-stack-box-enter {\n    opacity: 0; }\n  .react-stack-box.react-stack-box-fade.react-stack-box-enter-active, .react-stack-box.react-stack-box-fade.react-stack-box-enter-done, .react-stack-box.react-stack-box-fade.react-stack-box-exit {\n    opacity: 1; }\n  .react-stack-box.react-stack-box-fade.react-stack-box-exit-active {\n    opacity: 0; }\n  .react-stack-box.react-stack-box-scale.react-stack-box-enter {\n    transform: scale3d(0.95, 0.95, 0.95);\n    opacity: 0; }\n  .react-stack-box.react-stack-box-scale.react-stack-box-enter-active, .react-stack-box.react-stack-box-scale.react-stack-box-enter-done, .react-stack-box.react-stack-box-scale.react-stack-box-exit {\n    transform: scale3d(1, 1, 1);\n    opacity: 1; }\n  .react-stack-box.react-stack-box-scale.react-stack-box-exit-active {\n    transform: scale3d(0.95, 0.95, 0.95);\n    opacity: 0; }\n  .react-stack-box[data-after-animation=\"scale\"] {\n    transform: scale3d(1.05, 1.05, 1.05); }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-enter {\n    transform: translate3d(0, 100vh, 0); }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-enter-active, .react-stack-box.react-stack-box-to-top.react-stack-box-enter-done, .react-stack-box.react-stack-box-to-top.react-stack-box-exit {\n    transform: translate3d(0, 0, 0); }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-exit-active {\n    transform: translate3d(0, 100vh, 0); }\n\n.react-stack-dimmed-area {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: rgba(0, 0, 0, 0.2);\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.3s; }\n";
 styleInject(css_248z);
 
-const ReactStackProvider = ({ children }) => {
-    return (jsx(StackProvider, { children: children }));
+const ReactStackProvider = ({ duration, children }) => {
+    return (jsx(StackProvider, { duration: duration, children: children }));
 };
 
 export { AnimationType, Link, Screen, ReactStackProvider as default, useNavigaiton as useNavigation, useStacks };

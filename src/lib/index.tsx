@@ -1,3 +1,4 @@
+import { ReactElement } from 'react'
 import { AnimationType } from './interfaces'
 import StackProvider from './componets/provider'
 import Screen from './componets/screen'
@@ -7,13 +8,18 @@ import useStacks from './hooks/useStacks'
 import { IScreen } from './data/screen'
 import './styles/main.scss'
 
-const ReactStackProvider = ({ children }) => {
+interface IStackProvider {
+  duration?: number
+  children: ReactElement
+}
+
+const ReactStackProvider = ({ duration, children }: IStackProvider) => {
   return (
-    <StackProvider>
+    <StackProvider duration={duration}>
       {children}
     </StackProvider>
   )
 }
 
-export { Screen, Link, AnimationType, useNavigation, INavigation, INavigationPushState, useStacks, IScreen }
+export { IStackProvider, Screen, Link, AnimationType, useNavigation, INavigation, INavigationPushState, useStacks, IScreen }
 export default ReactStackProvider
