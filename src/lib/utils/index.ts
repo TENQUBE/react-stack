@@ -85,18 +85,9 @@ export const matchRouteToPathname = (stacks: IScreen[], pathname: string) => {
     const { match, pathVariable } = matchRoute(paths, matchData[i])
     if(match) {
       stacks[i].setPathVariable(pathVariable)
+      stacks[i].setURIPath(pathname)
+      stacks[i].setHash(pathname.split('#')[1])
       return stacks[i]
     }
   }    
-}
-
-export const matchLastSingleRoute = (stacks: IScreen[], pathname: string) => {
-  const notHashStacks = stacks.filter(({ route }) => !isHashRoute(route))
-  const lastStack = notHashStacks[notHashStacks.length - 1]
-  const matchData = explodeRouteSegments(lastStack.route)
-  const segments = pathname.split('#')[0].split('?')[0].split('/')
-  const paths = segments.slice(1, segments.length)
-  const { match } = matchRoute(paths, matchData)
-  
-  return match
 }

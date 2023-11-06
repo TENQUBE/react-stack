@@ -5,7 +5,11 @@ export interface IScreen {
     readonly component?: ReactElement | null;
     readonly animation?: AnimationType;
     pathVariable: unknown;
+    URIPath: string;
+    hash: string;
     setPathVariable(pathVariable: unknown): void;
+    setURIPath(path: string): void;
+    setHash(hash: string): void;
 }
 interface IScreenParams {
     readonly route?: string | null;
@@ -17,7 +21,12 @@ declare class Screen implements IScreen {
     readonly component?: ReactElement | null;
     readonly animation?: AnimationType;
     pathVariable: unknown;
+    URIPath: string;
+    hash: string;
     constructor({ route, component, animation }: IScreenParams);
+    static hashScreen(allPath: string): Screen;
     setPathVariable(pathVariable: unknown): void;
+    setURIPath(path: string): void;
+    setHash(hash: string): void;
 }
 export default Screen;

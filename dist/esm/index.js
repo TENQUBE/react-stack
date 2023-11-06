@@ -89,19 +89,21 @@ const matchRouteToPathname = (stacks, pathname) => {
         const { match, pathVariable } = matchRoute(paths, matchData[i]);
         if (match) {
             stacks[i].setPathVariable(pathVariable);
+            stacks[i].setURIPath(pathname);
+            stacks[i].setHash(pathname.split('#')[1]);
             return stacks[i];
         }
     }
 };
-const matchLastSingleRoute = (stacks, pathname) => {
-    const notHashStacks = stacks.filter(({ route }) => !isHashRoute(route));
-    const lastStack = notHashStacks[notHashStacks.length - 1];
-    const matchData = explodeRouteSegments(lastStack.route);
-    const segments = pathname.split('#')[0].split('?')[0].split('/');
-    const paths = segments.slice(1, segments.length);
-    const { match } = matchRoute(paths, matchData);
-    return match;
-};
+// export const matchLastSingleRoute = (stacks: IScreen[], pathname: string) => {
+//   const notHashStacks = stacks.filter(({ route }) => !isHashRoute(route))
+//   const lastStack = notHashStacks[notHashStacks.length - 1]
+//   const matchData = explodeRouteSegments(lastStack.route)
+//   const segments = pathname.split('#')[0].split('?')[0].split('/')
+//   const paths = segments.slice(1, segments.length)
+//   const { match } = matchRoute(paths, matchData)
+//   return match
+// }
 
 let Screen$1 = class Screen {
     constructor({ route, component, animation }) {
@@ -110,8 +112,21 @@ let Screen$1 = class Screen {
         this.animation = typeof animation === 'undefined' ? AnimationType.None : animation;
         this.pathVariable = {};
     }
+    static hashScreen(allPath) {
+        const hash = allPath.split('#')[1];
+        const hashStack = new Screen({ route: `#${hash}` });
+        hashStack.setURIPath(allPath);
+        hashStack.hash = hash;
+        return hashStack;
+    }
     setPathVariable(pathVariable) {
         this.pathVariable = pathVariable;
+    }
+    setURIPath(path) {
+        this.URIPath = path;
+    }
+    setHash(hash) {
+        this.hash = hash;
     }
 };
 
@@ -33717,7 +33732,6 @@ const StackProvider = ({ duration, children }) => {
         const { state } = window.history;
         if (!state)
             window.history.replaceState({ index: historyIdx + 1 }, '');
-        console.log(state.index, historyIdx);
         const index = state ? state.index : historyIdx + 1;
         const isForward = index > historyIdx;
         setHistoryIdx(index);
@@ -33730,30 +33744,32 @@ const StackProvider = ({ duration, children }) => {
             return;
         }
         const isForward = checkIsForward();
-        const { pathname, hash } = window.location;
+        const { pathname, hash, href, origin } = window.location;
+        const allPath = href.split(origin)[1];
         const bPath = beforePathname.current;
         const bHash = beforeHash.current;
         beforeHash.current = hash;
         beforePathname.current = pathname;
         // 패스는 같고 해시만 변했을 때
         if (pathname === bPath && hash && (!bHash || isForward)) {
-            setStacks([...stacks, new Screen$1({ route: hash })]);
+            const newHashScreen = Screen$1.hashScreen(allPath);
+            setStacks([...stacks, newHashScreen]);
             return;
         }
-        updateStacks(isForward ? pathname : -1);
+        updateStacks(isForward ? allPath : -1);
     }, [stacks, historyIdx]);
     const initStorageStackData = useCallback(() => {
-        const { pathname, hash } = window.location;
+        const { href, origin } = window.location;
         const storageData = JSON.parse(window.sessionStorage.getItem(STORAGE_KEY_NAME));
         if (!storageData || storageData.length === 0)
             return;
-        const storageStacks = storageData.map((route) => {
-            return isHashRoute(route)
-                ? new Screen$1({ route })
-                : matchRouteToPathname(screenList.current, route);
+        const allPath = href.split(origin)[1];
+        const storageStacks = storageData.map((screen) => {
+            return isHashRoute(screen.route)
+                ? Screen$1.hashScreen(allPath)
+                : matchRouteToPathname(screenList.current, screen.URIPath);
         });
-        if (!matchLastSingleRoute(storageStacks, pathname)
-            || (hash && storageStacks[storageStacks.length - 1].route !== hash)) {
+        if (storageStacks[storageStacks.length - 1].URIPath !== allPath) {
             return false;
         }
         setStacks(storageStacks);
@@ -33771,13 +33787,12 @@ const StackProvider = ({ duration, children }) => {
     useEffect(() => {
         if (stacks.length === 0)
             return;
-        const storageData = stacks.map((d) => d.route);
+        const storageData = stacks.map((d) => (Object.assign(Object.assign({}, d), { component: null })));
         window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData));
     }, [stacks]);
-    // 초기 히스토리 인덱스 설정
-    // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
     useLayoutEffect(() => {
         var _a, _b;
+        // 초기 히스토리 인덱스 설정
         const index = (_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index;
         if (index) {
             setHistoryIdx(index);
@@ -33785,6 +33800,7 @@ const StackProvider = ({ duration, children }) => {
         else {
             window.history.replaceState({ index: 0 }, '');
         }
+        // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
         if (initStorageStackData())
             return;
         updateStacks(window.location.pathname);

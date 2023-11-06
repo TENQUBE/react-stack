@@ -15,7 +15,7 @@ export default () => {
       <br />
       <Link to="#bbb">#bbb</Link>
       <br />
-      <Link to="/blue">/blue</Link>
+      <Link to="/blue#aaa">/blue</Link>
     </div>
   )
 }

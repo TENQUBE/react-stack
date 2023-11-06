@@ -6,7 +6,11 @@ export interface IScreen {
   readonly component?: ReactElement | null
   readonly animation?: AnimationType
   pathVariable: unknown
+  URIPath: string
+  hash: string
   setPathVariable(pathVariable: unknown): void
+  setURIPath(path: string): void
+  setHash(hash: string): void
 }
 
 interface IScreenParams {
@@ -20,6 +24,8 @@ class Screen implements IScreen {
   readonly component?: ReactElement | null
   readonly animation?: AnimationType
   pathVariable: unknown
+  URIPath: string
+  hash: string
 
   constructor({ route, component, animation }: IScreenParams) {
     this.route = route ? route : '*'
@@ -28,8 +34,24 @@ class Screen implements IScreen {
     this.pathVariable = {}
   }
 
+  static hashScreen(allPath: string) {
+    const hash = allPath.split('#')[1]
+    const hashStack = new Screen({ route: `#${hash}` })
+    hashStack.setURIPath(allPath)
+    hashStack.hash = hash
+    return hashStack
+  }
+
   setPathVariable(pathVariable: unknown) {
     this.pathVariable = pathVariable
+  }
+
+  setURIPath(path: string) {
+    this.URIPath = path
+  }
+
+  setHash(hash: string) {
+    this.hash = hash
   }
 }
 

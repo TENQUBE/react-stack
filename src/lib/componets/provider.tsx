@@ -2,7 +2,7 @@ import { createContext, useCallback, useEffect, useLayoutEffect, useRef, useStat
 
 import { IStackProvider } from '..'
 import { STORAGE_KEY_NAME } from '../constants'
-import { isHashRoute, matchLastSingleRoute, matchRouteToPathname } from '../utils'
+import { isHashRoute, matchRouteToPathname } from '../utils'
 import Screen, { IScreen } from '../data/screen'
 import Stacks from './stacks'
 
@@ -36,8 +36,6 @@ const StackProvider = ({ duration, children }: IStackProvider) => {
     const { state } = window.history
     if (!state) window.history.replaceState({ index: historyIdx + 1 }, '')
 
-    console.log(state.index, historyIdx)
-
     const index = state ? state.index : historyIdx + 1
     const isForward = index > historyIdx
     setHistoryIdx(index)
@@ -53,7 +51,8 @@ const StackProvider = ({ duration, children }: IStackProvider) => {
     }
 
     const isForward = checkIsForward()
-    const { pathname, hash } = window.location
+    const { pathname, hash, href, origin } = window.location
+    const allPath = href.split(origin)[1]
     const bPath = beforePathname.current
     const bHash = beforeHash.current
     
@@ -62,27 +61,29 @@ const StackProvider = ({ duration, children }: IStackProvider) => {
 
     // 패스는 같고 해시만 변했을 때
     if(pathname === bPath && hash && (!bHash || isForward)) {
-      setStacks([...stacks, new Screen({ route: hash })])
+      const newHashScreen = Screen.hashScreen(allPath)
+      setStacks([...stacks, newHashScreen])
       return
     }
     
-    updateStacks(isForward ? pathname : -1)
+    updateStacks(isForward ? allPath : -1)
   }, [stacks, historyIdx])
 
   const initStorageStackData = useCallback(() => {
-    const { pathname, hash } = window.location
+    const { href, origin } = window.location
     const storageData = JSON.parse(window.sessionStorage.getItem(STORAGE_KEY_NAME))
+
     if(!storageData || storageData.length === 0) return
 
-    const storageStacks = storageData.map((route: string) => {
-      return isHashRoute(route) 
-        ? new Screen({ route }) 
-        : matchRouteToPathname(screenList.current, route)
+    const allPath = href.split(origin)[1]
+    const storageStacks: IScreen[] = storageData.map((screen: IScreen) => {
+      return isHashRoute(screen.route) 
+        ? Screen.hashScreen(allPath) 
+        : matchRouteToPathname(screenList.current, screen.URIPath) 
     })
 
-    if(!matchLastSingleRoute(storageStacks, pathname)
-      || (hash && storageStacks[storageStacks.length - 1].route !== hash)) {
-        return false
+    if(storageStacks[storageStacks.length - 1].URIPath !== allPath) {
+      return false
     }
 
     setStacks(storageStacks)
@@ -102,19 +103,23 @@ const StackProvider = ({ duration, children }: IStackProvider) => {
   // 스택 변경 시 스토리지에 스택 정보 저장
   useEffect(() => { 
     if(stacks.length === 0) return
-    const storageData = stacks.map((d) => d.route)
+    const storageData = stacks.map((d) => ({
+      ...d,
+      component: null
+    }))
     window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData))
   }, [stacks])
 
-  // 초기 히스토리 인덱스 설정
-  // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
   useLayoutEffect(() => {
+    // 초기 히스토리 인덱스 설정
     const index = window.history?.state?.index
     if(index) {
       setHistoryIdx(index)
     } else {
       window.history.replaceState({ index: 0 }, '')
     }
+
+    // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
     if(initStorageStackData()) return
     updateStacks(window.location.pathname)
   }, [])

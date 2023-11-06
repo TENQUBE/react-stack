@@ -7,12 +7,7 @@ const styles: any = {
   height: '100%'
 }
 
-interface IProps {
-  isPrePrint?: boolean;
-}
-
-export default ({ isPrePrint }: IProps) => {
-  console.log(isPrePrint)
+export default () => {
   return (
     <div style={{...styles}}>
       <h1>black</h1>

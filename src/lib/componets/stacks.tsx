@@ -7,11 +7,11 @@ import { ANIMATION_DURATION } from '../constants'
 import { isHashRoute } from '../utils'
 import { ReactStackContext } from './provider'
 
-interface IStacks {
+interface IProps {
   duration?: number
 }
 
-const Stacks = ({ duration }: IStacks) => {
+const Stacks = ({ duration }: IProps) => {
   const animationDuration = typeof duration === 'number' ? duration : ANIMATION_DURATION
 
   const { stacks } = useContext(ReactStackContext)

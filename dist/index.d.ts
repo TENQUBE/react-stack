@@ -38,7 +38,11 @@ interface IScreen {
     readonly component?: ReactElement | null;
     readonly animation?: AnimationType;
     pathVariable: unknown;
+    URIPath: string;
+    hash: string;
     setPathVariable(pathVariable: unknown): void;
+    setURIPath(path: string): void;
+    setHash(hash: string): void;
 }
 
 declare const useStacks: () => IScreen[];
