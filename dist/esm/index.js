@@ -33701,6 +33701,7 @@ const Stacks = ({ duration }) => {
 const ReactStackContext = createContext(null);
 const StackProvider = ({ duration, children }) => {
     const screenList = useRef([]);
+    const checkMultipleMovesOrClear = useRef(false);
     const beforeHash = useRef('');
     const beforePathname = useRef('');
     const [stacks, setStacks] = useState([]);
@@ -33711,19 +33712,18 @@ const StackProvider = ({ duration, children }) => {
     const updateStacks = useCallback((to, isClear = false) => {
         const isToNo = typeof to === 'number';
         if (isToNo) {
+            if (to < -1)
+                checkMultipleMovesOrClear.current = true;
             setStacks(stacks.slice(0, stacks.length + to));
         }
         else {
+            if (isClear)
+                checkMultipleMovesOrClear.current = true;
             const stackData = matchRouteToPathname(screenList.current, to);
             setStacks(isClear ? [stackData] : [...stacks, stackData]);
         }
     }, [stacks]);
-    const checkMultipleMoves = useCallback(() => {
-        var _a, _b;
-        const stateIndex = (_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index;
-        return stateIndex && Math.abs(stateIndex - historyIdx) > 1;
-    }, [historyIdx]);
-    const checkToGoForward = useCallback(() => {
+    const checkGoForward = useCallback(() => {
         var _a, _b;
         const stateIndex = (_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index;
         if (!stateIndex)
@@ -33739,10 +33739,12 @@ const StackProvider = ({ duration, children }) => {
     const historyChangeStack = useCallback(() => {
         // 히스토리 인덱스 재할당
         setCurrentHistoryIndex();
-        // 여러 히스토리 이동은 스택 설정을 미리 진행하기 때문에, 아래의 스택 설정을 진행하지 않음
-        if (checkMultipleMoves())
+        // 여러 히스토리가 이동하거나 클리어 옵션 설정에는 스택 설정을 진행하기 때문에, 아래의 설정을 진행하지 않음
+        if (checkMultipleMovesOrClear.current) {
+            checkMultipleMovesOrClear.current = false;
             return;
-        const isForward = checkToGoForward();
+        }
+        const isForward = checkGoForward();
         const { pathname, hash, href, origin } = window.location;
         const allPath = href.split(origin)[1];
         const bPath = beforePathname.current;

@@ -10,6 +10,7 @@ export const ReactStackContext = createContext(null)
 
 const StackProvider = ({ duration, children }: IStackProvider) => {
   const screenList = useRef<IScreen[]>([])
+  const checkMultipleMovesOrClear = useRef<boolean>(false)
   const beforeHash = useRef<string>('')
   const beforePathname = useRef<string>('')
 
@@ -24,19 +25,16 @@ const StackProvider = ({ duration, children }: IStackProvider) => {
     const isToNo = typeof to === 'number'
 
     if(isToNo) {
+      if(to < -1) checkMultipleMovesOrClear.current = true
       setStacks(stacks.slice(0, stacks.length + to))
     } else {
+      if(isClear) checkMultipleMovesOrClear.current = true
       const stackData = matchRouteToPathname(screenList.current, to)
       setStacks(isClear ? [stackData] : [...stacks, stackData])
     }
   }, [stacks])
-
-  const checkMultipleMoves = useCallback(() => {
-    const stateIndex = window.history?.state?.index 
-    return stateIndex && Math.abs(stateIndex - historyIdx) > 1
-  }, [historyIdx])
-
-  const checkToGoForward = useCallback(() => {
+  
+  const checkGoForward = useCallback(() => {
     const stateIndex = window.history?.state?.index 
     if (!stateIndex) window.history.replaceState({ index: historyIdx + 1 }, '')
 
@@ -53,10 +51,13 @@ const StackProvider = ({ duration, children }: IStackProvider) => {
     // 히스토리 인덱스 재할당
     setCurrentHistoryIndex()
 
-    // 여러 히스토리 이동은 스택 설정을 미리 진행하기 때문에, 아래의 스택 설정을 진행하지 않음
-    if(checkMultipleMoves()) return
+    // 여러 히스토리가 이동하거나 클리어 옵션 설정에는 스택 설정을 진행하기 때문에, 아래의 설정을 진행하지 않음
+    if(checkMultipleMovesOrClear.current) {
+      checkMultipleMovesOrClear.current = false
+      return
+    }
 
-    const isForward = checkToGoForward()
+    const isForward = checkGoForward()
     const { pathname, hash, href, origin } = window.location
     const allPath = href.split(origin)[1]
     const bPath = beforePathname.current
