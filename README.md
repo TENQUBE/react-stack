@@ -133,6 +133,8 @@ interface INavigationPushState {
 }
 ```
 
+If you set the clear option, all previous stacks will disappear and only the requested screen will be displayed.
+
 ### useStacks
 You can see which stack is active.
 ```ts
@@ -140,7 +142,7 @@ You can see which stack is active.
 import { useStacks } from '@tenqube/react-stack'
 
 const White = () => {
-  const stacks = useStacks()
+  const stacks: IScreen[] = useStacks()
 
   useEffect(() => {
     console.log(stacks)
@@ -152,7 +154,13 @@ const White = () => {
 ```ts
 interface IScreen {
   readonly route?: string
-  readonly component?: ReactNode
+  readonly component?: ReactElement | null
   readonly animation?: AnimationType
+  pathVariable: unknown
+  URIPath: string
+  hash: string
+  setPathVariable(pathVariable: unknown): void
+  setURIPath(allPath: string): void
+  setHash(hash: string): void
 }
 ```
