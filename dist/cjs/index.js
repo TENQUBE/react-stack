@@ -99,15 +99,6 @@ const matchRouteToPathname = (stacks, pathname) => {
         }
     }
 };
-// export const matchLastSingleRoute = (stacks: IScreen[], pathname: string) => {
-//   const notHashStacks = stacks.filter(({ route }) => !isHashRoute(route))
-//   const lastStack = notHashStacks[notHashStacks.length - 1]
-//   const matchData = explodeRouteSegments(lastStack.route)
-//   const segments = pathname.split('#')[0].split('?')[0].split('/')
-//   const paths = segments.slice(1, segments.length)
-//   const { match } = matchRoute(paths, matchData)
-//   return match
-// }
 
 let Screen$1 = class Screen {
     constructor({ route, component, animation }) {
@@ -33716,7 +33707,6 @@ const StackProvider = ({ duration, children }) => {
     const screenList = React.useRef([]);
     const beforeHash = React.useRef('');
     const beforePathname = React.useRef('');
-    const checkHistoryGo = React.useRef(false);
     const [stacks, setStacks] = React.useState([]);
     const [historyIdx, setHistoryIdx] = React.useState(0);
     const addScreen = React.useCallback((data) => {
@@ -33732,22 +33722,31 @@ const StackProvider = ({ duration, children }) => {
             setStacks(isClear ? [stackData] : [...stacks, stackData]);
         }
     }, [stacks]);
-    const checkIsForward = React.useCallback(() => {
-        const { state } = window.history;
-        if (!state)
+    const checkMultipleMoves = React.useCallback(() => {
+        var _a, _b;
+        const stateIndex = (_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index;
+        return stateIndex && Math.abs(stateIndex - historyIdx) > 1;
+    }, [historyIdx]);
+    const checkToGoForward = React.useCallback(() => {
+        var _a, _b;
+        const stateIndex = (_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index;
+        if (!stateIndex)
             window.history.replaceState({ index: historyIdx + 1 }, '');
-        const index = state ? state.index : historyIdx + 1;
-        const isForward = index > historyIdx;
-        setHistoryIdx(index);
-        return isForward;
+        const index = stateIndex ? stateIndex : historyIdx + 1;
+        return index > historyIdx;
+    }, [historyIdx]);
+    const setCurrentHistoryIndex = React.useCallback(() => {
+        var _a, _b;
+        const stateIndex = (_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index;
+        setHistoryIdx(stateIndex ? stateIndex : historyIdx + 1);
     }, [historyIdx]);
     const historyChangeStack = React.useCallback(() => {
-        // useNavigation 에서 조건문에 따라 설정됨
-        if (checkHistoryGo.current) {
-            checkHistoryGo.current = false;
+        // 히스토리 인덱스 재할당
+        setCurrentHistoryIndex();
+        // 여러 히스토리 이동은 스택 설정을 미리 진행하기 때문에, 아래의 스택 설정을 진행하지 않음
+        if (checkMultipleMoves())
             return;
-        }
-        const isForward = checkIsForward();
+        const isForward = checkToGoForward();
         const { pathname, hash, href, origin } = window.location;
         const allPath = href.split(origin)[1];
         const bPath = beforePathname.current;
@@ -33809,7 +33808,7 @@ const StackProvider = ({ duration, children }) => {
             return;
         updateStacks(window.location.pathname);
     }, []);
-    return (jsxRuntime.jsx("div", { className: "react-stack-area", children: jsxRuntime.jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, historyIdx, setHistoryIdx, checkHistoryGo }, children: [children, jsxRuntime.jsx(Stacks, { duration: duration })] }) }));
+    return (jsxRuntime.jsx("div", { className: "react-stack-area", children: jsxRuntime.jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, historyIdx, setHistoryIdx }, children: [children, jsxRuntime.jsx(Stacks, { duration: duration })] }) }));
 };
 
 const Screen = ({ route, component, animation }) => {
@@ -33838,7 +33837,7 @@ const Link = ({ to, target = '_self', children }) => {
 };
 
 const useNavigaiton = () => {
-    const { stacks, updateStacks, historyIdx, setHistoryIdx, checkHistoryGo } = React.useContext(ReactStackContext);
+    const { stacks, updateStacks, historyIdx, setHistoryIdx } = React.useContext(ReactStackContext);
     return {
         push: (to, state) => {
             if (isHashRoute(to)) {
@@ -33846,8 +33845,6 @@ const useNavigaiton = () => {
                 return;
             }
             if (state && state.clear) {
-                checkHistoryGo.current = true;
-                setHistoryIdx(1);
                 updateStacks(to, true);
                 window.history.go((stacks.length - 1) * -1);
                 setTimeout(() => {
@@ -33865,8 +33862,6 @@ const useNavigaiton = () => {
         back: (to = 1) => {
             const toSize = to > 0 ? to * -1 : -1;
             if (toSize < -1) {
-                checkHistoryGo.current = true;
-                setHistoryIdx(historyIdx + toSize);
                 updateStacks(toSize);
             }
             window.history.go(toSize);

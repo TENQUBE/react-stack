@@ -13,7 +13,7 @@ export interface INavigation {
 }
 
 const useNavigaiton = (): INavigation => {
-  const { stacks, updateStacks, historyIdx, setHistoryIdx, checkHistoryGo } = useContext(ReactStackContext)
+  const { stacks, updateStacks, historyIdx, setHistoryIdx } = useContext(ReactStackContext)
   
   return {
     push: (to: string, state: INavigationPushState) => {
@@ -22,8 +22,6 @@ const useNavigaiton = (): INavigation => {
         return
       }
       if(state && state.clear) {
-        checkHistoryGo.current = true
-        setHistoryIdx(1)
         updateStacks(to, true)
         window.history.go((stacks.length - 1) * -1)
         setTimeout(() => {
@@ -41,8 +39,6 @@ const useNavigaiton = (): INavigation => {
     back: (to = 1) => {
       const toSize = to > 0 ? to * -1 : -1
       if(toSize < -1) {
-        checkHistoryGo.current = true
-        setHistoryIdx(historyIdx + toSize)
         updateStacks(toSize)
       }
       window.history.go(toSize)

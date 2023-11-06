@@ -16,12 +16,12 @@ export default () => {
       <Link to="#aaa">#aaa</Link>
       <br />
       <p onClick={() => {
-        navigation.back()
-      }}>back</p>
+        navigation.back(2)
+      }}>back(2)</p>
       <br />
       <p onClick={() => {
         navigation.push('/', { clear: true })
-      }}>/yellow</p>
+      }}>/white - clear</p>
     </div>
   )
 }

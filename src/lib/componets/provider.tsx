@@ -12,7 +12,6 @@ const StackProvider = ({ duration, children }: IStackProvider) => {
   const screenList = useRef<IScreen[]>([])
   const beforeHash = useRef<string>('')
   const beforePathname = useRef<string>('')
-  const checkHistoryGo = useRef<boolean>(false)
 
   const [stacks, setStacks] = useState<IScreen[]>([])
   const [historyIdx, setHistoryIdx] = useState<number>(0)
@@ -32,25 +31,32 @@ const StackProvider = ({ duration, children }: IStackProvider) => {
     }
   }, [stacks])
 
-  const checkIsForward = useCallback(() => {
-    const { state } = window.history
-    if (!state) window.history.replaceState({ index: historyIdx + 1 }, '')
+  const checkMultipleMoves = useCallback(() => {
+    const stateIndex = window.history?.state?.index 
+    return stateIndex && Math.abs(stateIndex - historyIdx) > 1
+  }, [historyIdx])
 
-    const index = state ? state.index : historyIdx + 1
-    const isForward = index > historyIdx
-    setHistoryIdx(index)
+  const checkToGoForward = useCallback(() => {
+    const stateIndex = window.history?.state?.index 
+    if (!stateIndex) window.history.replaceState({ index: historyIdx + 1 }, '')
 
-    return isForward
+    const index = stateIndex ? stateIndex : historyIdx + 1
+    return index > historyIdx
+  }, [historyIdx])
+
+  const setCurrentHistoryIndex = useCallback(() => {
+    const stateIndex = window.history?.state?.index 
+    setHistoryIdx(stateIndex ? stateIndex : historyIdx + 1)
   }, [historyIdx])
 
   const historyChangeStack = useCallback(() => {
-    // useNavigation 에서 조건문에 따라 설정됨
-    if(checkHistoryGo.current) {
-      checkHistoryGo.current = false
-      return
-    }
+    // 히스토리 인덱스 재할당
+    setCurrentHistoryIndex()
 
-    const isForward = checkIsForward()
+    // 여러 히스토리 이동은 스택 설정을 미리 진행하기 때문에, 아래의 스택 설정을 진행하지 않음
+    if(checkMultipleMoves()) return
+
+    const isForward = checkToGoForward()
     const { pathname, hash, href, origin } = window.location
     const allPath = href.split(origin)[1]
     const bPath = beforePathname.current
@@ -126,7 +132,7 @@ const StackProvider = ({ duration, children }: IStackProvider) => {
 
   return (
     <div className="react-stack-area">
-      <ReactStackContext.Provider value={{addScreen, stacks, updateStacks, historyIdx, setHistoryIdx, checkHistoryGo}}>
+      <ReactStackContext.Provider value={{ addScreen, stacks, updateStacks, historyIdx, setHistoryIdx }}>
         {children}
         <Stacks duration={duration} />
       </ReactStackContext.Provider>
