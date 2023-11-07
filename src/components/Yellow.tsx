@@ -10,12 +10,8 @@ const styles: any = {
 export default () => {
   return (
     <div style={{...styles}}>
-      <h1>Red</h1>
-      <Link to="#aaa">#aaa</Link>
-      <br />
-      <Link to="#bbb">#bbb</Link>
-      <br />
-      <Link to="/blue#aaa">/blue</Link>
+      <h1>Yellow</h1>
+      <Link to="/">/white</Link>
     </div>
   )
 }

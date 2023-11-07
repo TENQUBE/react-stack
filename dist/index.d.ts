@@ -38,13 +38,19 @@ interface IScreen {
     readonly component?: ReactElement | null;
     readonly animation?: AnimationType;
     pathVariable: unknown;
+    URIPath: string;
+    hash: string;
     setPathVariable(pathVariable: unknown): void;
+    setURIPath(path: string): void;
+    setHash(hash: string): void;
 }
 
 declare const useStacks: () => IScreen[];
 
-declare const ReactStackProvider: ({ children }: {
+interface IStackProvider {
+    duration?: number;
     children: any;
-}) => react_jsx_runtime.JSX.Element;
+}
+declare const ReactStackProvider: ({ duration, children }: IStackProvider) => react_jsx_runtime.JSX.Element;
 
-export { AnimationType, type INavigation, type INavigationPushState, type IScreen, Link, Screen, ReactStackProvider as default, useNavigaiton as useNavigation, useStacks };
+export { AnimationType, type INavigation, type INavigationPushState, type IScreen, type IStackProvider, Link, Screen, ReactStackProvider as default, useNavigaiton as useNavigation, useStacks };

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from '../../dist/esm'
+import { Link, useNavigation } from '../../dist/esm'
 const styles: any = {
   background: '#fff',
   position: 'absolute',
@@ -8,14 +8,20 @@ const styles: any = {
 }
 
 export default () => {
+  const navigation = useNavigation()
+
   return (
     <div style={{...styles}}>
       <h1>blue</h1>
       <Link to="#aaa">#aaa</Link>
       <br />
-      <Link to="#bbb">#bbb</Link>
+      <p onClick={() => {
+        navigation.back(2)
+      }}>back(2)</p>
       <br />
-      <Link to="/">/white</Link>
+      <p onClick={() => {
+        navigation.push('/', { clear: true })
+      }}>/white - clear</p>
     </div>
   )
 }
