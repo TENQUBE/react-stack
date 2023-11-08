@@ -1,4 +1,3 @@
-import { ReactElement } from 'react'
 import { AnimationType } from './interfaces'
 import StackProvider from './componets/provider'
 import Screen from './componets/screen'
@@ -10,12 +9,13 @@ import './styles/main.scss'
 
 interface IStackProvider {
   duration?: number
+  delay?: number
   children: any
 }
 
-const ReactStackProvider = ({ duration, children }: IStackProvider) => {
+const ReactStackProvider = ({ duration, delay, children }: IStackProvider) => {
   return (
-    <StackProvider duration={duration}>
+    <StackProvider duration={duration} delay={delay}>
       {children}
     </StackProvider>
   )

@@ -1,6 +1,6 @@
 {
   "name": "@tenqube/react-stack",
-  "version": "0.0.48",
+  "version": "0.0.56",
   "description": "A library that helps with screen stack routing and transition animation in webviews of hybrid apps.",
   "keywords": [
     "react",
@@ -10,7 +10,8 @@
   ],
   "scripts": {
     "start": "webpack-dev-server --mode development",
-    "rollup": "rm -rf dist && rollup -c --bundleConfigAsCjs"
+    "rollup": "rm -rf dist && rollup -c --bundleConfigAsCjs",
+    "build": "webpack --mode production"
   },
   "repository": {
     "type": "git",

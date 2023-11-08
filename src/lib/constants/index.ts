@@ -1,2 +1,3 @@
 export const STORAGE_KEY_NAME = 'reactAllPrintedScreenStacks'
-export const ANIMATION_DURATION = 300
+export const ANIMATION_DURATION = !/iPhone/i.test(window.navigator.userAgent) ? 400 : 350
+export const ANIMAITON_DELAY = 150

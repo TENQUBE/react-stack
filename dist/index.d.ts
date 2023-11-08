@@ -49,8 +49,9 @@ declare const useStacks: () => IScreen[];
 
 interface IStackProvider {
     duration?: number;
+    delay?: number;
     children: any;
 }
-declare const ReactStackProvider: ({ duration, children }: IStackProvider) => react_jsx_runtime.JSX.Element;
+declare const ReactStackProvider: ({ duration, delay, children }: IStackProvider) => react_jsx_runtime.JSX.Element;
 
 export { AnimationType, type INavigation, type INavigationPushState, type IScreen, type IStackProvider, Link, Screen, ReactStackProvider as default, useNavigaiton as useNavigation, useStacks };

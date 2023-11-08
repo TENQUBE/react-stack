@@ -23,7 +23,8 @@ var AnimationClassName;
 })(AnimationClassName || (AnimationClassName = {}));
 
 const STORAGE_KEY_NAME = 'reactAllPrintedScreenStacks';
-const ANIMATION_DURATION = 300;
+const ANIMATION_DURATION = !/iPhone/i.test(window.navigator.userAgent) ? 400 : 350;
+const ANIMAITON_DELAY = 150;
 
 const isHashRoute = (route) => {
     return typeof route === 'string' && route[0] === '#';
@@ -33674,9 +33675,12 @@ TransitionGroup.propTypes = process.env.NODE_ENV !== "production" ? {
 TransitionGroup.defaultProps = defaultProps;
 var TransitionGroup$1 = TransitionGroup;
 
-const Stacks = ({ duration }) => {
+const Stacks = ({ duration, delay }) => {
     const animationDuration = typeof duration === 'number' ? duration : ANIMATION_DURATION;
+    const animationDelay = typeof delay === 'number' ? delay : ANIMAITON_DELAY;
     const { stacks } = React.useContext(ReactStackContext);
+    const beforeStackLength = React.useRef(stacks.length);
+    // const [beforeStackLength, setbeforeStackLength] = useState(stacks.length)
     // 현재 출력된 전체 스크린 배열
     const allPrintScreenArr = stacks.filter(({ route }) => !isHashRoute(route));
     // 현재 출력된 마지막 스크린의 인덱스
@@ -33687,23 +33691,35 @@ const Stacks = ({ duration }) => {
             return 'none';
         return AnimationClassName[allPrintScreenArr[idx + 1].animation];
     };
+    React.useEffect(() => {
+    }, [stacks]);
     return (jsxRuntime.jsx(TransitionGroup$1, { children: stacks.map(({ route, component, animation, pathVariable }, i, arr) => {
             // 해시로 추가된 히스토리는 스크린을 출력하지 않음
             if (isHashRoute(route))
                 return null;
             // 출력된 각각의 스크린 인덱스
             const idx = i - arr.slice(0, i).filter(({ route }) => isHashRoute(route)).length;
-            return (jsxRuntime.jsx(CSSTransition$1, { timeout: animationDuration, classNames: `react-stack-box react-stack-box-${AnimationClassName[animation]} react-stack-box`, style: {
-                    transition: `transform ${animationDuration / 1000}s, opacity ${animationDuration / 1000}s`,
-                    display: activeScreenIdx > idx + 1 ? 'none' : 'block'
+            // 스택이 추가되었는지 확인
+            const isAddStack = stacks.length > beforeStackLength;
+            beforeStackLength.current = stacks.length;
+            // 스택이 추가되는 경우 애니메이션 딜레이 시간 추가
+            const timeout = isAddStack ? animationDuration + animationDelay : animationDuration;
+            return (jsxRuntime.jsx(CSSTransition$1, { timeout: timeout, classNames: `react-stack-box react-stack-box-${AnimationClassName[animation]} react-stack-box`, style: {
+                    'transitionProperty': 'transform, opacity',
+                    'transitionDuration': `${animationDuration / 1000}s, ${animationDuration / 1000}s`,
+                    'transitionTimingFunction': 'ease',
+                    'display': activeScreenIdx > idx + 1 ? 'none' : 'block',
+                    '--animation-delay': `${animationDelay / 1000}s`
                 }, children: jsxRuntime.jsxs("div", { "data-after-animation": getAfterAnimation(idx), children: [jsxRuntime.jsx("div", { className: 'react-stack-dimmed-area', style: {
-                                'transition': `opacity ${animationDuration / 1000}s`
-                            } }), React.cloneElement(component, Object.assign({ params: pathVariable }))] }) }, i));
+                                'transitionProperty': 'opacity',
+                                'transitionDuration': `${animationDuration / 1000}s`,
+                                'transitionTimingFunction': 'ease'
+                            } }), jsxRuntime.jsx("div", { className: 'react-stack-content-area', children: React.cloneElement(component, Object.assign({ params: pathVariable })) })] }) }, i));
         }) }));
 };
 
 const ReactStackContext = React.createContext(null);
-const StackProvider = ({ duration, children }) => {
+const StackProvider = ({ duration, delay, children }) => {
     const screenList = React.useRef([]);
     const checkMultipleMovesOrClear = React.useRef(false);
     const beforeHash = React.useRef('');
@@ -33730,9 +33746,9 @@ const StackProvider = ({ duration, children }) => {
     const checkGoForward = React.useCallback(() => {
         var _a, _b;
         const stateIndex = (_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index;
-        if (!stateIndex)
+        if (typeof stateIndex !== 'number')
             window.history.replaceState({ index: historyIdx + 1 }, '');
-        const index = stateIndex ? stateIndex : historyIdx + 1;
+        const index = typeof stateIndex === 'number' ? stateIndex : historyIdx + 1;
         return index > historyIdx;
     }, [historyIdx]);
     const setCurrentHistoryIndex = React.useCallback(() => {
@@ -33803,14 +33819,14 @@ const StackProvider = ({ duration, children }) => {
             setHistoryIdx(index);
         }
         else {
-            window.history.replaceState({ index: 0 }, '');
+            window.history.replaceState({ index: 1 }, '');
         }
         // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
         if (initStorageStackData())
             return;
         updateStacks(window.location.pathname);
     }, []);
-    return (jsxRuntime.jsx("div", { className: "react-stack-area", children: jsxRuntime.jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, historyIdx, setHistoryIdx }, children: [children, jsxRuntime.jsx(Stacks, { duration: duration })] }) }));
+    return (jsxRuntime.jsx("div", { className: "react-stack-area", children: jsxRuntime.jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, historyIdx, setHistoryIdx }, children: [children, jsxRuntime.jsx(Stacks, { duration: duration, delay: delay })] }) }));
 };
 
 const Screen = ({ route, component, animation }) => {
@@ -33903,11 +33919,11 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z = ".react-stack-area {\n  position: absolute;\n  width: 100vw;\n  height: 100vh;\n  overflow: hidden; }\n\n.react-stack-box {\n  width: 100vw;\n  height: 100vh;\n  position: absolute;\n  transition: transform 0.3s, opacity 0.3s;\n  transform: translate3d(0, 0, 0) scale3d(1, 1, 1);\n  opacity: 1;\n  will-change: transform, opacity; }\n  .react-stack-box.react-stack-box-to-left .react-stack-dimmed-area {\n    transform: translate3d(-100vw, 0, 0); }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-enter {\n    transform: translate3d(100vw, 0, 0); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-enter .react-stack-dimmed-area {\n      opacity: 0; }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active, .react-stack-box.react-stack-box-to-left.react-stack-box-enter-done, .react-stack-box.react-stack-box-to-left.react-stack-box-exit {\n    transform: translate3d(0, 0, 0); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active .react-stack-dimmed-area, .react-stack-box.react-stack-box-to-left.react-stack-box-enter-done .react-stack-dimmed-area, .react-stack-box.react-stack-box-to-left.react-stack-box-exit .react-stack-dimmed-area {\n      opacity: 1; }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-exit-active {\n    transform: translate3d(100vw, 0, 0); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-exit-active .react-stack-dimmed-area {\n      opacity: 0; }\n  .react-stack-box.react-stack-box-fade.react-stack-box-enter {\n    opacity: 0; }\n  .react-stack-box.react-stack-box-fade.react-stack-box-enter-active, .react-stack-box.react-stack-box-fade.react-stack-box-enter-done, .react-stack-box.react-stack-box-fade.react-stack-box-exit {\n    opacity: 1; }\n  .react-stack-box.react-stack-box-fade.react-stack-box-exit-active {\n    opacity: 0; }\n  .react-stack-box.react-stack-box-scale.react-stack-box-enter {\n    transform: scale3d(0.95, 0.95, 0.95);\n    opacity: 0; }\n  .react-stack-box.react-stack-box-scale.react-stack-box-enter-active, .react-stack-box.react-stack-box-scale.react-stack-box-enter-done, .react-stack-box.react-stack-box-scale.react-stack-box-exit {\n    transform: scale3d(1, 1, 1);\n    opacity: 1; }\n  .react-stack-box.react-stack-box-scale.react-stack-box-exit-active {\n    transform: scale3d(0.95, 0.95, 0.95);\n    opacity: 0; }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-enter {\n    transform: translate3d(0, 100vh, 0); }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-enter-active, .react-stack-box.react-stack-box-to-top.react-stack-box-enter-done, .react-stack-box.react-stack-box-to-top.react-stack-box-exit {\n    transform: translate3d(0, 0, 0); }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-exit-active {\n    transform: translate3d(0, 100vh, 0); }\n\n.react-stack-area .react-stack-box[data-after-animation=\"to-left\"] {\n  transform: translate3d(-3rem, 0, 0); }\n\n.react-stack-area .react-stack-box[data-after-animation=\"scale\"] {\n  transform: scale3d(1.05, 1.05, 1.05); }\n\n.react-stack-dimmed-area {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: rgba(0, 0, 0, 0.2);\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.3s; }\n";
+var css_248z = ".react-stack-area {\n  position: absolute;\n  width: 100vw;\n  height: 100vh;\n  overflow: hidden; }\n\n.react-stack-box {\n  width: 100vw;\n  height: 100vh;\n  position: absolute;\n  transition: transform 0.4s ease 0.1s, opacity 0.4s ease 0.1s;\n  transform: translate3d(0, 0, 0) scale3d(1, 1, 1);\n  opacity: 1;\n  will-change: transform, opacity; }\n  .react-stack-box.react-stack-box-to-left .react-stack-dimmed-area {\n    transform: translate3d(-100vw, 0, 0); }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-enter {\n    transform: translate3d(100vw, 0, 0); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-enter .react-stack-dimmed-area {\n      opacity: 0; }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active {\n    transition-delay: var(--animation-delay, \"0.1s\"); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active .react-stack-dimmed-area {\n      transition-delay: var(--animation-delay, \"0.1s\"); }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active, .react-stack-box.react-stack-box-to-left.react-stack-box-enter-done, .react-stack-box.react-stack-box-to-left.react-stack-box-exit {\n    transform: translate3d(0, 0, 0); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active .react-stack-dimmed-area, .react-stack-box.react-stack-box-to-left.react-stack-box-enter-done .react-stack-dimmed-area, .react-stack-box.react-stack-box-to-left.react-stack-box-exit .react-stack-dimmed-area {\n      opacity: 1; }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-exit-active {\n    transform: translate3d(100vw, 0, 0); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-exit-active .react-stack-dimmed-area {\n      opacity: 0; }\n  .react-stack-box.react-stack-box-fade.react-stack-box-enter {\n    opacity: 0; }\n  .react-stack-box.react-stack-box-fade.react-stack-box-enter-active {\n    transition-delay: var(--animation-delay, \"0.1s\"); }\n  .react-stack-box.react-stack-box-fade.react-stack-box-enter-active, .react-stack-box.react-stack-box-fade.react-stack-box-enter-done, .react-stack-box.react-stack-box-fade.react-stack-box-exit {\n    opacity: 1; }\n  .react-stack-box.react-stack-box-fade.react-stack-box-exit-active {\n    opacity: 0; }\n  .react-stack-box.react-stack-box-scale.react-stack-box-enter {\n    transform: scale3d(0.95, 0.95, 0.95);\n    opacity: 0; }\n  .react-stack-box.react-stack-box-scale.react-stack-box-enter-active {\n    transition-delay: var(--animation-delay, \"0.1s\"); }\n  .react-stack-box.react-stack-box-scale.react-stack-box-enter-active, .react-stack-box.react-stack-box-scale.react-stack-box-enter-done, .react-stack-box.react-stack-box-scale.react-stack-box-exit {\n    transform: scale3d(1, 1, 1);\n    opacity: 1; }\n  .react-stack-box.react-stack-box-scale.react-stack-box-exit-active {\n    transform: scale3d(0.95, 0.95, 0.95);\n    opacity: 0; }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-enter {\n    transform: translate3d(0, 100vh, 0); }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-enter-active {\n    transition-delay: var(--animation-delay, \"0.1s\"); }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-enter-active, .react-stack-box.react-stack-box-to-top.react-stack-box-enter-done, .react-stack-box.react-stack-box-to-top.react-stack-box-exit {\n    transform: translate3d(0, 0, 0); }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-exit-active {\n    transform: translate3d(0, 100vh, 0); }\n\n.react-stack-area .react-stack-box[data-after-animation=\"to-left\"] {\n  transform: translate3d(-3rem, 0, 0);\n  transition-delay: var(--animation-delay, \"0.1s\"); }\n\n.react-stack-area .react-stack-box[data-after-animation=\"scale\"] {\n  transform: scale3d(1.05, 1.05, 1.05);\n  transition-delay: var(--animation-delay, \"0.1s\"); }\n\n.react-stack-dimmed-area {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: rgba(0, 0, 0, 0.2);\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.4s ease 0.1s; }\n\n.react-stack-content-area {\n  position: absolute;\n  width: 100%;\n  height: 100%; }\n";
 styleInject(css_248z);
 
-const ReactStackProvider = ({ duration, children }) => {
-    return (jsxRuntime.jsx(StackProvider, { duration: duration, children: children }));
+const ReactStackProvider = ({ duration, delay, children }) => {
+    return (jsxRuntime.jsx(StackProvider, { duration: duration, delay: delay, children: children }));
 };
 
 exports.Link = Link;
