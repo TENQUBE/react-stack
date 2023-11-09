@@ -4,7 +4,8 @@ export enum AnimationType {
   ToTop,
   Scale,
   Fade,
-  BotttomSheet
+  BotttomSheet,
+  Toast
 }
 
 
@@ -14,5 +15,6 @@ export enum AnimationClassName {
   'to-top',
   'scale',
   'fade',
-  'bottom-sheet'
+  'bottom-sheet',
+  'toast'
 }

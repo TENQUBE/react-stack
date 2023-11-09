@@ -119,7 +119,7 @@
 
   // botoom-sheet
   .react-stack-bottom-sheet-content-area {
-    transition: transform 0.4s ease 0.1s, opacity 0.4s ease 0.1s;
+    transition: transform 0.4s ease;
     transform: translate3d(0, calc(100% - var(--maxHeight-fromTop, '0px')), 0);
     will-change: transform;
   }
@@ -162,6 +162,55 @@
       }
     }
   }
+
+  // toast
+  .react-stack-toast-content-area {
+    transition: transform 0.4s ease, opacity 0.2s ease;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+
+  // Animation: toast
+  &.react-stack-box-toast {
+    &.react-stack-box-enter {
+      .react-stack-toast-dimmed-area {
+        opacity: 0;
+      }
+      .react-stack-toast-content-area {
+        opacity: 0;
+        transform: translate3d(0, 2rem, 0);
+      }
+    }
+
+    &.react-stack-box-enter-active {
+      transition-delay: var(--animation-delay, '0.15s');
+      .react-stack-toast-dimmed-area {
+        transition-delay: var(--animation-delay, '0.15s');
+      }
+    }
+
+    &.react-stack-box-enter-active,
+    &.react-stack-box-enter-done,
+    &.react-stack-box-exit {
+      .react-stack-toast-dimmed-area {
+        opacity: 1;
+      }
+      .react-stack-toast-content-area {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+      }
+    }
+
+    &.react-stack-box-exit-active {
+      .react-stack-toast-dimmed-area {
+        opacity: 0;
+      }
+      .react-stack-toast-content-area {
+        opacity: 0;
+        transform: translate3d(0, 2rem, 0);
+      }
+    }
+  }
 }
 
 // Animation: before screen
@@ -179,7 +228,7 @@
   }
 }
 
-
+// view screen
 .react-stack-dimmed-area {
   position: fixed;
   top: 0;
@@ -198,6 +247,7 @@
   height: 100%;
 }
 
+// bottom sheet screen
 .react-stack-bottom-sheet-dimmed-area {
   position: fixed;
   top: 0;
@@ -228,3 +278,26 @@
 // .react-stack-bottom-sheet-content-box {
   
 // }
+
+// toast screen
+.react-stack-toast-dimmed-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  will-change: opacity;
+  transition: opacity 0.4s ease 0.1s;
+}
+
+.react-stack-toast-content-area {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+}

@@ -4,7 +4,8 @@ export declare enum AnimationType {
     ToTop = 2,
     Scale = 3,
     Fade = 4,
-    BotttomSheet = 5
+    BotttomSheet = 5,
+    Toast = 6
 }
 export declare enum AnimationClassName {
     'none' = 0,
@@ -12,5 +13,6 @@ export declare enum AnimationClassName {
     'to-top' = 2,
     'scale' = 3,
     'fade' = 4,
-    'bottom-sheet' = 5
+    'bottom-sheet' = 5,
+    'toast' = 6
 }

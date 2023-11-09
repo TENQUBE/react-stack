@@ -17,7 +17,9 @@ export default () => {
       <p onClick={() => {
         // navigation.push('/', { clear: true })
         navigation.back()
-        navigation.push('/red')
+        setTimeout(() => {
+          navigation.push('/red')
+        }, 500)
       }}>/white - clear</p>
       <br />
       <Link to="/red">/red#bbb</Link>

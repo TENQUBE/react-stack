@@ -4,7 +4,7 @@ import { useBottomSheet } from '../hooks/useBottomSheet'
 import { usePDC } from '../hooks/usePDC'
 import { useNavigation } from '..'
 import { ReactStackContext } from './provider'
-import Screen from '../data/screen'
+import ScreenObj from '../data/screen'
 import { AnimationType } from '../interfaces'
 
 interface IContainerProps {
@@ -47,6 +47,9 @@ const BottomSheetContainer = ({ isExpandabled, height = window.innerHeight * 0.4
         className={'react-stack-bottom-sheet-content-area'}
         onClick={(e) => e.stopPropagation()}
         style={{
+          'transitionProperty': 'transform',
+          'transitionDuration': `${animationDuration/1000}s`,
+          'transitionTimingFunction': 'ease',
           top: `${maxHeightFromTop}px`,
           '--maxHeight-fromTop': `${maxHeightFromTop}px`
         } as any}
@@ -59,7 +62,9 @@ const BottomSheetContainer = ({ isExpandabled, height = window.innerHeight * 0.4
         <div 
           ref={contentRef} 
           className='react-stack-bottom-sheet-content-box'
-          style={{ height: height - 40 }}
+          style={{ 
+            height: height - 40 
+          }}
         >
           { children }
         </div>
@@ -95,7 +100,7 @@ const BottomSheet = ({ route,  component, isExpandabled, height }: IProps)  => {
   const { addScreen } = useContext(ReactStackContext)
 
   useLayoutEffect(() => {
-    addScreen(new Screen({ 
+    addScreen(new ScreenObj({ 
       route, 
       component: <BottomSheetComp isExpandabled={isExpandabled} height={height} component={component} />, 
       animation: AnimationType.BotttomSheet

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { RecoilRoot } from 'recoil'
-import ReactStackProvider, { AnimationType, BottomSheet, Screen, useNavigation, useStacks } from '../dist/esm'
+import ReactStackProvider, { Toast, AnimationType, BottomSheet, Screen, useNavigation, useStacks } from '../dist/esm'
 import Black from './components/Black'
 import Blue from './components/Blue'
 import Red from './components/Red'
@@ -46,7 +46,8 @@ export default () => {
         <Screen route="/" component={<White />} animation={AnimationType.None} />
         {/* <Screen route="/black/:test/black" component={<Black />} animation={AnimationType.Scale} /> */}
         <BottomSheet route="/black" isExpandabled={false} height={500} component={<Black />} />
-        <Screen route="/blue" component={<Blue />} animation={AnimationType.ToLeft} />
+        <Toast route="/blue" component={<Blue />} />
+        {/* <Screen route="/blue" component={<Blue />} animation={AnimationType.ToLeft} /> */}
         <Screen route="/red" component={<Red />} animation={AnimationType.Scale} />
         <Screen route="/yellow" component={<Yellow />} animation={AnimationType.ToTop} />
       </ReactStackProvider>
