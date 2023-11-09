@@ -116,6 +116,52 @@
       transform: translate3d(0, 100vh, 0);
     }
   }
+
+  // botoom-sheet
+  .react-stack-bottom-sheet-content-area {
+    transition: transform 0.4s ease 0.1s, opacity 0.4s ease 0.1s;
+    transform: translate3d(0, calc(100% - var(--maxHeight-fromTop, '0px')), 0);
+    will-change: transform;
+  }
+
+  // Animation: bottom-sheet
+  &.react-stack-box-bottom-sheet {
+    &.react-stack-box-enter {
+      .react-stack-bottom-sheet-dimmed-area {
+        opacity: 0;
+      }
+      .react-stack-bottom-sheet-content-area {
+        transform: translate3d(0, calc(100% - var(--maxHeight-fromTop, '0px')), 0);
+      }
+    }
+
+    &.react-stack-box-enter-active {
+      transition-delay: var(--animation-delay, '0.15s');
+      .react-stack-bottom-sheet-dimmed-area {
+        transition-delay: var(--animation-delay, '0.15s');
+      }
+    }
+
+    &.react-stack-box-enter-active,
+    &.react-stack-box-enter-done,
+    &.react-stack-box-exit {
+      .react-stack-bottom-sheet-dimmed-area {
+        opacity: 1;
+      }
+      .react-stack-bottom-sheet-content-area {
+        transform: translate3d(0, 0, 0);
+      }
+    }
+
+    &.react-stack-box-exit-active {
+      .react-stack-bottom-sheet-dimmed-area {
+        opacity: 0;
+      }
+      .react-stack-bottom-sheet-content-area {
+        transform: translate3d(0, calc(100% - var(--maxHeight-fromTop, '0px')), 0);
+      }
+    }
+  }
 }
 
 // Animation: before screen
@@ -151,3 +197,34 @@
   width: 100%;
   height: 100%;
 }
+
+.react-stack-bottom-sheet-dimmed-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  will-change: opacity;
+  transition: opacity 0.4s ease 0.1s;
+}
+
+.react-stack-bottom-sheet-content-area {
+  position: fixed;
+  z-index: 100;
+  left: 0;
+  right: 0;
+  height: 100vh;
+}
+
+.react-stack-bottom-sheet-drag-area {
+  position: absolute;
+  width: 100%;
+  height: 40px;
+  z-index: 10;
+}
+
+// .react-stack-bottom-sheet-content-box {
+  
+// }

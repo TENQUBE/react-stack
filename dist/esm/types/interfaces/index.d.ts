@@ -3,12 +3,14 @@ export declare enum AnimationType {
     ToLeft = 1,
     ToTop = 2,
     Scale = 3,
-    Fade = 4
+    Fade = 4,
+    BotttomSheet = 5
 }
 export declare enum AnimationClassName {
     'none' = 0,
     'to-left' = 1,
     'to-top' = 2,
     'scale' = 3,
-    'fade' = 4
+    'fade' = 4,
+    'bottom-sheet' = 5
 }

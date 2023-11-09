@@ -1,7 +1,7 @@
 {
   "name": "@tenqube/react-stack",
-  "version": "0.0.57",
-  "description": "A library that helps with screen stack routing and transition animation in web or webviews of hybrid apps.",
+  "version": "0.0.58",
+  "description": "A library that helps with screen stack routing and transition animation in mobile web or webviews of hybrid apps.",
   "keywords": [
     "react",
     "componnet",
@@ -38,6 +38,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-transition-group": "^4.4.5",
+    "recoil": "^0.7.7",
     "rollup": "^3.29.4",
     "rollup-plugin-dts": "^6.0.2",
     "rollup-plugin-peer-deps-external": "^2.2.4",
@@ -48,7 +49,8 @@
     "webpack-dev-server": "^4.15.1"
   },
   "peerDependencies": {
-    "react": ">=18.0.0"
+    "react": ">=18.0.0",
+    "recoil": ">=0.6.0"
   },
   "engines": {
     "node": ">=18.18.0"
@@ -58,8 +60,5 @@
   "types": "dist/index.d.ts",
   "files": [
     "dist"
-  ],
-  "dependencies": {
-    "@tenqube/react-stack": "^0.0.40"
-  }
+  ]
 }

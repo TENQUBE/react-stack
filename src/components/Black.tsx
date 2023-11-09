@@ -15,7 +15,9 @@ export default () => {
       <h1>black</h1>
       <Link to="#aaa">#aaa</Link>
       <p onClick={() => {
-        navigation.push('/', { clear: true })
+        // navigation.push('/', { clear: true })
+        navigation.back()
+        navigation.push('/red')
       }}>/white - clear</p>
       <br />
       <Link to="/red">/red#bbb</Link>

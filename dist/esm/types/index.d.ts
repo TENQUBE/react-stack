@@ -1,6 +1,7 @@
 import { AnimationType } from './interfaces';
 import Screen from './componets/screen';
 import Link from './componets/link';
+import BottomSheet from './componets/bottomsheet';
 import useNavigation, { INavigation, INavigationPushState } from './hooks/useNavigaiton';
 import useStacks from './hooks/useStacks';
 import { IScreen } from './data/screen';
@@ -11,5 +12,5 @@ interface IStackProvider {
     children: any;
 }
 declare const ReactStackProvider: ({ duration, delay, children }: IStackProvider) => import("react/jsx-runtime").JSX.Element;
-export { IStackProvider, Screen, Link, AnimationType, useNavigation, INavigation, INavigationPushState, useStacks, IScreen };
+export { IStackProvider, Screen, BottomSheet, Link, AnimationType, useNavigation, INavigation, INavigationPushState, useStacks, IScreen };
 export default ReactStackProvider;
