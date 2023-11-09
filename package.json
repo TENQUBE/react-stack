@@ -1,6 +1,6 @@
 {
   "name": "@tenqube/react-stack",
-  "version": "0.0.56",
+  "version": "0.0.57",
   "description": "A library that helps with screen stack routing and transition animation in web or webviews of hybrid apps.",
   "keywords": [
     "react",

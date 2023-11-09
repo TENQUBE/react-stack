@@ -28,9 +28,9 @@
     }
 
     &.react-stack-box-enter-active {
-      transition-delay: var(--animation-delay, '0.1s');
+      transition-delay: var(--animation-delay, '0.15s');
       .react-stack-dimmed-area {
-        transition-delay: var(--animation-delay, '0.1s');
+        transition-delay: var(--animation-delay, '0.15s');
       }
     }
 
@@ -58,7 +58,7 @@
     }
 
     &.react-stack-box-enter-active {
-      transition-delay: var(--animation-delay, '0.1s');
+      transition-delay: var(--animation-delay, '0.15s');
     }
 
     &.react-stack-box-enter-active,
@@ -80,7 +80,7 @@
     }
 
     &.react-stack-box-enter-active {
-      transition-delay: var(--animation-delay, '0.1s');
+      transition-delay: var(--animation-delay, '0.15s');
     }
 
     &.react-stack-box-enter-active,
@@ -103,7 +103,7 @@
     }
 
     &.react-stack-box-enter-active {
-      transition-delay: var(--animation-delay, '0.1s');
+      transition-delay: var(--animation-delay, '0.15s');
     }
 
     &.react-stack-box-enter-active,
@@ -123,12 +123,12 @@
   .react-stack-box {
     &[data-after-animation="to-left"] {
       transform: translate3d(-3rem, 0, 0);
-      transition-delay: var(--animation-delay, '0.1s');
+      transition-delay: var(--animation-delay, '0.15s');
     }
   
     &[data-after-animation="scale"] {
       transform: scale3d(1.05, 1.05, 1.05);
-      transition-delay: var(--animation-delay, '0.1s');
+      transition-delay: var(--animation-delay, '0.15s');
     }
   }
 }
