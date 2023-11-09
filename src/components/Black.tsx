@@ -14,7 +14,6 @@ export default () => {
     <div style={{...styles}}>
       <h1>black</h1>
       <Link to="#aaa">#aaa</Link>
-      <br />
       <p onClick={() => {
         navigation.push('/', { clear: true })
       }}>/white - clear</p>

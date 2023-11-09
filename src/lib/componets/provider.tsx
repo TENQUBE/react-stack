@@ -8,7 +8,7 @@ import Stacks from './stacks'
 
 export const ReactStackContext = createContext(null)
 
-const StackProvider = ({ duration, children }: IStackProvider) => {
+const StackProvider = ({ duration, delay, children }: IStackProvider) => {
   const screenList = useRef<IScreen[]>([])
   const checkMultipleMovesOrClear = useRef<boolean>(false)
   const beforeHash = useRef<string>('')
@@ -35,10 +35,10 @@ const StackProvider = ({ duration, children }: IStackProvider) => {
   }, [stacks])
   
   const checkGoForward = useCallback(() => {
-    const stateIndex = window.history?.state?.index 
-    if (!stateIndex) window.history.replaceState({ index: historyIdx + 1 }, '')
+    const stateIndex = window.history?.state?.index
+    if (typeof stateIndex !== 'number') window.history.replaceState({ index: historyIdx + 1 }, '')
 
-    const index = stateIndex ? stateIndex : historyIdx + 1
+    const index = typeof stateIndex === 'number' ? stateIndex : historyIdx + 1
     return index > historyIdx
   }, [historyIdx])
 
@@ -123,7 +123,7 @@ const StackProvider = ({ duration, children }: IStackProvider) => {
     if(index) {
       setHistoryIdx(index)
     } else {
-      window.history.replaceState({ index: 0 }, '')
+      window.history.replaceState({ index: 1 }, '')
     }
 
     // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
@@ -135,7 +135,7 @@ const StackProvider = ({ duration, children }: IStackProvider) => {
     <div className="react-stack-area">
       <ReactStackContext.Provider value={{ addScreen, stacks, updateStacks, historyIdx, setHistoryIdx }}>
         {children}
-        <Stacks duration={duration} />
+        <Stacks duration={duration} delay={delay} />
       </ReactStackContext.Provider>
     </div>
   )

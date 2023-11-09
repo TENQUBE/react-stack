@@ -9,7 +9,8 @@ const styles: any = {
   background: '#fff',
   position: 'absolute',
   width: '100%',
-  height: '100%'
+  height: '100%',
+  overflow: 'auto'
 }
 
 const White = () => {
@@ -27,7 +28,7 @@ const White = () => {
   return (
     <div style={{...styles}}>
       <h1>white</h1>
-      {/* <Link to="/black">/black</Link> */}
+      <br />
       <p onClick={onClick}>/black2</p>
     </div>
   )
@@ -35,7 +36,7 @@ const White = () => {
 
 export default () => {
   return (
-    <ReactStackProvider duration={300}>
+    <ReactStackProvider duration={400} delay={100}>
       <Screen route="/" component={<White />} animation={AnimationType.None} />
       <Screen route="/black/:test/black" component={<Black />} animation={AnimationType.Scale} />
       <Screen route="/blue" component={<Blue />} animation={AnimationType.ToLeft} />

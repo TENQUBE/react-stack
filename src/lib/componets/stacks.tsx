@@ -1,20 +1,23 @@
-import { cloneElement, useContext } from 'react'
+import { cloneElement, useContext, useRef } from 'react'
 import { CSSTransition, TransitionGroup } from 'react-transition-group'
 
 import { IScreen } from '../data/screen'
 import { AnimationClassName } from '../interfaces'
-import { ANIMATION_DURATION } from '../constants'
+import { ANIMAITON_DELAY, ANIMATION_DURATION } from '../constants'
 import { isHashRoute } from '../utils'
 import { ReactStackContext } from './provider'
 
 interface IProps {
   duration?: number
+  delay?: number
 }
 
-const Stacks = ({ duration }: IProps) => {
+const Stacks = ({ duration, delay }: IProps) => {
   const animationDuration = typeof duration === 'number' ? duration : ANIMATION_DURATION
+  const animationDelay = typeof delay === 'number' ? delay : ANIMAITON_DELAY
 
   const { stacks } = useContext(ReactStackContext)
+  const beforeStackLength = useRef(stacks.length)
 
   // 현재 출력된 전체 스크린 배열
   const allPrintScreenArr = stacks.filter(({ route }) => !isHashRoute(route))
@@ -33,25 +36,37 @@ const Stacks = ({ duration }: IProps) => {
         if(isHashRoute(route)) return null
         // 출력된 각각의 스크린 인덱스
         const idx = i - arr.slice(0, i).filter(({ route }) => isHashRoute(route)).length
+        // 스택이 추가되었는지 확인
+        const isAddStack = stacks.length > beforeStackLength
+        beforeStackLength.current = stacks.length
+        // 스택이 추가되는 경우 애니메이션 딜레이 시간 추가
+        const timeout = isAddStack ? animationDuration + animationDelay : animationDuration
 
         return (
           <CSSTransition 
             key={i} 
-            timeout={animationDuration} 
+            timeout={timeout} 
             classNames={`react-stack-box react-stack-box-${AnimationClassName[animation]} react-stack-box`}
             style={{
-              transition: `transform ${animationDuration/1000}s, opacity ${animationDuration/1000}s`,
-              display: activeScreenIdx > idx + 1 ? 'none' : 'block'
+              'transitionProperty': 'transform, opacity',
+              'transitionDuration': `${animationDuration/1000}s, ${animationDuration/1000}s`,
+              'transitionTimingFunction': 'ease',
+              'display': activeScreenIdx > idx + 1 ? 'none' : 'block',
+              '--animation-delay': `${animationDelay/1000}s`
             }}
           >
             <div data-after-animation={getAfterAnimation(idx)}>
               <div 
                 className={'react-stack-dimmed-area'}
                 style={{
-                  'transition': `opacity ${animationDuration/1000}s`
+                  'transitionProperty': 'opacity',
+                  'transitionDuration': `${animationDuration/1000}s`,
+                  'transitionTimingFunction': 'ease'
                 }}
-              /> 
-              { cloneElement(component, {...{ params: pathVariable }}) }
+              />
+              <div className={'react-stack-content-area'}>
+                { cloneElement(component, {...{ params: pathVariable }}) }
+              </div>
             </div>
           </CSSTransition>
         )
