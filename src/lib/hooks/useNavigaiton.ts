@@ -1,6 +1,7 @@
-import { useContext, useLayoutEffect, useState } from 'react'
+import { useContext } from 'react'
 import { ReactStackContext } from '../componets/provider'
 import { isHashRoute } from '../utils'
+import inMemoryCache from '../utils/inMemoryCache'
 
 export interface INavigationPushState {
   clear: boolean
@@ -12,36 +13,55 @@ export interface INavigation {
   back: (to?: number) => void
 }
 
+
+
 const useNavigaiton = (): INavigation => {
-  const { stacks, updateStacks, historyIdx, setHistoryIdx } = useContext(ReactStackContext)
-  
+  const { updateStacks, animationDuration, animationDelay } = useContext(ReactStackContext)
+
   return {
     push: (to: string, state: INavigationPushState) => {
-      if(isHashRoute(to)) {
-        window.location.hash = String(to)
-        return
-      }
-      if(state && state.clear) {
-        updateStacks(to, true)
-        window.history.go((stacks.length - 1) * -1)
-        setTimeout(() => {
-          window.history.replaceState({ index: 1 }, '', to)
-        }, 20)
-        return
-      }
-      setHistoryIdx(historyIdx + 1)
-      updateStacks(to)
-      window.history.pushState({ index: historyIdx + 1}, '', to)
+      return new Promise((resolve) => {
+        const historyIndex = inMemoryCache.getHistoryIndex()
+
+        if(isHashRoute(to)) {
+          window.location.hash = String(to)
+          return setTimeout(() => {
+            resolve(null)
+          }, animationDuration + animationDelay + 10)
+        }
+  
+        if(state?.clear) {
+          const stackLen = inMemoryCache.getScreens().length
+          updateStacks(to, true)
+          window.history.go((stackLen - 1) * -1)
+          return setTimeout(() => {
+            resolve(null)
+          }, animationDuration + animationDelay + 10)
+        }
+
+        inMemoryCache.setHistoryIndex(historyIndex + 1)
+        updateStacks(to)
+        window.history.pushState({ index: historyIndex + 1 }, '', to)
+        return setTimeout(() => {
+          resolve(null)
+        }, animationDuration + animationDelay + 10)
+      })
     },
     replace: (to: string) => {
-      window.history.replaceState({ index: historyIdx }, '', to)
+      const historyIndex = inMemoryCache.getHistoryIndex()
+      window.history.replaceState({ index: historyIndex }, '', to)
     },
     back: (to = 1) => {
-      const toSize = to > 0 ? to * -1 : -1
-      if(toSize < -1) {
-        updateStacks(toSize)
-      }
-      window.history.go(toSize)
+      return new Promise((resolve) => {
+        const toSize = to > 0 ? to * -1 : -1
+        if(toSize < -1) {
+          updateStacks(toSize)
+        }
+        window.history.go(toSize)
+        return setTimeout(() => {
+          resolve(null)
+        }, animationDuration + 10)
+      })
     }
   }
 }

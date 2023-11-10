@@ -23,18 +23,14 @@ const White = () => {
   }, [stacks])
 
   const onClick = () => {
-    navigation.push('/black')
+    navigation.push('/yellow')
   }
 
   return (
     <div style={{...styles}}>
       <h1>white</h1>
-      <br /><br /><br /><br /><br /><br /><br /><br />
-      <br /><br /><br /><br /><br /><br /><br /><br />
-      <br /><br /><br /><br /><br /><br /><br /><br />
-      <br /><br /><br /><br /><br /><br /><br /><br />
-      <br /><br /><br /><br /><br /><br /><br /><br />
-      <p onClick={onClick}>/black2</p>
+      <br /><br />
+      <p onClick={onClick}>/yellow</p>
     </div>
   )
 }
@@ -42,7 +38,7 @@ const White = () => {
 export default () => {
   return (
     <RecoilRoot>
-      <ReactStackProvider duration={400} delay={100}>
+      <ReactStackProvider duration={400} delay={400}>
         <Screen route="/" component={<White />} animation={AnimationType.None} />
         {/* <Screen route="/black/:test/black" component={<Black />} animation={AnimationType.Scale} /> */}
         <BottomSheet route="/black" isExpandabled={false} height={500} component={<Black />} />

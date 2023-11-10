@@ -1,10 +1,11 @@
 import { createContext, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { IStackProvider } from '..'
-import { STORAGE_KEY_NAME } from '../constants'
+import { ANIMAITON_DELAY, ANIMATION_DURATION, STORAGE_KEY_SCREEN_STACKS } from '../constants'
 import { isHashRoute, matchRouteToPathname } from '../utils'
 import Screen, { IScreen } from '../data/screen'
 import Stacks from './stacks'
+import inMemoryCache from '../utils/inMemoryCache'
 
 export const ReactStackContext = createContext(null)
 
@@ -15,7 +16,6 @@ const StackProvider = ({ duration, delay, children }: IStackProvider) => {
   const beforePathname = useRef<string>('')
 
   const [stacks, setStacks] = useState<IScreen[]>([])
-  const [historyIdx, setHistoryIdx] = useState<number>(0)
 
   const addScreen = useCallback((data: IScreen) => {
     screenList.current = [...screenList.current, data]
@@ -23,37 +23,38 @@ const StackProvider = ({ duration, delay, children }: IStackProvider) => {
 
   const updateStacks = useCallback((to: string | number, isClear = false) => {
     const isToNo = typeof to === 'number'
+    const baseStack = inMemoryCache.getScreens()
 
     if(isToNo) {
       if(to < -1) checkMultipleMovesOrClear.current = true
-      setStacks(stacks.slice(0, stacks.length + to))
+      inMemoryCache.setScreens(baseStack.slice(0, baseStack.length + to))
+      setStacks(baseStack.slice(0, baseStack.length + to))
     } else {
       if(isClear) checkMultipleMovesOrClear.current = true
       const stackData = matchRouteToPathname(screenList.current, to)
-      setStacks(isClear ? [stackData] : [...stacks, stackData])
+      inMemoryCache.setScreens(isClear ? [stackData] : [...baseStack, stackData])
+      setStacks(isClear ? [stackData] : [...baseStack, stackData])
     }
   }, [stacks])
   
-  const checkGoForward = useCallback(() => {
+  const checkGoForward = () => {
+    const historyIndex = inMemoryCache.getHistoryIndex()
     const stateIndex = window.history?.state?.index
-    if (typeof stateIndex !== 'number') window.history.replaceState({ index: historyIdx + 1 }, '')
+    if (typeof stateIndex !== 'number') {
+      window.history.replaceState({ index: historyIndex + 1 }, '')
+    }
 
-    const index = typeof stateIndex === 'number' ? stateIndex : historyIdx + 1
-    return index > historyIdx
-  }, [historyIdx])
-
-  const setCurrentHistoryIndex = useCallback(() => {
-    const stateIndex = window.history?.state?.index 
-    setHistoryIdx(stateIndex ? stateIndex : historyIdx + 1)
-  }, [historyIdx])
+    const index = typeof stateIndex === 'number' ? stateIndex : historyIndex + 1
+    inMemoryCache.setHistoryIndex(index)
+    return index > historyIndex
+  }
 
   const historyChangeStack = useCallback(() => {
-    // 히스토리 인덱스 재할당
-    setCurrentHistoryIndex()
-
     // 여러 히스토리가 이동하거나 클리어 옵션 설정에는 스택 설정을 진행하기 때문에, 아래의 설정을 진행하지 않음
     if(checkMultipleMovesOrClear.current) {
       checkMultipleMovesOrClear.current = false
+      window.history.replaceState({ index: 1 }, '')
+      inMemoryCache.setHistoryIndex(1)
       return
     }
 
@@ -74,29 +75,30 @@ const StackProvider = ({ duration, delay, children }: IStackProvider) => {
     }
     
     updateStacks(isForward ? allPath : -1)
-  }, [stacks, historyIdx])
+  }, [stacks])
 
   const initStorageStackData = useCallback(() => {
     const { href, origin } = window.location
-    const storageData = JSON.parse(window.sessionStorage.getItem(STORAGE_KEY_NAME))
+    const storageStacksData = JSON.parse(window.sessionStorage.getItem(STORAGE_KEY_SCREEN_STACKS))
 
-    if(!storageData || storageData.length === 0) return
+    if(!storageStacksData || storageStacksData.length === 0) return
 
     const allPath = href.split(origin)[1]
-    const storageStacks: IScreen[] = storageData.map((screen: IScreen) => {
+    const storageStacks: IScreen[] = storageStacksData.map((screen: IScreen) => {
       return isHashRoute(screen.route) 
-        ? Screen.hashScreen(allPath) 
+        ? Screen.hashScreen(screen.URIPath) 
         : matchRouteToPathname(screenList.current, screen.URIPath) 
     })
-
-    if(storageStacks[storageStacks.length - 1].URIPath !== allPath) {
+    if(storageStacks[storageStacks.length - 1].URIPath !== allPath 
+      || storageStacks.length !== window.history?.state?.index) {
       return false
     }
 
+    inMemoryCache.setScreens(storageStacks)
     setStacks(storageStacks)
   
     return true
-  }, [stacks, historyIdx])
+  }, [stacks])
 
   // 히스토리 변화에 대한 이벤트 등록
   useEffect(() => {
@@ -105,23 +107,23 @@ const StackProvider = ({ duration, delay, children }: IStackProvider) => {
     return () => {
       window.removeEventListener('popstate', historyChangeStack)
     }
-  }, [stacks, historyIdx])
+  }, [stacks])
 
-  // 스택 변경 시 스토리지에 스택 정보 저장
+  // 스택 변경 시 스토리지에 저장
   useEffect(() => { 
     if(stacks.length === 0) return
     const storageData = stacks.map((d) => ({
       ...d,
       component: null
     }))
-    window.sessionStorage.setItem(STORAGE_KEY_NAME, JSON.stringify(storageData))
+    window.sessionStorage.setItem(STORAGE_KEY_SCREEN_STACKS, JSON.stringify(storageData))
   }, [stacks])
 
   useLayoutEffect(() => {
     // 초기 히스토리 인덱스 설정
     const index = window.history?.state?.index
     if(index) {
-      setHistoryIdx(index)
+      inMemoryCache.setHistoryIndex(index)
     } else {
       window.history.replaceState({ index: 1 }, '')
     }
@@ -131,11 +133,14 @@ const StackProvider = ({ duration, delay, children }: IStackProvider) => {
     updateStacks(window.location.pathname)
   }, [])
 
+  const animationDuration = typeof duration === 'number' ? duration : ANIMATION_DURATION
+  const animationDelay = typeof delay === 'number' ? delay : ANIMAITON_DELAY
+
   return (
     <div className="react-stack-area">
-      <ReactStackContext.Provider value={{ addScreen, stacks, updateStacks, historyIdx, setHistoryIdx }}>
+      <ReactStackContext.Provider value={{ addScreen, stacks, updateStacks, animationDuration, animationDelay }}>
         {children}
-        <Stacks duration={duration} delay={delay} />
+        <Stacks />
       </ReactStackContext.Provider>
     </div>
   )
