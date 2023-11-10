@@ -31,7 +31,7 @@ const Stacks = ({ duration, delay }: IProps) => {
   
   return (
     <TransitionGroup>
-      {stacks.map(({ route, component, animation, screenType, pathVariable }, i: number, arr: IScreen[]) => {
+      {stacks.map(({ route, component, animation, pathVariable }, i: number, arr: IScreen[]) => {
         // 해시로 추가된 히스토리는 스크린을 출력하지 않음
         if(isHashRoute(route)) return null
         // 출력된 각각의 스크린 인덱스
