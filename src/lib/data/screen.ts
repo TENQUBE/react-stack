@@ -2,9 +2,9 @@ import { ReactElement } from 'react'
 import { AnimationType } from '../interfaces'
 
 export interface IScreen {
-  readonly route?: string
-  readonly component?: ReactElement | null
-  readonly animation?: AnimationType
+  readonly route: string
+  readonly component: ReactElement | null
+  readonly animation: AnimationType
   pathVariable: unknown
   URIPath: string
   hash: string
@@ -21,8 +21,8 @@ interface IScreenParams {
 
 class Screen implements IScreen {
   readonly route: string
-  readonly component?: ReactElement | null
-  readonly animation?: AnimationType
+  readonly component: ReactElement | null
+  readonly animation: AnimationType
   pathVariable: unknown
   URIPath: string
   hash: string

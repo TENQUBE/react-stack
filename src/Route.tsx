@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
-import ReactStackProvider, { AnimationType, Screen, useNavigation, useStacks } from '../dist/esm'
+import { RecoilRoot } from 'recoil'
+import ReactStackProvider, { Toast, AnimationType, BottomSheet, Screen, useNavigation, useStacks } from '../dist/esm'
 import Black from './components/Black'
 import Blue from './components/Blue'
 import Red from './components/Red'
@@ -28,7 +29,11 @@ const White = () => {
   return (
     <div style={{...styles}}>
       <h1>white</h1>
-      <br />
+      <br /><br /><br /><br /><br /><br /><br /><br />
+      <br /><br /><br /><br /><br /><br /><br /><br />
+      <br /><br /><br /><br /><br /><br /><br /><br />
+      <br /><br /><br /><br /><br /><br /><br /><br />
+      <br /><br /><br /><br /><br /><br /><br /><br />
       <p onClick={onClick}>/black2</p>
     </div>
   )
@@ -36,12 +41,16 @@ const White = () => {
 
 export default () => {
   return (
-    <ReactStackProvider duration={400} delay={100}>
-      <Screen route="/" component={<White />} animation={AnimationType.None} />
-      <Screen route="/black/:test/black" component={<Black />} animation={AnimationType.Scale} />
-      <Screen route="/blue" component={<Blue />} animation={AnimationType.ToLeft} />
-      <Screen route="/red" component={<Red />} animation={AnimationType.Scale} />
-      <Screen route="/yellow" component={<Yellow />} animation={AnimationType.ToTop} />
-    </ReactStackProvider>
+    <RecoilRoot>
+      <ReactStackProvider duration={400} delay={100}>
+        <Screen route="/" component={<White />} animation={AnimationType.None} />
+        {/* <Screen route="/black/:test/black" component={<Black />} animation={AnimationType.Scale} /> */}
+        <BottomSheet route="/black" isExpandabled={false} height={500} component={<Black />} />
+        <Toast route="/blue" component={<Blue />} />
+        {/* <Screen route="/blue" component={<Blue />} animation={AnimationType.ToLeft} /> */}
+        <Screen route="/red" component={<Red />} animation={AnimationType.Scale} />
+        <Screen route="/yellow" component={<Yellow />} animation={AnimationType.ToTop} />
+      </ReactStackProvider>
+    </RecoilRoot>
   )
 }

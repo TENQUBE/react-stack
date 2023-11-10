@@ -15,7 +15,11 @@ export default () => {
       <h1>black</h1>
       <Link to="#aaa">#aaa</Link>
       <p onClick={() => {
-        navigation.push('/', { clear: true })
+        // navigation.push('/', { clear: true })
+        navigation.back()
+        setTimeout(() => {
+          navigation.push('/red')
+        }, 500)
       }}>/white - clear</p>
       <br />
       <Link to="/red">/red#bbb</Link>

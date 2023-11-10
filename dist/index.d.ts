@@ -6,22 +6,39 @@ declare enum AnimationType {
     ToLeft = 1,
     ToTop = 2,
     Scale = 3,
-    Fade = 4
+    Fade = 4,
+    BotttomSheet = 5,
+    Toast = 6
 }
 
-interface IProps$1 {
+interface IProps$3 {
     route: string;
     component: ReactElement;
     animation?: AnimationType;
 }
-declare const Screen: ({ route, component, animation }: IProps$1) => any;
+declare const Screen: ({ route, component, animation }: IProps$3) => any;
 
-interface IProps {
+interface IProps$2 {
     to: string;
     target?: string;
     children?: ReactNode;
 }
-declare const Link: ({ to, target, children }: IProps) => react_jsx_runtime.JSX.Element;
+declare const Link: ({ to, target, children }: IProps$2) => react_jsx_runtime.JSX.Element;
+
+interface IProps$1 {
+    route: string;
+    component: ReactElement;
+    isExpandabled?: boolean;
+    height?: number;
+}
+declare const BottomSheet: ({ route, component, isExpandabled, height }: IProps$1) => any;
+
+interface IProps {
+    route: string;
+    component: ReactElement;
+    animation?: AnimationType;
+}
+declare const Toast: ({ route, component }: IProps) => any;
 
 interface INavigationPushState {
     clear: boolean;
@@ -34,9 +51,9 @@ interface INavigation {
 declare const useNavigaiton: () => INavigation;
 
 interface IScreen {
-    readonly route?: string;
-    readonly component?: ReactElement | null;
-    readonly animation?: AnimationType;
+    readonly route: string;
+    readonly component: ReactElement | null;
+    readonly animation: AnimationType;
     pathVariable: unknown;
     URIPath: string;
     hash: string;
@@ -54,4 +71,4 @@ interface IStackProvider {
 }
 declare const ReactStackProvider: ({ duration, delay, children }: IStackProvider) => react_jsx_runtime.JSX.Element;
 
-export { AnimationType, type INavigation, type INavigationPushState, type IScreen, type IStackProvider, Link, Screen, ReactStackProvider as default, useNavigaiton as useNavigation, useStacks };
+export { AnimationType, BottomSheet, type INavigation, type INavigationPushState, type IScreen, type IStackProvider, Link, Screen, Toast, ReactStackProvider as default, useNavigaiton as useNavigation, useStacks };

@@ -1,4 +1,5 @@
-import { jsx, jsxs } from 'react/jsx-runtime';
+import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
+import { atom, useRecoilState, RecoilRoot } from 'recoil';
 import React, { Children, isValidElement, cloneElement, useContext, useRef, createContext, useState, useCallback, useEffect, useLayoutEffect } from 'react';
 
 var AnimationType;
@@ -8,6 +9,8 @@ var AnimationType;
     AnimationType[AnimationType["ToTop"] = 2] = "ToTop";
     AnimationType[AnimationType["Scale"] = 3] = "Scale";
     AnimationType[AnimationType["Fade"] = 4] = "Fade";
+    AnimationType[AnimationType["BotttomSheet"] = 5] = "BotttomSheet";
+    AnimationType[AnimationType["Toast"] = 6] = "Toast";
 })(AnimationType || (AnimationType = {}));
 var AnimationClassName;
 (function (AnimationClassName) {
@@ -16,6 +19,8 @@ var AnimationClassName;
     AnimationClassName[AnimationClassName["to-top"] = 2] = "to-top";
     AnimationClassName[AnimationClassName["scale"] = 3] = "scale";
     AnimationClassName[AnimationClassName["fade"] = 4] = "fade";
+    AnimationClassName[AnimationClassName["bottom-sheet"] = 5] = "bottom-sheet";
+    AnimationClassName[AnimationClassName["toast"] = 6] = "toast";
 })(AnimationClassName || (AnimationClassName = {}));
 
 const STORAGE_KEY_NAME = 'reactAllPrintedScreenStacks';
@@ -33686,7 +33691,7 @@ const Stacks = ({ duration, delay }) => {
             return 'none';
         return AnimationClassName[allPrintScreenArr[idx + 1].animation];
     };
-    return (jsx(TransitionGroup$1, { children: stacks.map(({ route, component, animation, pathVariable }, i, arr) => {
+    return (jsx(TransitionGroup$1, { children: stacks.map(({ route, component, animation, screenType, pathVariable }, i, arr) => {
             // 해시로 추가된 히스토리는 스크린을 출력하지 않음
             if (isHashRoute(route))
                 return null;
@@ -33703,11 +33708,10 @@ const Stacks = ({ duration, delay }) => {
                     'transitionTimingFunction': 'ease',
                     'display': activeScreenIdx > idx + 1 ? 'none' : 'block',
                     '--animation-delay': `${animationDelay / 1000}s`
-                }, children: jsxs("div", { "data-after-animation": getAfterAnimation(idx), children: [jsx("div", { className: 'react-stack-dimmed-area', style: {
-                                'transitionProperty': 'opacity',
-                                'transitionDuration': `${animationDuration / 1000}s`,
-                                'transitionTimingFunction': 'ease'
-                            } }), jsx("div", { className: 'react-stack-content-area', children: cloneElement(component, Object.assign({ params: pathVariable })) })] }) }, i));
+                }, children: jsx("div", { "data-after-animation": getAfterAnimation(idx), children: cloneElement(component, Object.assign({
+                        params: pathVariable,
+                        animationDuration: animationDuration
+                    })) }) }, i));
         }) }));
 };
 
@@ -33822,10 +33826,24 @@ const StackProvider = ({ duration, delay, children }) => {
     return (jsx("div", { className: "react-stack-area", children: jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, historyIdx, setHistoryIdx }, children: [children, jsx(Stacks, { duration: duration, delay: delay })] }) }));
 };
 
+const ScreenContainer = ({ animationDuration, children }) => {
+    return (jsxs(Fragment, { children: [jsx("div", { className: 'react-stack-dimmed-area', style: {
+                    'transitionProperty': 'opacity',
+                    'transitionDuration': `${animationDuration / 1000}s`,
+                    'transitionTimingFunction': 'ease'
+                } }), jsx("div", { className: 'react-stack-content-area', children: children })] }));
+};
+const ScreenComponent = ({ component, params, animationDuration }) => {
+    return (jsx(ScreenContainer, { animationDuration: animationDuration, children: cloneElement(component, Object.assign({ params })) }));
+};
 const Screen = ({ route, component, animation }) => {
     const { addScreen } = useContext(ReactStackContext);
     useLayoutEffect(() => {
-        addScreen(new Screen$1({ route, component, animation }));
+        addScreen(new Screen$1({
+            route,
+            component: jsx(ScreenComponent, { component: component }),
+            animation
+        }));
     }, []);
     return null;
 };
@@ -33847,9 +33865,215 @@ const Link = ({ to, target = '_self', children }) => {
     return (jsx("a", { href: to, onClick: handleClickPush, target: target, children: children }));
 };
 
+function useBottomSheet({ minHeightFromTop, maxHeightFromTop }) {
+    const [isExit, setExit] = useState(false);
+    const eventRef = useRef(null);
+    const sheetRef = useRef(null);
+    const contentRef = useRef(null);
+    const metrics = useRef({
+        touchStart: {
+            sheetY: 0,
+            touchY: 0
+        },
+        touchMove: {
+            prevTouchY: 0,
+            movingDirection: 'none'
+        },
+        isContentTouched: false
+    });
+    const canMoveBottomSheet = () => {
+        const { touchMove, isContentTouched } = metrics.current;
+        if (!isContentTouched)
+            return true;
+        if (sheetRef.current.getBoundingClientRect().y !== minHeightFromTop)
+            return true;
+        if (touchMove.movingDirection === 'down')
+            return contentRef.current.scrollTop <= 0;
+        return false;
+    };
+    const handleTouchStart = useCallback((e) => {
+        const { touchStart } = metrics.current;
+        touchStart.sheetY = sheetRef.current.getBoundingClientRect().y;
+        touchStart.touchY = e.touches[0].clientY;
+        sheetRef.current.style.setProperty('transition', `none`);
+    }, []);
+    const handleTouchMove = useCallback((e) => {
+        const { touchStart, touchMove } = metrics.current;
+        const currentTouch = e.touches[0];
+        if (touchMove.prevTouchY === undefined || touchMove.prevTouchY === 0) {
+            touchMove.prevTouchY = touchStart.touchY;
+        }
+        if (touchMove.prevTouchY <= currentTouch.clientY) {
+            touchMove.movingDirection = 'down';
+        }
+        else {
+            touchMove.movingDirection = 'up';
+        }
+        if (canMoveBottomSheet()) {
+            if (e.cancelable)
+                e.preventDefault();
+            const touchOffset = currentTouch.clientY - touchStart.touchY;
+            let nextSheetY = touchStart.sheetY + touchOffset;
+            if (nextSheetY <= minHeightFromTop) {
+                nextSheetY = minHeightFromTop;
+            }
+            sheetRef.current.style.setProperty('transform', `translateY(${nextSheetY - maxHeightFromTop}px)`);
+        }
+    }, [minHeightFromTop]);
+    const handleTouchEnd = useCallback(() => {
+        const { touchMove } = metrics.current;
+        const currentSheetY = sheetRef.current.getBoundingClientRect().y;
+        sheetRef.current.style.setProperty('transition', `transform ${ANIMATION_DURATION / 1000}s`);
+        if (touchMove.movingDirection === 'down') {
+            if (currentSheetY > maxHeightFromTop + 30) {
+                sheetRef.current.style.setProperty('transform', `translateY(calc(100vh - ${maxHeightFromTop}px))`);
+                setExit(true);
+            }
+            else {
+                sheetRef.current.style.setProperty('transform', 'translateY(0)');
+            }
+        }
+        else {
+            if (currentSheetY !== minHeightFromTop) {
+                sheetRef.current.style.setProperty('transform', `translateY(${minHeightFromTop - maxHeightFromTop}px)`);
+            }
+        }
+        metrics.current = {
+            touchStart: {
+                sheetY: 0,
+                touchY: 0
+            },
+            touchMove: {
+                prevTouchY: 0,
+                movingDirection: 'none'
+            },
+            isContentTouched: false
+        };
+    }, [minHeightFromTop]);
+    useEffect(() => {
+        var _a, _b, _c;
+        (_a = eventRef.current) === null || _a === void 0 ? void 0 : _a.addEventListener('touchstart', handleTouchStart);
+        (_b = eventRef.current) === null || _b === void 0 ? void 0 : _b.addEventListener('touchmove', handleTouchMove);
+        (_c = eventRef.current) === null || _c === void 0 ? void 0 : _c.addEventListener('touchend', handleTouchEnd);
+        return () => {
+            var _a, _b, _c;
+            (_a = eventRef.current) === null || _a === void 0 ? void 0 : _a.removeEventListener('touchstart', handleTouchStart);
+            (_b = eventRef.current) === null || _b === void 0 ? void 0 : _b.removeEventListener('touchmove', handleTouchMove);
+            (_c = eventRef.current) === null || _c === void 0 ? void 0 : _c.removeEventListener('touchend', handleTouchEnd);
+        };
+    }, [minHeightFromTop]);
+    useEffect(() => {
+        var _a;
+        const handleTouchStart = () => {
+            metrics.current.isContentTouched = true;
+        };
+        (_a = eventRef.current) === null || _a === void 0 ? void 0 : _a.addEventListener('touchstart', handleTouchStart);
+        return () => {
+            var _a;
+            (_a = eventRef.current) === null || _a === void 0 ? void 0 : _a.removeEventListener('touchstart', handleTouchStart);
+        };
+    }, []);
+    return { eventRef, sheetRef, contentRef, isExit };
+}
+
+const preventionDoubleClick = atom({
+    key: 'preventionDoubleClick',
+    default: false
+});
+const usePreventionDoubleClick = () => {
+    return useRecoilState(preventionDoubleClick);
+};
+
+function usePDC() {
+    const [isDisabled, setDisable] = usePreventionDoubleClick();
+    const handleClick = (fnc) => {
+        if (isDisabled)
+            return;
+        setDisable(true);
+        setTimeout(() => {
+            setDisable(false);
+        }, 300);
+        fnc();
+    };
+    return handleClick;
+}
+
+const BottomSheetContainer = ({ isExpandabled, height = window.innerHeight * 0.4, animationDuration, children }) => {
+    const navigation = useNavigaiton();
+    const pdc = usePDC();
+    const maxHeightFromTop = window.innerHeight - height;
+    const minHeightFromTop = isExpandabled ? 0 : maxHeightFromTop;
+    const { eventRef, sheetRef, contentRef, isExit } = useBottomSheet({ minHeightFromTop, maxHeightFromTop });
+    const handleClickExit = () => {
+        pdc(navigation.back);
+    };
+    useEffect(() => {
+        if (isExit)
+            handleClickExit();
+    }, [isExit]);
+    return (jsxs(Fragment, { children: [jsx("div", { className: 'react-stack-bottom-sheet-dimmed-area', onClick: handleClickExit, style: {
+                    'transitionProperty': 'opacity',
+                    'transitionDuration': `${animationDuration / 1000}s`,
+                    'transitionTimingFunction': 'ease'
+                } }), jsxs("div", { ref: sheetRef, className: 'react-stack-bottom-sheet-content-area', onClick: (e) => e.stopPropagation(), style: {
+                    'transitionProperty': 'transform',
+                    'transitionDuration': `${animationDuration / 1000}s`,
+                    'transitionTimingFunction': 'ease',
+                    top: `${maxHeightFromTop}px`,
+                    '--maxHeight-fromTop': `${maxHeightFromTop}px`
+                }, children: [jsx("div", { ref: eventRef, className: 'react-stack-bottom-sheet-drag-area', onClick: (e) => e.stopPropagation() }), jsx("div", { ref: contentRef, className: 'react-stack-bottom-sheet-content-box', style: {
+                            height: height - 40
+                        }, children: children })] })] }));
+};
+const BottomSheetComp = ({ component, isExpandabled, height, params, animationDuration }) => {
+    return (jsx(BottomSheetContainer, { isExpandabled: isExpandabled, height: height, animationDuration: animationDuration, children: cloneElement(component, Object.assign({ params })) }));
+};
+const BottomSheet = ({ route, component, isExpandabled, height }) => {
+    const { addScreen } = useContext(ReactStackContext);
+    useLayoutEffect(() => {
+        addScreen(new Screen$1({
+            route,
+            component: jsx(BottomSheetComp, { isExpandabled: isExpandabled, height: height, component: component }),
+            animation: AnimationType.BotttomSheet
+        }));
+    }, []);
+    return null;
+};
+
+const ToastContainer = ({ animationDuration, children }) => {
+    const navigation = useNavigaiton();
+    const pdc = usePDC();
+    const handleClickExit = () => {
+        pdc(navigation.back);
+    };
+    return (jsxs(Fragment, { children: [jsx("div", { className: 'react-stack-toast-dimmed-area', style: {
+                    'transitionProperty': 'opacity',
+                    'transitionDuration': `${animationDuration / 1000}s`,
+                    'transitionTimingFunction': 'ease'
+                } }), jsx("div", { className: 'react-stack-toast-content-area', onClick: handleClickExit, style: {
+                    'transitionProperty': 'transform, opacity',
+                    'transitionDuration': `${animationDuration / 1000}s, ${animationDuration / 2000}s`,
+                    'transitionTimingFunction': 'ease, ease'
+                }, children: jsx("div", { className: 'react-stack-toast-content-box', onClick: (e) => e.stopPropagation(), children: children }) })] }));
+};
+const ToastComponent = ({ component, params, animationDuration }) => {
+    return (jsx(ToastContainer, { animationDuration: animationDuration, children: cloneElement(component, Object.assign({ params })) }));
+};
+const Toast = ({ route, component }) => {
+    const { addScreen } = useContext(ReactStackContext);
+    useLayoutEffect(() => {
+        addScreen(new Screen$1({
+            route,
+            component: jsx(ToastComponent, { component: component }),
+            animation: AnimationType.Toast
+        }));
+    }, []);
+    return null;
+};
+
 const useNavigaiton = () => {
     const { stacks, updateStacks, historyIdx, setHistoryIdx } = useContext(ReactStackContext);
-    return {
+    const [naviagtion, setNavigation] = useState({
         push: (to, state) => {
             if (isHashRoute(to)) {
                 window.location.hash = String(to);
@@ -33877,7 +34101,39 @@ const useNavigaiton = () => {
             }
             window.history.go(toSize);
         }
-    };
+    });
+    useEffect(() => {
+        setNavigation({
+            push: (to, state) => {
+                if (isHashRoute(to)) {
+                    window.location.hash = String(to);
+                    return;
+                }
+                if (state && state.clear) {
+                    updateStacks(to, true);
+                    window.history.go((stacks.length - 1) * -1);
+                    setTimeout(() => {
+                        window.history.replaceState({ index: 1 }, '', to);
+                    }, 20);
+                    return;
+                }
+                setHistoryIdx(historyIdx + 1);
+                updateStacks(to);
+                window.history.pushState({ index: historyIdx + 1 }, '', to);
+            },
+            replace: (to) => {
+                window.history.replaceState({ index: historyIdx }, '', to);
+            },
+            back: (to = 1) => {
+                const toSize = to > 0 ? to * -1 : -1;
+                if (toSize < -1) {
+                    updateStacks(toSize);
+                }
+                window.history.go(toSize);
+            }
+        });
+    }, [stacks, historyIdx]);
+    return naviagtion;
 };
 
 const useStacks = () => {
@@ -33912,12 +34168,12 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z = ".react-stack-area {\n  position: absolute;\n  width: 100vw;\n  height: 100vh;\n  overflow: hidden; }\n\n.react-stack-box {\n  width: 100vw;\n  height: 100vh;\n  position: absolute;\n  transition: transform 0.4s ease 0.1s, opacity 0.4s ease 0.1s;\n  transform: translate3d(0, 0, 0) scale3d(1, 1, 1);\n  opacity: 1;\n  will-change: transform, opacity; }\n  .react-stack-box.react-stack-box-to-left .react-stack-dimmed-area {\n    transform: translate3d(-100vw, 0, 0); }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-enter {\n    transform: translate3d(100vw, 0, 0); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-enter .react-stack-dimmed-area {\n      opacity: 0; }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active {\n    transition-delay: var(--animation-delay, \"0.15s\"); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active .react-stack-dimmed-area {\n      transition-delay: var(--animation-delay, \"0.15s\"); }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active, .react-stack-box.react-stack-box-to-left.react-stack-box-enter-done, .react-stack-box.react-stack-box-to-left.react-stack-box-exit {\n    transform: translate3d(0, 0, 0); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active .react-stack-dimmed-area, .react-stack-box.react-stack-box-to-left.react-stack-box-enter-done .react-stack-dimmed-area, .react-stack-box.react-stack-box-to-left.react-stack-box-exit .react-stack-dimmed-area {\n      opacity: 1; }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-exit-active {\n    transform: translate3d(100vw, 0, 0); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-exit-active .react-stack-dimmed-area {\n      opacity: 0; }\n  .react-stack-box.react-stack-box-fade.react-stack-box-enter {\n    opacity: 0; }\n  .react-stack-box.react-stack-box-fade.react-stack-box-enter-active {\n    transition-delay: var(--animation-delay, \"0.15s\"); }\n  .react-stack-box.react-stack-box-fade.react-stack-box-enter-active, .react-stack-box.react-stack-box-fade.react-stack-box-enter-done, .react-stack-box.react-stack-box-fade.react-stack-box-exit {\n    opacity: 1; }\n  .react-stack-box.react-stack-box-fade.react-stack-box-exit-active {\n    opacity: 0; }\n  .react-stack-box.react-stack-box-scale.react-stack-box-enter {\n    transform: scale3d(0.95, 0.95, 0.95);\n    opacity: 0; }\n  .react-stack-box.react-stack-box-scale.react-stack-box-enter-active {\n    transition-delay: var(--animation-delay, \"0.15s\"); }\n  .react-stack-box.react-stack-box-scale.react-stack-box-enter-active, .react-stack-box.react-stack-box-scale.react-stack-box-enter-done, .react-stack-box.react-stack-box-scale.react-stack-box-exit {\n    transform: scale3d(1, 1, 1);\n    opacity: 1; }\n  .react-stack-box.react-stack-box-scale.react-stack-box-exit-active {\n    transform: scale3d(0.95, 0.95, 0.95);\n    opacity: 0; }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-enter {\n    transform: translate3d(0, 100vh, 0); }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-enter-active {\n    transition-delay: var(--animation-delay, \"0.15s\"); }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-enter-active, .react-stack-box.react-stack-box-to-top.react-stack-box-enter-done, .react-stack-box.react-stack-box-to-top.react-stack-box-exit {\n    transform: translate3d(0, 0, 0); }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-exit-active {\n    transform: translate3d(0, 100vh, 0); }\n\n.react-stack-area .react-stack-box[data-after-animation=\"to-left\"] {\n  transform: translate3d(-3rem, 0, 0);\n  transition-delay: var(--animation-delay, \"0.15s\"); }\n\n.react-stack-area .react-stack-box[data-after-animation=\"scale\"] {\n  transform: scale3d(1.05, 1.05, 1.05);\n  transition-delay: var(--animation-delay, \"0.15s\"); }\n\n.react-stack-dimmed-area {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: rgba(0, 0, 0, 0.2);\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.4s ease 0.1s; }\n\n.react-stack-content-area {\n  position: absolute;\n  width: 100%;\n  height: 100%; }\n";
+var css_248z = ".react-stack-area {\n  position: absolute;\n  width: 100vw;\n  height: 100vh;\n  overflow: hidden; }\n\n.react-stack-box {\n  width: 100vw;\n  height: 100vh;\n  position: absolute;\n  transition: transform 0.4s ease 0.1s, opacity 0.4s ease 0.1s;\n  transform: translate3d(0, 0, 0) scale3d(1, 1, 1);\n  opacity: 1;\n  will-change: transform, opacity; }\n  .react-stack-box.react-stack-box-to-left .react-stack-dimmed-area {\n    transform: translate3d(-100vw, 0, 0); }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-enter {\n    transform: translate3d(100vw, 0, 0); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-enter .react-stack-dimmed-area {\n      opacity: 0; }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active {\n    transition-delay: var(--animation-delay, \"0.15s\"); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active .react-stack-dimmed-area {\n      transition-delay: var(--animation-delay, \"0.15s\"); }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active, .react-stack-box.react-stack-box-to-left.react-stack-box-enter-done, .react-stack-box.react-stack-box-to-left.react-stack-box-exit {\n    transform: translate3d(0, 0, 0); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-enter-active .react-stack-dimmed-area, .react-stack-box.react-stack-box-to-left.react-stack-box-enter-done .react-stack-dimmed-area, .react-stack-box.react-stack-box-to-left.react-stack-box-exit .react-stack-dimmed-area {\n      opacity: 1; }\n  .react-stack-box.react-stack-box-to-left.react-stack-box-exit-active {\n    transform: translate3d(100vw, 0, 0); }\n    .react-stack-box.react-stack-box-to-left.react-stack-box-exit-active .react-stack-dimmed-area {\n      opacity: 0; }\n  .react-stack-box.react-stack-box-fade.react-stack-box-enter {\n    opacity: 0; }\n  .react-stack-box.react-stack-box-fade.react-stack-box-enter-active {\n    transition-delay: var(--animation-delay, \"0.15s\"); }\n  .react-stack-box.react-stack-box-fade.react-stack-box-enter-active, .react-stack-box.react-stack-box-fade.react-stack-box-enter-done, .react-stack-box.react-stack-box-fade.react-stack-box-exit {\n    opacity: 1; }\n  .react-stack-box.react-stack-box-fade.react-stack-box-exit-active {\n    opacity: 0; }\n  .react-stack-box.react-stack-box-scale.react-stack-box-enter {\n    transform: scale3d(0.95, 0.95, 0.95);\n    opacity: 0; }\n  .react-stack-box.react-stack-box-scale.react-stack-box-enter-active {\n    transition-delay: var(--animation-delay, \"0.15s\"); }\n  .react-stack-box.react-stack-box-scale.react-stack-box-enter-active, .react-stack-box.react-stack-box-scale.react-stack-box-enter-done, .react-stack-box.react-stack-box-scale.react-stack-box-exit {\n    transform: scale3d(1, 1, 1);\n    opacity: 1; }\n  .react-stack-box.react-stack-box-scale.react-stack-box-exit-active {\n    transform: scale3d(0.95, 0.95, 0.95);\n    opacity: 0; }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-enter {\n    transform: translate3d(0, 100vh, 0); }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-enter-active {\n    transition-delay: var(--animation-delay, \"0.15s\"); }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-enter-active, .react-stack-box.react-stack-box-to-top.react-stack-box-enter-done, .react-stack-box.react-stack-box-to-top.react-stack-box-exit {\n    transform: translate3d(0, 0, 0); }\n  .react-stack-box.react-stack-box-to-top.react-stack-box-exit-active {\n    transform: translate3d(0, 100vh, 0); }\n  .react-stack-box .react-stack-bottom-sheet-content-area {\n    transition: transform 0.4s ease;\n    transform: translate3d(0, calc(100% - var(--maxHeight-fromTop, '0px')), 0);\n    will-change: transform; }\n  .react-stack-box.react-stack-box-bottom-sheet.react-stack-box-enter .react-stack-bottom-sheet-dimmed-area {\n    opacity: 0; }\n  .react-stack-box.react-stack-box-bottom-sheet.react-stack-box-enter .react-stack-bottom-sheet-content-area {\n    transform: translate3d(0, calc(100% - var(--maxHeight-fromTop, '0px')), 0); }\n  .react-stack-box.react-stack-box-bottom-sheet.react-stack-box-enter-active {\n    transition-delay: var(--animation-delay, \"0.15s\"); }\n    .react-stack-box.react-stack-box-bottom-sheet.react-stack-box-enter-active .react-stack-bottom-sheet-dimmed-area {\n      transition-delay: var(--animation-delay, \"0.15s\"); }\n  .react-stack-box.react-stack-box-bottom-sheet.react-stack-box-enter-active .react-stack-bottom-sheet-dimmed-area, .react-stack-box.react-stack-box-bottom-sheet.react-stack-box-enter-done .react-stack-bottom-sheet-dimmed-area, .react-stack-box.react-stack-box-bottom-sheet.react-stack-box-exit .react-stack-bottom-sheet-dimmed-area {\n    opacity: 1; }\n  .react-stack-box.react-stack-box-bottom-sheet.react-stack-box-enter-active .react-stack-bottom-sheet-content-area, .react-stack-box.react-stack-box-bottom-sheet.react-stack-box-enter-done .react-stack-bottom-sheet-content-area, .react-stack-box.react-stack-box-bottom-sheet.react-stack-box-exit .react-stack-bottom-sheet-content-area {\n    transform: translate3d(0, 0, 0); }\n  .react-stack-box.react-stack-box-bottom-sheet.react-stack-box-exit-active .react-stack-bottom-sheet-dimmed-area {\n    opacity: 0; }\n  .react-stack-box.react-stack-box-bottom-sheet.react-stack-box-exit-active .react-stack-bottom-sheet-content-area {\n    transform: translate3d(0, calc(100% - var(--maxHeight-fromTop, '0px')), 0); }\n  .react-stack-box .react-stack-toast-content-area {\n    transition: transform 0.4s ease, opacity 0.2s ease;\n    transform: translate3d(0, 0, 0);\n    will-change: transform; }\n  .react-stack-box.react-stack-box-toast.react-stack-box-enter .react-stack-toast-dimmed-area {\n    opacity: 0; }\n  .react-stack-box.react-stack-box-toast.react-stack-box-enter .react-stack-toast-content-area {\n    opacity: 0;\n    transform: translate3d(0, 2rem, 0); }\n  .react-stack-box.react-stack-box-toast.react-stack-box-enter-active {\n    transition-delay: var(--animation-delay, \"0.15s\"); }\n    .react-stack-box.react-stack-box-toast.react-stack-box-enter-active .react-stack-toast-dimmed-area {\n      transition-delay: var(--animation-delay, \"0.15s\"); }\n  .react-stack-box.react-stack-box-toast.react-stack-box-enter-active .react-stack-toast-dimmed-area, .react-stack-box.react-stack-box-toast.react-stack-box-enter-done .react-stack-toast-dimmed-area, .react-stack-box.react-stack-box-toast.react-stack-box-exit .react-stack-toast-dimmed-area {\n    opacity: 1; }\n  .react-stack-box.react-stack-box-toast.react-stack-box-enter-active .react-stack-toast-content-area, .react-stack-box.react-stack-box-toast.react-stack-box-enter-done .react-stack-toast-content-area, .react-stack-box.react-stack-box-toast.react-stack-box-exit .react-stack-toast-content-area {\n    opacity: 1;\n    transform: translate3d(0, 0, 0); }\n  .react-stack-box.react-stack-box-toast.react-stack-box-exit-active .react-stack-toast-dimmed-area {\n    opacity: 0; }\n  .react-stack-box.react-stack-box-toast.react-stack-box-exit-active .react-stack-toast-content-area {\n    opacity: 0;\n    transform: translate3d(0, 2rem, 0); }\n\n.react-stack-area .react-stack-box[data-after-animation=\"to-left\"] {\n  transform: translate3d(-3rem, 0, 0);\n  transition-delay: var(--animation-delay, \"0.15s\"); }\n\n.react-stack-area .react-stack-box[data-after-animation=\"scale\"] {\n  transform: scale3d(1.05, 1.05, 1.05);\n  transition-delay: var(--animation-delay, \"0.15s\"); }\n\n.react-stack-dimmed-area {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: rgba(0, 0, 0, 0.2);\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.4s ease 0.1s; }\n\n.react-stack-content-area {\n  position: absolute;\n  width: 100%;\n  height: 100%; }\n\n.react-stack-bottom-sheet-dimmed-area {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: rgba(0, 0, 0, 0.2);\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.4s ease 0.1s; }\n\n.react-stack-bottom-sheet-content-area {\n  position: fixed;\n  z-index: 100;\n  left: 0;\n  right: 0;\n  height: 100vh; }\n\n.react-stack-bottom-sheet-drag-area {\n  position: absolute;\n  width: 100%;\n  height: 40px;\n  z-index: 10; }\n\n.react-stack-toast-dimmed-area {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: rgba(0, 0, 0, 0.2);\n  opacity: 0;\n  will-change: opacity;\n  transition: opacity 0.4s ease 0.1s; }\n\n.react-stack-toast-content-area {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  opacity: 0; }\n";
 styleInject(css_248z);
 
 const ReactStackProvider = ({ duration, delay, children }) => {
-    return (jsx(StackProvider, { duration: duration, delay: delay, children: children }));
+    return (jsx(RecoilRoot, { children: jsx(StackProvider, { duration: duration, delay: delay, children: children }) }));
 };
 
-export { AnimationType, Link, Screen, ReactStackProvider as default, useNavigaiton as useNavigation, useStacks };
+export { AnimationType, BottomSheet, Link, Screen, Toast, ReactStackProvider as default, useNavigaiton as useNavigation, useStacks };
 //# sourceMappingURL=index.js.map

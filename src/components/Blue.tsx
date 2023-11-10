@@ -1,10 +1,11 @@
 import React from 'react'
-import { Link, useNavigation } from '../../dist/esm'
+import { useNavigation } from '../../dist/esm'
 const styles: any = {
-  background: '#fff',
-  position: 'absolute',
-  width: '100%',
-  height: '100%'
+  background: 'red',
+  width: '200px',
+  height: '120px',
+  borderRadius: '30px',
+  textAlign: 'center'
 }
 
 export default () => {
@@ -13,15 +14,9 @@ export default () => {
   return (
     <div style={{...styles}}>
       <h1>blue</h1>
-      <Link to="#aaa">#aaa</Link>
-      <br />
       <p onClick={() => {
-        navigation.back(2)
-      }}>back(2)</p>
-      <br />
-      <p onClick={() => {
-        navigation.push('/', { clear: true })
-      }}>/white - clear</p>
+        navigation.push('/yellow')
+      }}>yellow</p>
     </div>
   )
 }

@@ -56,17 +56,12 @@ const Stacks = ({ duration, delay }: IProps) => {
             }}
           >
             <div data-after-animation={getAfterAnimation(idx)}>
-              <div 
-                className={'react-stack-dimmed-area'}
-                style={{
-                  'transitionProperty': 'opacity',
-                  'transitionDuration': `${animationDuration/1000}s`,
-                  'transitionTimingFunction': 'ease'
-                }}
-              />
-              <div className={'react-stack-content-area'}>
-                { cloneElement(component, {...{ params: pathVariable }}) }
-              </div>
+              {
+                cloneElement(component, {...{ 
+                  params: pathVariable, 
+                  animationDuration: animationDuration 
+                }})
+              }
             </div>
           </CSSTransition>
         )
