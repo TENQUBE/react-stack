@@ -33806,7 +33806,7 @@ const StackProvider = ({ duration, delay, children }) => {
         const storageStacksData = JSON.parse(window.sessionStorage.getItem(STORAGE_KEY_SCREEN_STACKS));
         if (!storageStacksData || storageStacksData.length === 0)
             return;
-        const allPath = href.split(origin)[1];
+        const allPath = decodeURI(href.split(origin)[1]);
         const storageStacks = storageStacksData.map((screen) => {
             return isHashRoute(screen.route)
                 ? Screen$1.hashScreen(screen.URIPath)
