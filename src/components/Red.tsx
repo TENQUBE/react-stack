@@ -16,10 +16,10 @@ export default () => {
       <br />
       <Link to="#bbb">#bbb</Link>
       <br />
-      {/* <Link to="/blue#aaa">/blue</Link> */}
-      <p onClick={() => {
+      <Link to="/black?aaa=aaa">/black</Link>
+      {/* <p onClick={() => {
         navigation.replace('/blue')
-      }}>relpace</p>
+      }}>relpace</p> */}
     </div>
   )
 }

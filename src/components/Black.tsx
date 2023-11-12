@@ -25,7 +25,7 @@ export default () => {
         // navigation.push('/blue')
       }}>/white - clear</p>
       <br />
-      <Link to="/red">/red#bbb</Link>
+      <Link to="/red?test=test">/red?test=test</Link>
     </div>
   )
 }
