@@ -21,6 +21,13 @@ const StackProvider = ({ duration, delay, children }: IStackProvider) => {
     screenList.current = [...screenList.current, data]
   }, [])
 
+  const changeLastScreen = useCallback((to: string) => {
+    const baseStack = inMemoryCache.getScreens()
+    const stackData = matchRouteToPathname(screenList.current, to)
+    inMemoryCache.setScreens([...baseStack.slice(0, baseStack.length - 1), stackData])
+    setStacks([...baseStack.slice(0, baseStack.length - 1), stackData])
+  }, [stacks])
+
   const updateStacks = useCallback((to: string | number, isClear = false) => {
     const isToNo = typeof to === 'number'
     const baseStack = inMemoryCache.getScreens()
@@ -36,13 +43,6 @@ const StackProvider = ({ duration, delay, children }: IStackProvider) => {
       setStacks(isClear ? [stackData] : [...baseStack, stackData])
     }
   }, [stacks])
-
-  const changeStacks = useCallback((to: string) => {
-    const baseStack = inMemoryCache.getScreens()
-    const stackData = matchRouteToPathname(screenList.current, to)
-    inMemoryCache.setScreens([...baseStack.slice(0, baseStack.length - 1), stackData])
-    setStacks([...baseStack.slice(0, baseStack.length - 1), stackData])
-  }, [])
   
   const checkGoForward = () => {
     const historyIndex = inMemoryCache.getHistoryIndex()
@@ -145,7 +145,7 @@ const StackProvider = ({ duration, delay, children }: IStackProvider) => {
 
   return (
     <div className="react-stack-area">
-      <ReactStackContext.Provider value={{ addScreen, stacks, updateStacks, changeStacks, animationDuration, animationDelay }}>
+      <ReactStackContext.Provider value={{ addScreen, stacks, updateStacks, changeLastScreen, animationDuration, animationDelay }}>
         {children}
         <Stacks />
       </ReactStackContext.Provider>

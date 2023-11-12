@@ -17,7 +17,7 @@ const DELAY_MARGIN = 10
 
 
 const useNavigaiton = (): INavigation => {
-  const { updateStacks, changeStacks, animationDuration, animationDelay } = useContext(ReactStackContext)
+  const { updateStacks, changeLastScreen, animationDuration, animationDelay } = useContext(ReactStackContext)
 
   return {
     push: (to: string, state: INavigationPushState) => {
@@ -51,7 +51,7 @@ const useNavigaiton = (): INavigation => {
     replace: (to: string) => {
       return new Promise((resolve) => {
         const historyIndex = inMemoryCache.getHistoryIndex()
-        changeStacks(to)
+        changeLastScreen(to)
         window.history.replaceState({ index: historyIndex }, '', to)
         return setTimeout(() => {
           resolve(null)
