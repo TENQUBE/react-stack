@@ -13,10 +13,11 @@ export interface INavigation {
   back: (to?: number) => void
 }
 
+const DELAY_MARGIN = 10
 
 
 const useNavigaiton = (): INavigation => {
-  const { updateStacks, animationDuration, animationDelay } = useContext(ReactStackContext)
+  const { updateStacks, changeStacks, animationDuration, animationDelay } = useContext(ReactStackContext)
 
   return {
     push: (to: string, state: INavigationPushState) => {
@@ -27,7 +28,7 @@ const useNavigaiton = (): INavigation => {
           window.location.hash = String(to)
           return setTimeout(() => {
             resolve(null)
-          }, animationDuration + animationDelay + 10)
+          }, animationDuration + animationDelay + DELAY_MARGIN)
         }
   
         if(state?.clear) {
@@ -36,7 +37,7 @@ const useNavigaiton = (): INavigation => {
           window.history.go((stackLen - 1) * -1)
           return setTimeout(() => {
             resolve(null)
-          }, animationDuration + animationDelay + 10)
+          }, animationDuration + animationDelay + DELAY_MARGIN)
         }
 
         inMemoryCache.setHistoryIndex(historyIndex + 1)
@@ -44,12 +45,18 @@ const useNavigaiton = (): INavigation => {
         window.history.pushState({ index: historyIndex + 1 }, '', to)
         return setTimeout(() => {
           resolve(null)
-        }, animationDuration + animationDelay + 10)
+        }, (animationDuration * 2) + animationDelay + DELAY_MARGIN)
       })
     },
     replace: (to: string) => {
-      const historyIndex = inMemoryCache.getHistoryIndex()
-      window.history.replaceState({ index: historyIndex }, '', to)
+      return new Promise((resolve) => {
+        const historyIndex = inMemoryCache.getHistoryIndex()
+        changeStacks(to)
+        window.history.replaceState({ index: historyIndex }, '', to)
+        return setTimeout(() => {
+          resolve(null)
+        }, animationDuration + animationDelay + DELAY_MARGIN)
+      })
     },
     back: (to = 1) => {
       return new Promise((resolve) => {
@@ -60,7 +67,7 @@ const useNavigaiton = (): INavigation => {
         window.history.go(toSize)
         return setTimeout(() => {
           resolve(null)
-        }, animationDuration + 10)
+        }, animationDuration + DELAY_MARGIN)
       })
     }
   }

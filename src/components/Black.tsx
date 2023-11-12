@@ -18,7 +18,7 @@ export default () => {
         // navigation.push('/', { clear: true })
         // navigation.back(2)
         await navigation.back()
-        await navigation.push('/red')
+        await navigation.replace('/red')
         await navigation.push('/blue')
         // navigation.back()
         // navigation.push('/red')

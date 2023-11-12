@@ -33760,6 +33760,12 @@ const StackProvider = ({ duration, delay, children }) => {
             setStacks(isClear ? [stackData] : [...baseStack, stackData]);
         }
     }, [stacks]);
+    const changeStacks = useCallback((to) => {
+        const baseStack = inMemoryCache.getScreens();
+        const stackData = matchRouteToPathname(screenList.current, to);
+        inMemoryCache.setScreens([...baseStack.slice(0, baseStack.length - 1), stackData]);
+        setStacks([...baseStack.slice(0, baseStack.length - 1), stackData]);
+    }, []);
     const checkGoForward = () => {
         var _a, _b;
         const historyIndex = inMemoryCache.getHistoryIndex();
@@ -33846,7 +33852,7 @@ const StackProvider = ({ duration, delay, children }) => {
     }, []);
     const animationDuration = typeof duration === 'number' ? duration : ANIMATION_DURATION;
     const animationDelay = typeof delay === 'number' ? delay : ANIMAITON_DELAY;
-    return (jsx("div", { className: "react-stack-area", children: jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, animationDuration, animationDelay }, children: [children, jsx(Stacks, {})] }) }));
+    return (jsx("div", { className: "react-stack-area", children: jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, changeStacks, animationDuration, animationDelay }, children: [children, jsx(Stacks, {})] }) }));
 };
 
 const ScreenContainer = ({ animationDuration, children }) => {
@@ -34095,8 +34101,9 @@ const Toast = ({ route, component }) => {
     return null;
 };
 
+const DELAY_MARGIN = 10;
 const useNavigaiton = () => {
-    const { updateStacks, animationDuration, animationDelay } = useContext(ReactStackContext);
+    const { updateStacks, changeStacks, animationDuration, animationDelay } = useContext(ReactStackContext);
     return {
         push: (to, state) => {
             return new Promise((resolve) => {
@@ -34104,28 +34111,34 @@ const useNavigaiton = () => {
                 if (isHashRoute(to)) {
                     window.location.hash = String(to);
                     return setTimeout(() => {
-                        resolve(true);
-                    }, animationDuration + animationDelay + 10);
+                        resolve(null);
+                    }, animationDuration + animationDelay + DELAY_MARGIN);
                 }
                 if (state === null || state === void 0 ? void 0 : state.clear) {
                     const stackLen = inMemoryCache.getScreens().length;
                     updateStacks(to, true);
                     window.history.go((stackLen - 1) * -1);
                     return setTimeout(() => {
-                        resolve(true);
-                    }, animationDuration + animationDelay + 10);
+                        resolve(null);
+                    }, animationDuration + animationDelay + DELAY_MARGIN);
                 }
                 inMemoryCache.setHistoryIndex(historyIndex + 1);
                 updateStacks(to);
                 window.history.pushState({ index: historyIndex + 1 }, '', to);
                 return setTimeout(() => {
-                    resolve(true);
-                }, animationDuration + animationDelay + 10);
+                    resolve(null);
+                }, (animationDuration * 2) + animationDelay + DELAY_MARGIN);
             });
         },
         replace: (to) => {
-            const historyIndex = inMemoryCache.getHistoryIndex();
-            window.history.replaceState({ index: historyIndex }, '', to);
+            return new Promise((resolve) => {
+                const historyIndex = inMemoryCache.getHistoryIndex();
+                changeStacks(to);
+                window.history.replaceState({ index: historyIndex }, '', to);
+                return setTimeout(() => {
+                    resolve(null);
+                }, animationDuration + animationDelay + DELAY_MARGIN);
+            });
         },
         back: (to = 1) => {
             return new Promise((resolve) => {
@@ -34134,9 +34147,9 @@ const useNavigaiton = () => {
                     updateStacks(toSize);
                 }
                 window.history.go(toSize);
-                setTimeout(() => {
-                    resolve(true);
-                }, animationDuration + 10);
+                return setTimeout(() => {
+                    resolve(null);
+                }, animationDuration + DELAY_MARGIN);
             });
         }
     };
