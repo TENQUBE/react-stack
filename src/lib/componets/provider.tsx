@@ -16,6 +16,7 @@ const StackProvider = ({ duration, delay, children }: IStackProvider) => {
   const beforePathname = useRef<string>('')
 
   const [stacks, setStacks] = useState<IScreen[]>([])
+  const [isPDC, setPDC] = useState(false)
 
   const addScreen = useCallback((data: IScreen) => {
     screenList.current = [...screenList.current, data]
@@ -145,7 +146,10 @@ const StackProvider = ({ duration, delay, children }: IStackProvider) => {
 
   return (
     <div className="react-stack-area">
-      <ReactStackContext.Provider value={{ addScreen, stacks, updateStacks, changeLastScreen, animationDuration, animationDelay }}>
+      <ReactStackContext.Provider value={{ 
+        addScreen, stacks, updateStacks, changeLastScreen, animationDuration, animationDelay,
+        isPDC, setPDC
+      }}>
         {children}
         <Stacks />
       </ReactStackContext.Provider>

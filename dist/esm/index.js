@@ -1,5 +1,4 @@
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
-import { atom, useRecoilState, RecoilRoot } from 'recoil';
 import React, { Children, isValidElement, cloneElement, useContext, useRef, createContext, useState, useCallback, useEffect, useLayoutEffect } from 'react';
 
 var AnimationType;
@@ -33740,6 +33739,7 @@ const StackProvider = ({ duration, delay, children }) => {
     const beforeHash = useRef('');
     const beforePathname = useRef('');
     const [stacks, setStacks] = useState([]);
+    const [isPDC, setPDC] = useState(false);
     const addScreen = useCallback((data) => {
         screenList.current = [...screenList.current, data];
     }, []);
@@ -33852,7 +33852,10 @@ const StackProvider = ({ duration, delay, children }) => {
     }, []);
     const animationDuration = typeof duration === 'number' ? duration : ANIMATION_DURATION;
     const animationDelay = typeof delay === 'number' ? delay : ANIMAITON_DELAY;
-    return (jsx("div", { className: "react-stack-area", children: jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, changeLastScreen, animationDuration, animationDelay }, children: [children, jsx(Stacks, {})] }) }));
+    return (jsx("div", { className: "react-stack-area", children: jsxs(ReactStackContext.Provider, { value: {
+                addScreen, stacks, updateStacks, changeLastScreen, animationDuration, animationDelay,
+                isPDC, setPDC
+            }, children: [children, jsx(Stacks, {})] }) }));
 };
 
 const ScreenContainer = ({ animationDuration, children }) => {
@@ -34006,22 +34009,14 @@ function useBottomSheet({ minHeightFromTop, maxHeightFromTop }) {
     return { eventRef, sheetRef, contentRef, isExit };
 }
 
-const preventionDoubleClick = atom({
-    key: 'preventionDoubleClick',
-    default: false
-});
-const usePreventionDoubleClick = () => {
-    return useRecoilState(preventionDoubleClick);
-};
-
 function usePDC() {
-    const [isDisabled, setDisable] = usePreventionDoubleClick();
+    const { isPDC, setPDC } = useContext(ReactStackContext);
     const handleClick = (fnc) => {
-        if (isDisabled)
+        if (isPDC)
             return;
-        setDisable(true);
+        setPDC(true);
         setTimeout(() => {
-            setDisable(false);
+            setPDC(false);
         }, 300);
         fnc();
     };
@@ -34191,7 +34186,7 @@ var css_248z = ".react-stack-area {\n  position: absolute;\n  width: 100vw;\n  h
 styleInject(css_248z);
 
 const ReactStackProvider = ({ duration, delay, children }) => {
-    return (jsx(RecoilRoot, { children: jsx(StackProvider, { duration: duration, delay: delay, children: children }) }));
+    return (jsx(StackProvider, { duration: duration, delay: delay, children: children }));
 };
 
 export { AnimationType, BottomSheet, Link, Screen, Toast, ReactStackProvider as default, useNavigaiton as useNavigation, useStacks };

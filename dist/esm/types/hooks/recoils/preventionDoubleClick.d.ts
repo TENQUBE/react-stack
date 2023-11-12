@@ -1,3 +1,3 @@
-export declare const usePreventionDoubleClick: () => [boolean, import("recoil").SetterOrUpdater<boolean>];
-export declare const usePreventionDoubleClickValue: () => boolean;
-export declare const useSetPreventionDoubleClick: () => import("recoil").SetterOrUpdater<boolean>;
+export declare const usePreventionDoubleClick: () => any;
+export declare const usePreventionDoubleClickValue: () => any;
+export declare const useSetPreventionDoubleClick: () => any;

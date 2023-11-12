@@ -1,13 +1,14 @@
-import { usePreventionDoubleClick } from './recoils/preventionDoubleClick'
+import { useContext } from 'react'
+import { ReactStackContext } from '../componets/provider'
 
 export function usePDC() {
-  const [isDisabled, setDisable] = usePreventionDoubleClick()
+  const { isPDC, setPDC } = useContext(ReactStackContext)
 
   const handleClick = (fnc: any) => {
-    if(isDisabled) return
-    setDisable(true)
+    if(isPDC) return
+    setPDC(true)
     setTimeout(() => {
-      setDisable(false)
+      setPDC(false)
     }, 300)
     fnc()
   }
