@@ -33743,6 +33743,12 @@ const StackProvider = ({ duration, delay, children }) => {
     const addScreen = useCallback((data) => {
         screenList.current = [...screenList.current, data];
     }, []);
+    const changeLastScreen = useCallback((to) => {
+        const baseStack = inMemoryCache.getScreens();
+        const stackData = matchRouteToPathname(screenList.current, to);
+        inMemoryCache.setScreens([...baseStack.slice(0, baseStack.length - 1), stackData]);
+        setStacks([...baseStack.slice(0, baseStack.length - 1), stackData]);
+    }, [stacks]);
     const updateStacks = useCallback((to, isClear = false) => {
         const isToNo = typeof to === 'number';
         const baseStack = inMemoryCache.getScreens();
@@ -33760,12 +33766,6 @@ const StackProvider = ({ duration, delay, children }) => {
             setStacks(isClear ? [stackData] : [...baseStack, stackData]);
         }
     }, [stacks]);
-    const changeStacks = useCallback((to) => {
-        const baseStack = inMemoryCache.getScreens();
-        const stackData = matchRouteToPathname(screenList.current, to);
-        inMemoryCache.setScreens([...baseStack.slice(0, baseStack.length - 1), stackData]);
-        setStacks([...baseStack.slice(0, baseStack.length - 1), stackData]);
-    }, []);
     const checkGoForward = () => {
         var _a, _b;
         const historyIndex = inMemoryCache.getHistoryIndex();
@@ -33852,7 +33852,7 @@ const StackProvider = ({ duration, delay, children }) => {
     }, []);
     const animationDuration = typeof duration === 'number' ? duration : ANIMATION_DURATION;
     const animationDelay = typeof delay === 'number' ? delay : ANIMAITON_DELAY;
-    return (jsx("div", { className: "react-stack-area", children: jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, changeStacks, animationDuration, animationDelay }, children: [children, jsx(Stacks, {})] }) }));
+    return (jsx("div", { className: "react-stack-area", children: jsxs(ReactStackContext.Provider, { value: { addScreen, stacks, updateStacks, changeLastScreen, animationDuration, animationDelay }, children: [children, jsx(Stacks, {})] }) }));
 };
 
 const ScreenContainer = ({ animationDuration, children }) => {
@@ -34103,7 +34103,7 @@ const Toast = ({ route, component }) => {
 
 const DELAY_MARGIN = 10;
 const useNavigaiton = () => {
-    const { updateStacks, changeStacks, animationDuration, animationDelay } = useContext(ReactStackContext);
+    const { updateStacks, changeLastScreen, animationDuration, animationDelay } = useContext(ReactStackContext);
     return {
         push: (to, state) => {
             return new Promise((resolve) => {
@@ -34133,7 +34133,7 @@ const useNavigaiton = () => {
         replace: (to) => {
             return new Promise((resolve) => {
                 const historyIndex = inMemoryCache.getHistoryIndex();
-                changeStacks(to);
+                changeLastScreen(to);
                 window.history.replaceState({ index: historyIndex }, '', to);
                 return setTimeout(() => {
                     resolve(null);
