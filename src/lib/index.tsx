@@ -1,4 +1,3 @@
-import { RecoilRoot } from 'recoil'
 import { AnimationType } from './interfaces'
 import StackProvider from './componets/provider'
 import Screen from './componets/screen'
@@ -18,11 +17,9 @@ interface IStackProvider {
 
 const ReactStackProvider = ({ duration, delay, children }: IStackProvider) => {
   return (
-    <RecoilRoot>
-      <StackProvider duration={duration} delay={delay}>
-        {children}
-      </StackProvider>
-    </RecoilRoot>
+    <StackProvider duration={duration} delay={delay}>
+      {children}
+    </StackProvider>
   )
 }
 

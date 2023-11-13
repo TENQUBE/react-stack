@@ -11,7 +11,7 @@ export default () => {
   return (
     <div style={{...styles}}>
       <h1>Yellow</h1>
-      <Link to="/">/white</Link>
+      <Link to="/black">/black</Link>
     </div>
   )
 }

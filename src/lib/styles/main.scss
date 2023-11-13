@@ -136,7 +136,9 @@
     }
 
     &.react-stack-box-enter-active {
-      transition-delay: var(--animation-delay, '0.15s');
+      .react-stack-bottom-sheet-content-area {
+        transition-delay: var(--animation-delay, '0.15s');
+      }
       .react-stack-bottom-sheet-dimmed-area {
         transition-delay: var(--animation-delay, '0.15s');
       }
@@ -183,7 +185,9 @@
     }
 
     &.react-stack-box-enter-active {
-      transition-delay: var(--animation-delay, '0.15s');
+      .react-stack-toast-content-area {
+        transition-delay: var(--animation-delay, '0.15s');
+      }
       .react-stack-toast-dimmed-area {
         transition-delay: var(--animation-delay, '0.15s');
       }
