@@ -4,6 +4,7 @@ interface IProps {
     route: string;
     component: ReactElement;
     animation?: AnimationType;
+    className?: string;
 }
-declare const Toast: ({ route, component }: IProps) => any;
+declare const Toast: ({ route, component, className }: IProps) => any;
 export default Toast;

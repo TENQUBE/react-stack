@@ -37,13 +37,13 @@ const White = () => {
 export default () => {
   return (
     <ReactStackProvider duration={400} delay={400}>
-      <Screen route="/" component={<White />} animation={AnimationType.None} />
+      <Screen route="/" component={<White />} animation={AnimationType.None} className={''}/>
       {/* <Screen route="/black/:test/black" component={<Black />} animation={AnimationType.Scale} /> */}
-      <BottomSheet route="/black" isExpandabled={false} height={500} component={<Black />} />
-      <Toast route="/blue" component={<Blue />} />
+      <BottomSheet route="/black" isExpandabled={false} height={500} component={<Black />} className={'tttttt ssssss'} />
+      <Toast route="/blue" component={<Blue />} className={''} />
       {/* <Screen route="/blue" component={<Blue />} animation={AnimationType.ToLeft} /> */}
-      <Screen route="/red" component={<Red />} animation={AnimationType.Scale} />
-      <Screen route="/yellow" component={<Yellow />} animation={AnimationType.ToTop} />
+      <Screen route="/red" component={<Red />} animation={AnimationType.Scale} className={''} />
+      <Screen route="/yellow" component={<Yellow />} animation={AnimationType.ToTop} className={''} />
     </ReactStackProvider>
   )
 }

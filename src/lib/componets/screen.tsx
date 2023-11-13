@@ -39,16 +39,18 @@ interface IProps {
   route: string
   component: ReactElement
   animation?: AnimationType
+  className?: string
 }
 
-const Screen = ({ route, component, animation }: IProps) => {
+const Screen = ({ route, component, animation, className }: IProps) => {
   const { addScreen } = useContext(ReactStackContext)
 
   useLayoutEffect(() => {
     addScreen(new ScreenObj({ 
       route, 
       component: <ScreenComponent component={component} />, 
-      animation
+      animation,
+      className
     }))
   }, [])
 

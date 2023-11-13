@@ -61,16 +61,18 @@ interface IProps {
   route: string
   component: ReactElement
   animation?: AnimationType
+  className?: string
 }
 
-const Toast = ({ route, component }: IProps) => {
+const Toast = ({ route, component, className }: IProps) => {
   const { addScreen } = useContext(ReactStackContext)
 
   useLayoutEffect(() => {
     addScreen(new ScreenObj({ 
       route, 
       component: <ToastComponent component={component} />, 
-      animation: AnimationType.Toast
+      animation: AnimationType.Toast,
+      className
     }))
   }, [])
 

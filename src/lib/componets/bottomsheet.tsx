@@ -94,16 +94,18 @@ interface IProps {
   component: ReactElement
   isExpandabled?: boolean
   height?: number
+  className?: string
 }
 
-const BottomSheet = ({ route,  component, isExpandabled, height }: IProps)  => {
+const BottomSheet = ({ route,  component, isExpandabled, height, className }: IProps)  => {
   const { addScreen } = useContext(ReactStackContext)
 
   useLayoutEffect(() => {
     addScreen(new ScreenObj({ 
       route, 
       component: <BottomSheetComp isExpandabled={isExpandabled} height={height} component={component} />, 
-      animation: AnimationType.BotttomSheet
+      animation: AnimationType.BotttomSheet,
+      className
     }))
   }, [])
 

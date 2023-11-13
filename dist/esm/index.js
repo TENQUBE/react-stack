@@ -102,10 +102,12 @@ const matchRouteToPathname = (stacks, pathname) => {
 };
 
 let Screen$1 = class Screen {
-    constructor({ route, component, animation }) {
+    constructor({ route, component, animation, className }) {
         this.route = route ? route : '*';
         this.component = component ? component : null;
         this.animation = typeof animation === 'undefined' ? AnimationType.None : animation;
+        if (className)
+            this.className = className;
         this.pathVariable = {};
     }
     static hashScreen(allPath) {
@@ -33691,7 +33693,7 @@ const Stacks = () => {
     // 스택이 추가되었는지 확인
     const isAddStack = stacks.length > beforeStackLength.current;
     beforeStackLength.current = stacks.length;
-    return (jsx(TransitionGroup$1, { children: stacks.map(({ route, component, animation, pathVariable }, i, arr) => {
+    return (jsx(TransitionGroup$1, { children: stacks.map(({ route, component, animation, pathVariable, className }, i, arr) => {
             // 해시로 추가된 히스토리는 스크린을 출력하지 않음
             if (isHashRoute(route))
                 return null;
@@ -33699,7 +33701,7 @@ const Stacks = () => {
             const idx = i - arr.slice(0, i).filter(({ route }) => isHashRoute(route)).length;
             // 스택이 추가되는 경우 애니메이션 딜레이 시간 추가
             const timeout = isAddStack ? animationDuration + animationDelay : animationDuration;
-            return (jsx(CSSTransition$1, { timeout: timeout, classNames: `react-stack-box react-stack-box-${AnimationClassName[animation]} react-stack-box`, style: {
+            return (jsx(CSSTransition$1, { timeout: timeout, classNames: `${className} react-stack-box react-stack-box-${AnimationClassName[animation]} react-stack-box`, style: {
                     'transitionProperty': 'transform, opacity',
                     'transitionDuration': `${animationDuration / 1000}s, ${animationDuration / 1000}s`,
                     'transitionTimingFunction': 'ease',
@@ -33868,13 +33870,14 @@ const ScreenContainer = ({ animationDuration, children }) => {
 const ScreenComponent = ({ component, params, animationDuration }) => {
     return (jsx(ScreenContainer, { animationDuration: animationDuration, children: cloneElement(component, Object.assign({ params })) }));
 };
-const Screen = ({ route, component, animation }) => {
+const Screen = ({ route, component, animation, className }) => {
     const { addScreen } = useContext(ReactStackContext);
     useLayoutEffect(() => {
         addScreen(new Screen$1({
             route,
             component: jsx(ScreenComponent, { component: component }),
-            animation
+            animation,
+            className
         }));
     }, []);
     return null;
@@ -34053,13 +34056,14 @@ const BottomSheetContainer = ({ isExpandabled, height = window.innerHeight * 0.4
 const BottomSheetComp = ({ component, isExpandabled, height, params, animationDuration }) => {
     return (jsx(BottomSheetContainer, { isExpandabled: isExpandabled, height: height, animationDuration: animationDuration, children: cloneElement(component, Object.assign({ params })) }));
 };
-const BottomSheet = ({ route, component, isExpandabled, height }) => {
+const BottomSheet = ({ route, component, isExpandabled, height, className }) => {
     const { addScreen } = useContext(ReactStackContext);
     useLayoutEffect(() => {
         addScreen(new Screen$1({
             route,
             component: jsx(BottomSheetComp, { isExpandabled: isExpandabled, height: height, component: component }),
-            animation: AnimationType.BotttomSheet
+            animation: AnimationType.BotttomSheet,
+            className
         }));
     }, []);
     return null;
@@ -34084,13 +34088,14 @@ const ToastContainer = ({ animationDuration, children }) => {
 const ToastComponent = ({ component, params, animationDuration }) => {
     return (jsx(ToastContainer, { animationDuration: animationDuration, children: cloneElement(component, Object.assign({ params })) }));
 };
-const Toast = ({ route, component }) => {
+const Toast = ({ route, component, className }) => {
     const { addScreen } = useContext(ReactStackContext);
     useLayoutEffect(() => {
         addScreen(new Screen$1({
             route,
             component: jsx(ToastComponent, { component: component }),
-            animation: AnimationType.Toast
+            animation: AnimationType.Toast,
+            className
         }));
     }, []);
     return null;

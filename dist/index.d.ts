@@ -15,8 +15,9 @@ interface IProps$3 {
     route: string;
     component: ReactElement;
     animation?: AnimationType;
+    className?: string;
 }
-declare const Screen: ({ route, component, animation }: IProps$3) => any;
+declare const Screen: ({ route, component, animation, className }: IProps$3) => any;
 
 interface IProps$2 {
     to: string;
@@ -30,15 +31,17 @@ interface IProps$1 {
     component: ReactElement;
     isExpandabled?: boolean;
     height?: number;
+    className?: string;
 }
-declare const BottomSheet: ({ route, component, isExpandabled, height }: IProps$1) => any;
+declare const BottomSheet: ({ route, component, isExpandabled, height, className }: IProps$1) => any;
 
 interface IProps {
     route: string;
     component: ReactElement;
     animation?: AnimationType;
+    className?: string;
 }
-declare const Toast: ({ route, component }: IProps) => any;
+declare const Toast: ({ route, component, className }: IProps) => any;
 
 interface INavigationPushState {
     clear: boolean;
@@ -54,6 +57,7 @@ interface IScreen {
     readonly route: string;
     readonly component: ReactElement | null;
     readonly animation: AnimationType;
+    readonly className?: string;
     pathVariable: unknown;
     URIPath: string;
     hash: string;

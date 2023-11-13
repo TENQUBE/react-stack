@@ -4,6 +4,7 @@ interface IProps {
     component: ReactElement;
     isExpandabled?: boolean;
     height?: number;
+    className?: string;
 }
-declare const BottomSheet: ({ route, component, isExpandabled, height }: IProps) => any;
+declare const BottomSheet: ({ route, component, isExpandabled, height, className }: IProps) => any;
 export default BottomSheet;
