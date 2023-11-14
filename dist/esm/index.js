@@ -33871,7 +33871,7 @@ function useLoading() {
     };
 }
 
-const DELAY_MARGIN = 10;
+const DELAY_MARGIN$1 = 10;
 const useNavigaiton = () => {
     const { updateStacks, changeLastScreen, animationDuration, animationDelay } = useContext(ReactStackContext);
     const startLoading = useLoading();
@@ -33883,7 +33883,7 @@ const useNavigaiton = () => {
                     window.location.hash = String(to);
                     return setTimeout(() => {
                         resolve(null);
-                    }, DELAY_MARGIN);
+                    }, DELAY_MARGIN$1);
                 }
                 if (state === null || state === void 0 ? void 0 : state.clear) {
                     const stackLen = inMemoryCache.getScreens().length;
@@ -33893,7 +33893,7 @@ const useNavigaiton = () => {
                     window.history.go((stackLen - 1) * -1);
                     return setTimeout(() => {
                         resolve(null);
-                    }, animationDuration + animationDelay + DELAY_MARGIN);
+                    }, animationDuration + animationDelay + DELAY_MARGIN$1);
                 }
                 startLoading();
                 updateStacks(to);
@@ -33901,7 +33901,7 @@ const useNavigaiton = () => {
                 window.history.pushState({ index: historyIndex + 1 }, '', to);
                 return setTimeout(() => {
                     resolve(null);
-                }, (animationDuration * 2) + animationDelay + DELAY_MARGIN);
+                }, (animationDuration * 2) + animationDelay + DELAY_MARGIN$1);
             });
         },
         replace: (to) => {
@@ -33911,7 +33911,7 @@ const useNavigaiton = () => {
                 window.history.replaceState({ index: inMemoryCache.getHistoryIndex() }, '', to);
                 return setTimeout(() => {
                     resolve(null);
-                }, animationDuration + animationDelay + DELAY_MARGIN);
+                }, animationDuration + animationDelay + DELAY_MARGIN$1);
             });
         },
         back: (to = 1) => {
@@ -33923,7 +33923,7 @@ const useNavigaiton = () => {
                 window.history.go(toSize);
                 return setTimeout(() => {
                     resolve(null);
-                }, animationDuration + DELAY_MARGIN);
+                }, animationDuration + DELAY_MARGIN$1);
             });
         }
     };
@@ -55239,8 +55239,9 @@ var loadingLottie = {
 	assets: assets
 };
 
+const DELAY_MARGIN = 100;
 function Loading({ loadingComp }) {
-    const { isLoading, setLoading, animationDuration, animationDelay } = useContext(ReactStackContext);
+    const { isLoading, setLoading, animationDelay } = useContext(ReactStackContext);
     const [active, setActive] = useState(false);
     const [done, setDone] = useState(false);
     useEffect(() => {
@@ -55251,7 +55252,7 @@ function Loading({ loadingComp }) {
                 setTimeout(() => {
                     setLoading(false);
                 }, 150);
-            }, animationDuration + animationDelay);
+            }, animationDelay + DELAY_MARGIN);
         }
         else {
             setActive(false);

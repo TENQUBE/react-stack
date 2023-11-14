@@ -4,8 +4,10 @@ import loadingLottie from '../images/loading.json'
 
 import { ReactStackContext } from './provider'
 
+const DELAY_MARGIN = 100
+
 export default function Loading ({ loadingComp }: { loadingComp: ReactElement }) {
-  const { isLoading, setLoading, animationDuration, animationDelay } = useContext(ReactStackContext)
+  const { isLoading, setLoading, animationDelay } = useContext(ReactStackContext)
 
   const [active, setActive] = useState(false)
   const [done, setDone] = useState(false)
@@ -18,7 +20,7 @@ export default function Loading ({ loadingComp }: { loadingComp: ReactElement })
         setTimeout(() => {
           setLoading(false)
         }, 150)
-      }, animationDuration + animationDelay)
+      }, animationDelay + DELAY_MARGIN)
     } else {
       setActive(false)
       setDone(false)
