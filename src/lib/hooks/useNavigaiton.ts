@@ -2,10 +2,13 @@ import { useContext } from 'react'
 import { ReactStackContext } from '../componets/provider'
 import { isHashRoute } from '../utils'
 import inMemoryCache from '../utils/inMemoryCache'
+import useLoading from './useLoading'
 
 export interface INavigationPushState {
   clear: boolean
 }
+
+const DELAY_MARGIN = 10
 
 export interface INavigation {
   push: (to: string, state?: INavigationPushState) => void
@@ -13,11 +16,9 @@ export interface INavigation {
   back: (to?: number) => void
 }
 
-const DELAY_MARGIN = 10
-
-
 const useNavigaiton = (): INavigation => {
   const { updateStacks, changeLastScreen, animationDuration, animationDelay } = useContext(ReactStackContext)
+  const startLoading = useLoading()
 
   return {
     push: (to: string, state: INavigationPushState) => {
@@ -28,20 +29,23 @@ const useNavigaiton = (): INavigation => {
           window.location.hash = String(to)
           return setTimeout(() => {
             resolve(null)
-          }, animationDuration + animationDelay + DELAY_MARGIN)
+          }, DELAY_MARGIN)
         }
   
         if(state?.clear) {
           const stackLen = inMemoryCache.getScreens().length
+          startLoading()
           updateStacks(to, true)
+          inMemoryCache.setHistoryIndex(1)
           window.history.go((stackLen - 1) * -1)
           return setTimeout(() => {
             resolve(null)
           }, animationDuration + animationDelay + DELAY_MARGIN)
         }
 
-        inMemoryCache.setHistoryIndex(historyIndex + 1)
+        startLoading()
         updateStacks(to)
+        inMemoryCache.setHistoryIndex(historyIndex + 1)
         window.history.pushState({ index: historyIndex + 1 }, '', to)
         return setTimeout(() => {
           resolve(null)
@@ -50,9 +54,9 @@ const useNavigaiton = (): INavigation => {
     },
     replace: (to: string) => {
       return new Promise((resolve) => {
-        const historyIndex = inMemoryCache.getHistoryIndex()
+        startLoading()
         changeLastScreen(to)
-        window.history.replaceState({ index: historyIndex }, '', to)
+        window.history.replaceState({ index: inMemoryCache.getHistoryIndex() }, '', to)
         return setTimeout(() => {
           resolve(null)
         }, animationDuration + animationDelay + DELAY_MARGIN)

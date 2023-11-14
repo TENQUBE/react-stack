@@ -279,10 +279,6 @@
   z-index: 10;
 }
 
-// .react-stack-bottom-sheet-content-box {
-  
-// }
-
 // toast screen
 .react-stack-toast-dimmed-area {
   position: fixed;
@@ -304,4 +300,38 @@
   justify-content: center;
   align-items: center;
   opacity: 0;
+}
+
+// progress
+.react-stack-prgoress-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: -1;
+  background: rgba(0, 0, 0, 0.2);
+  display: none;
+  opacity: 0;
+  transition: opacity 0.15s;  
+
+  &.enter {
+    display: flex;
+    z-index: 10000;
+  }
+
+  &.active {
+    opacity: 1;
+  }
+
+  &.done {
+    opacity: 0;
+  }
+
+  & > div {
+    margin-top: -2%;
+  }
 }
