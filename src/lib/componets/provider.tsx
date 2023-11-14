@@ -9,13 +9,14 @@ import inMemoryCache from '../utils/inMemoryCache'
 
 export const ReactStackContext = createContext(null)
 
-const StackProvider = ({ duration, delay, children }: IStackProvider) => {
+const StackProvider = ({ duration, delay, children, progressIndicator }: IStackProvider) => {
   const screenList = useRef<IScreen[]>([])
   const checkMultipleMovesOrClear = useRef<boolean>(false)
   const beforeHash = useRef<string>('')
   const beforePathname = useRef<string>('')
 
   const [stacks, setStacks] = useState<IScreen[]>([])
+  const [isLoading, setLoading] = useState(false)
   const [isPDC, setPDC] = useState(false)
 
   const addScreen = useCallback((data: IScreen) => {
@@ -62,7 +63,6 @@ const StackProvider = ({ duration, delay, children }: IStackProvider) => {
     if(checkMultipleMovesOrClear.current) {
       checkMultipleMovesOrClear.current = false
       window.history.replaceState({ index: 1 }, '')
-      inMemoryCache.setHistoryIndex(1)
       return
     }
 
@@ -148,7 +148,7 @@ const StackProvider = ({ duration, delay, children }: IStackProvider) => {
     <div className="react-stack-area">
       <ReactStackContext.Provider value={{ 
         addScreen, stacks, updateStacks, changeLastScreen, animationDuration, animationDelay,
-        isPDC, setPDC
+        isPDC, setPDC, isLoading, setLoading, progressIndicator
       }}>
         {children}
         <Stacks />

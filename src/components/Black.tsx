@@ -15,11 +15,11 @@ export default () => {
       <h1>black</h1>
       <Link to="#aaa">#aaa</Link>
       <p onClick={async () => {
-        // navigation.push('/', { clear: true })
+        navigation.push('/', { clear: true })
         // navigation.back(2)
-        await navigation.back()
-        await navigation.replace('/red')
-        await navigation.push('/blue')
+        // await navigation.back()
+        // await navigation.replace('/red')
+        // await navigation.push('/blue')
         // navigation.back()
         // navigation.push('/red')
         // navigation.push('/blue')

@@ -11,6 +11,33 @@ declare enum AnimationType {
     Toast = 6
 }
 
+interface IScreen {
+    readonly route: string;
+    readonly component: ReactElement | null;
+    readonly animation: AnimationType;
+    readonly className?: string;
+    pathVariable: unknown;
+    URIPath: string;
+    hash: string;
+    setPathVariable(pathVariable: unknown): void;
+    setURIPath(path: string): void;
+    setHash(hash: string): void;
+}
+
+interface INavigationPushState {
+    clear: boolean;
+}
+interface INavigation {
+    push: (to: string, state?: INavigationPushState) => void;
+    replace: (to: string) => void;
+    back: (to?: number) => void;
+}
+declare const useNavigaiton: () => INavigation;
+
+declare function useLoading(): () => void;
+
+declare const useStacks: () => IScreen[];
+
 interface IProps$3 {
     route: string;
     component: ReactElement;
@@ -43,36 +70,13 @@ interface IProps {
 }
 declare const Toast: ({ route, component, className }: IProps) => any;
 
-interface INavigationPushState {
-    clear: boolean;
-}
-interface INavigation {
-    push: (to: string, state?: INavigationPushState) => void;
-    replace: (to: string) => void;
-    back: (to?: number) => void;
-}
-declare const useNavigaiton: () => INavigation;
-
-interface IScreen {
-    readonly route: string;
-    readonly component: ReactElement | null;
-    readonly animation: AnimationType;
-    readonly className?: string;
-    pathVariable: unknown;
-    URIPath: string;
-    hash: string;
-    setPathVariable(pathVariable: unknown): void;
-    setURIPath(path: string): void;
-    setHash(hash: string): void;
-}
-
-declare const useStacks: () => IScreen[];
-
 interface IStackProvider {
     duration?: number;
     delay?: number;
+    progressIndicator: boolean;
+    loadingComponent?: ReactElement;
     children: any;
 }
-declare const ReactStackProvider: ({ duration, delay, children }: IStackProvider) => react_jsx_runtime.JSX.Element;
+declare const ReactStackProvider: ({ duration, delay, children, progressIndicator, loadingComponent }: IStackProvider) => react_jsx_runtime.JSX.Element;
 
-export { AnimationType, BottomSheet, type INavigation, type INavigationPushState, type IScreen, type IStackProvider, Link, Screen, Toast, ReactStackProvider as default, useNavigaiton as useNavigation, useStacks };
+export { AnimationType, BottomSheet, type INavigation, type INavigationPushState, type IScreen, type IStackProvider, Link, Screen, Toast, ReactStackProvider as default, useLoading, useNavigaiton as useNavigation, useStacks };
