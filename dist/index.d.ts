@@ -73,7 +73,7 @@ declare const Toast: ({ route, component, className }: IProps) => any;
 interface IStackProvider {
     duration?: number;
     delay?: number;
-    progressIndicator: boolean;
+    progressIndicator?: boolean;
     loadingComponent?: ReactElement;
     children: any;
 }

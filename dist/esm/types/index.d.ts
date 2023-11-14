@@ -12,7 +12,7 @@ import './styles/main.scss';
 interface IStackProvider {
     duration?: number;
     delay?: number;
-    progressIndicator: boolean;
+    progressIndicator?: boolean;
     loadingComponent?: ReactElement;
     children: any;
 }
