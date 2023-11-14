@@ -55255,7 +55255,7 @@ function Loading({ loadingComp }) {
                 setTimeout(() => {
                     setLoading(false);
                 }, 150);
-            }, (animationDuration * 1.5) + animationDelay);
+            }, animationDuration + animationDelay);
         }
         else {
             setActive(false);

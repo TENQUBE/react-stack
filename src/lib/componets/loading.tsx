@@ -18,7 +18,7 @@ export default function Loading ({ loadingComp }: { loadingComp: ReactElement })
         setTimeout(() => {
           setLoading(false)
         }, 150)
-      }, (animationDuration * 1.5) + animationDelay)
+      }, animationDuration + animationDelay)
     } else {
       setActive(false)
       setDone(false)
