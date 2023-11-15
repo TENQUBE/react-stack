@@ -1,4 +1,4 @@
-import { cloneElement, useContext, useRef } from 'react'
+import { cloneElement, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CSSTransition, TransitionGroup } from 'react-transition-group'
 
 import { IScreen } from '../data/screen'
@@ -10,6 +10,8 @@ const Stacks = () => {
   const { stacks, animationDuration, animationDelay } = useContext(ReactStackContext)
   const beforeStackLength = useRef(stacks.length)
 
+  const [isAnimation, setAnimation] = useState(null)
+
   // 현재 출력된 전체 스크린 배열
   const allPrintScreenArr = stacks.filter(({ route }) => !isHashRoute(route))
   // 현재 출력된 마지막 스크린의 인덱스
@@ -20,12 +22,30 @@ const Stacks = () => {
     return AnimationClassName[allPrintScreenArr[idx + 1].animation]
   }
 
+  useLayoutEffect(() => {
+    if(stacks.length === 0) return
+    // 새로고침으로 접근했을때, (이미 스택을 가지고 있는 경우 애니메이션을 비활성화)
+    setAnimation(!(isAnimation === null && stacks.length > 1))
+  }, [stacks])
+
+  useEffect(() => {
+    if(isAnimation) return
+    // 랜더링이 된 후 애니메이션이 비활성화 되어 있다면 다시 활성화
+    setAnimation(true)
+  }, [isAnimation])
+
   // 스택이 추가되었는지 확인
   const isAddStack = stacks.length > beforeStackLength.current
   beforeStackLength.current = stacks.length
-  
+
+  const duration = isAnimation ? animationDuration / 1000 : 0
+  const delay = isAnimation ? animationDelay / 1000 : 0
+
   return (
-    <TransitionGroup>
+    <TransitionGroup style={{
+      '--animation-duration': `${duration}s`,
+      '--animation-delay': `${delay}s`
+    } as any}>
       {stacks.map(({ route, component, animation, pathVariable, className }, i: number, arr: IScreen[]) => {
         // 해시로 추가된 히스토리는 스크린을 출력하지 않음
         if(isHashRoute(route)) return null
@@ -37,15 +57,8 @@ const Stacks = () => {
         return (
           <CSSTransition 
             key={route + i} 
-            timeout={timeout} 
+            timeout={isAnimation ? timeout : 0} 
             classNames={`${className} react-stack-box react-stack-box-${AnimationClassName[animation]} react-stack-box`}
-            style={{
-              'transitionProperty': 'transform, opacity',
-              'transitionDuration': `${animationDuration/1000}s, ${animationDuration/1000}s`,
-              'transitionTimingFunction': 'ease',
-              // 'display': activeScreenIdx > idx + 1 ? 'none' : 'block',
-              '--animation-delay': `${animationDelay/1000}s`
-            }}
           >
             <div data-after-animation={getAfterAnimation(idx)}>
               {

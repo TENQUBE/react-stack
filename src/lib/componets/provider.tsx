@@ -150,8 +150,8 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
         addScreen, stacks, updateStacks, changeLastScreen, animationDuration, animationDelay,
         isPDC, setPDC, isLoading, setLoading, progressIndicator
       }}>
-        {children}
         <Stacks />
+        {children}
       </ReactStackContext.Provider>
     </div>
   )

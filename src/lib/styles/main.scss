@@ -9,7 +9,7 @@
   width: 100vw;
   height: 100vh;
   position: absolute;
-  transition: transform 0.4s ease 0.1s, opacity 0.4s ease 0.1s;
+  transition: transform var(--animation-duration, '0.4s') ease var(--animation-delay, '0.15s'), opacity var(--animation-duration, '0.4s') ease var(--animation-delay, '0.15s');
   transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
   opacity: 1;
   will-change: transform, opacity;
@@ -119,10 +119,19 @@
 
   // botoom-sheet
   .react-stack-bottom-sheet-content-area {
-    transition: transform 0.4s ease;
+    transition: transform var(--animation-duration, '0.4s') ease;
     transform: translate3d(0, calc(100% - var(--maxHeight-fromTop, '0px')), 0);
     will-change: transform;
+    top: var(--maxHeight-fromTop, '0');
+
+    .react-stack-bottom-sheet-content-box {
+      height: var(--bottomsheet-height, 0);
+    }
   }
+
+  // .react-stack-bottom-sheet-dimmed-area {
+  //   opacity: 1;
+  // }
 
   // Animation: bottom-sheet
   &.react-stack-box-bottom-sheet {
@@ -167,7 +176,7 @@
 
   // toast
   .react-stack-toast-content-area {
-    transition: transform 0.4s ease, opacity 0.2s ease;
+    transition: transform var(--animation-duration, '0.4s') ease, opacity 0.2s ease;
     transform: translate3d(0, 0, 0);
     will-change: transform;
   }
@@ -222,12 +231,10 @@
   .react-stack-box {
     &[data-after-animation="to-left"] {
       transform: translate3d(-3rem, 0, 0);
-      transition-delay: var(--animation-delay, '0.15s');
     }
   
     &[data-after-animation="scale"] {
       transform: scale3d(1.05, 1.05, 1.05);
-      transition-delay: var(--animation-delay, '0.15s');
     }
   }
 }
@@ -242,7 +249,7 @@
   background: rgba(0, 0, 0, 0.2);
   opacity: 0;
   will-change: opacity;
-  transition: opacity 0.4s ease 0.1s;
+  transition: opacity var(--animation-duration, '0.4s') ease var(--animation-delay, '0.15s');
 }
 
 .react-stack-content-area {
@@ -259,9 +266,9 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.2);
-  opacity: 0;
+  // opacity: 0;
   will-change: opacity;
-  transition: opacity 0.4s ease 0.1s;
+  transition: opacity var(--animation-duration, '0.4s') ease var(--animation-delay, '0.15s');
 }
 
 .react-stack-bottom-sheet-content-area {
@@ -275,7 +282,7 @@
 .react-stack-bottom-sheet-drag-area {
   position: absolute;
   width: 100%;
-  height: 40px;
+  height: 30px;
   z-index: 10;
 }
 
@@ -289,7 +296,7 @@
   background: rgba(0, 0, 0, 0.2);
   opacity: 0;
   will-change: opacity;
-  transition: opacity 0.4s ease 0.1s;
+  transition: opacity var(--animation-duration, '0.4s') ease var(--animation-delay, '0.15s');
 }
 
 .react-stack-toast-content-area {
