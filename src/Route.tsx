@@ -43,7 +43,7 @@ export default () => {
       <Toast route="/blue" component={<Blue />} className={''} />
       {/* <Screen route="/blue" component={<Blue />} animation={AnimationType.ToLeft} /> */}
       <Screen route="/red" component={<Red />} animation={AnimationType.Scale} className={''} />
-      <Screen route="/yellow" component={<Yellow />} animation={AnimationType.ToTop} className={''} />
+      <Screen route="/yellow" component={<Yellow />} animation={AnimationType.ToLeft} className={''} />
     </ReactStackProvider>
   )
 }

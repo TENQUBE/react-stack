@@ -36,22 +36,15 @@ const BottomSheetContainer = ({ isExpandabled, height = window.innerHeight * 0.4
       <div 
         className='react-stack-bottom-sheet-dimmed-area' 
         onClick={handleClickExit} 
-        style={{
-          'transitionProperty': 'opacity',
-          'transitionDuration': `${animationDuration/1000}s`,
-          'transitionTimingFunction': 'ease'
-        }}
       />
       <div 
         ref={sheetRef}  
         className={'react-stack-bottom-sheet-content-area'}
         onClick={(e) => e.stopPropagation()}
         style={{
-          'transitionProperty': 'transform',
-          'transitionDuration': `${animationDuration/1000}s`,
-          'transitionTimingFunction': 'ease',
-          top: `${maxHeightFromTop}px`,
-          '--maxHeight-fromTop': `${maxHeightFromTop}px`
+          '--maxHeight-fromTop': `${maxHeightFromTop}px`,
+          '--bottomsheet-height': `${height}px`,
+          'top': `${maxHeightFromTop}px`
         } as any}
       >
         <div 
@@ -62,9 +55,6 @@ const BottomSheetContainer = ({ isExpandabled, height = window.innerHeight * 0.4
         <div 
           ref={contentRef} 
           className='react-stack-bottom-sheet-content-box'
-          style={{ 
-            height: height - 40 
-          }}
         >
           { children }
         </div>

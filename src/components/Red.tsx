@@ -17,6 +17,8 @@ export default () => {
       <Link to="#bbb">#bbb</Link>
       <br />
       <Link to="/black?aaa=aaa">/black</Link>
+      <br />
+      <Link to="/blue">/blue</Link>
       {/* <p onClick={() => {
         navigation.replace('/blue')
       }}>relpace</p> */}
