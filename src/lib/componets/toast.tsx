@@ -17,20 +17,10 @@ const ToastContainer = ({ animationDuration, children }) => {
     <>
       <div 
         className={'react-stack-toast-dimmed-area'}
-        style={{
-          'transitionProperty': 'opacity',
-          'transitionDuration': `${animationDuration/1000}s`,
-          'transitionTimingFunction': 'ease'
-        }}
       />
       <div 
         className={'react-stack-toast-content-area'}
-        onClick={handleClickExit} 
-        style={{
-          'transitionProperty': 'transform, opacity',
-          'transitionDuration': `${animationDuration/1000}s, ${animationDuration/2000}s`,
-          'transitionTimingFunction': 'ease, ease'
-        }}
+        onClick={handleClickExit}
       >
         <div 
           className={'react-stack-toast-content-box'}

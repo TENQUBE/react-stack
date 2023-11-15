@@ -266,7 +266,7 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.2);
-  // opacity: 0;
+  opacity: 0;
   will-change: opacity;
   transition: opacity var(--animation-duration, '0.4s') ease var(--animation-delay, '0.15s');
 }
