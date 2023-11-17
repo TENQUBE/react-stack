@@ -36,7 +36,7 @@ const White = () => {
 
 export default () => {
   return (
-    <ReactStackProvider duration={400} delay={200} progressIndicator={true} loadingComponent={null}>
+    <ReactStackProvider duration={0} delay={0} progressIndicator={false} loadingComponent={null}>
       <Screen route="/" component={<White />} animation={AnimationType.None} className={''}/>
       {/* <Screen route="/black/:test/black" component={<Black />} animation={AnimationType.Scale} /> */}
       <BottomSheet route="/black" isExpandabled={false} height={500} component={<Black />} className={'tttttt ssssss'} />
