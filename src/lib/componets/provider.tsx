@@ -96,7 +96,8 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
       return isHashRoute(screen.route) 
         ? Screen.hashScreen(screen.URIPath) 
         : matchRouteToPathname(screenList.current, screen.URIPath) 
-    })
+    }).filter(Boolean)
+
     if(storageStacks[storageStacks.length - 1].URIPath !== allPath 
       || storageStacks.length !== window.history?.state?.index) {
       return false
@@ -135,6 +136,9 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
     } else {
       window.history.replaceState({ index: 1 }, '')
     }
+
+    // 인메모리 초기화
+    inMemoryCache.clear()
 
     // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
     if(initStorageStackData()) return

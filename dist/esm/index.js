@@ -33721,7 +33721,9 @@ const Stacks = () => {
             const idx = i - arr.slice(0, i).filter(({ route }) => isHashRoute(route)).length;
             // 스택이 추가되는 경우 애니메이션 딜레이 시간 추가
             const timeout = isAddStack ? animationDuration + animationDelay : animationDuration;
-            return (jsx(CSSTransition$1, { timeout: isAnimation ? timeout : 0, classNames: `${className} react-stack-box react-stack-box-${AnimationClassName[animation]} react-stack-box`, children: jsx("div", { "data-after-animation": getAfterAnimation(idx), children: cloneElement(component, Object.assign({
+            // className 프롭스가 있다면 추가
+            const stackClassName = className ? `${className} react-stack-box` : 'react-stack-box';
+            return (jsx(CSSTransition$1, { timeout: isAnimation ? timeout : 0, classNames: `${stackClassName} react-stack-box-${AnimationClassName[animation]} react-stack-box`, children: jsx("div", { "data-after-animation": getAfterAnimation(idx), children: cloneElement(component, Object.assign({
                         params: pathVariable,
                         animationDuration: animationDuration
                     })) }) }, route + i));
@@ -33744,6 +33746,10 @@ class InMemoryCache {
     }
     getHistoryIndex() {
         return this.historyIndex;
+    }
+    clear() {
+        this.screens = [];
+        this.historyIndex = 1;
     }
 }
 var inMemoryCache = new InMemoryCache();
@@ -33827,7 +33833,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
             return isHashRoute(screen.route)
                 ? Screen$1.hashScreen(screen.URIPath)
                 : matchRouteToPathname(screenList.current, screen.URIPath);
-        });
+        }).filter(Boolean);
         if (storageStacks[storageStacks.length - 1].URIPath !== allPath
             || storageStacks.length !== ((_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index)) {
             return false;
@@ -33861,6 +33867,8 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
         else {
             window.history.replaceState({ index: 1 }, '');
         }
+        // 인메모리 초기화
+        inMemoryCache.clear();
         // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
         if (initStorageStackData())
             return;
