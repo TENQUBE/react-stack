@@ -47,7 +47,7 @@ test('바텀시트 형태의 화면을 출력할 수 있다.', async () => {
 })
 
 
-test('dimmed 영역을 터치하면 바텀시트 화면을 종료한다.', async () => {
+test('바텀시트 화면의 dimmed 영역을 터치하면 바텀시트 화면을 종료한다.', async () => {
   const Dashboard = () => {
     return (
       <div>
@@ -77,6 +77,7 @@ test('dimmed 영역을 터치하면 바텀시트 화면을 종료한다.', async
 
   await user.click(screen.getByText('bottom sheet'))
   expect(screen.getByText('bottom sheet content')).toBeInTheDocument()
+  expect(document.getElementsByClassName('bottomsheet').length).toBe(1)
 
   fireEvent.click(document.getElementsByClassName('react-stack-bottom-sheet-dimmed-area')[0])
   await waitFor(() => expect(document.getElementsByClassName('bottomsheet').length).toBe(0))

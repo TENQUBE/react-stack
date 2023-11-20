@@ -5,7 +5,7 @@ import { AnimationType } from '../interfaces'
 import { useNavigation } from '..'
 import { usePDC } from '../hooks/usePDC'
 
-const ToastContainer = ({ animationDuration, children }) => {
+const ToastContainer = ({ children }) => {
   const navigation = useNavigation()
   const pdc = usePDC()
 
@@ -35,13 +35,12 @@ const ToastContainer = ({ animationDuration, children }) => {
 
 interface IToastComp {
   component: ReactElement
-  animationDuration?: number
   params?: unknown
 }
 
-const ToastComponent = ({ component, params, animationDuration }: IToastComp) => {
+const ToastComponent = ({ component, params }: IToastComp) => {
   return (
-    <ToastContainer animationDuration={animationDuration}>
+    <ToastContainer>
       { cloneElement(component, {...{ params }}) }
     </ToastContainer>
   )
