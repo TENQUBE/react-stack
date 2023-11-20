@@ -1,4 +1,4 @@
-import { ReactElement, cloneElement, useContext, useLayoutEffect } from 'react'
+import { ReactElement, cloneElement, useContext } from 'react'
 import { ReactStackContext } from './provider'
 import ScreenObj from '../data/screen'
 import { AnimationType } from '../interfaces'
@@ -50,21 +50,18 @@ const ToastComponent = ({ component, params, animationDuration }: IToastComp) =>
 interface IProps {
   route: string
   component: ReactElement
-  animation?: AnimationType
   className?: string
 }
 
 const Toast = ({ route, component, className }: IProps) => {
   const { addScreen } = useContext(ReactStackContext)
 
-  useLayoutEffect(() => {
-    addScreen(new ScreenObj({ 
-      route, 
-      component: <ToastComponent component={component} />, 
-      animation: AnimationType.Toast,
-      className
-    }))
-  }, [])
+  addScreen(new ScreenObj({ 
+    route, 
+    component: <ToastComponent component={component} />, 
+    animation: AnimationType.Toast,
+    className
+  }))
 
   return null
 }

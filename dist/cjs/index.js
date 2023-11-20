@@ -33970,14 +33970,12 @@ const ScreenComponent = ({ component, params, animationDuration }) => {
 };
 const Screen = ({ route, component, animation, className }) => {
     const { addScreen } = React.useContext(ReactStackContext);
-    React.useLayoutEffect(() => {
-        addScreen(new Screen$1({
-            route,
-            component: jsxRuntime.jsx(ScreenComponent, { component: component }),
-            animation,
-            className
-        }));
-    }, []);
+    addScreen(new Screen$1({
+        route,
+        component: jsxRuntime.jsx(ScreenComponent, { component: component }),
+        animation,
+        className
+    }));
     return null;
 };
 
@@ -34126,7 +34124,7 @@ function usePDC() {
     return handleClick;
 }
 
-const BottomSheetContainer = ({ isExpandabled, height = window.innerHeight * 0.4, animationDuration, children }) => {
+const BottomSheetContainer = ({ isExpandabled, height = window.innerHeight * 0.4, children }) => {
     const navigation = useNavigaiton();
     const pdc = usePDC();
     const maxHeightFromTop = window.innerHeight - height;
@@ -34145,19 +34143,17 @@ const BottomSheetContainer = ({ isExpandabled, height = window.innerHeight * 0.4
                     'top': `${maxHeightFromTop}px`
                 }, children: [jsxRuntime.jsx("div", { ref: eventRef, className: 'react-stack-bottom-sheet-drag-area', onClick: (e) => e.stopPropagation() }), jsxRuntime.jsx("div", { ref: contentRef, className: 'react-stack-bottom-sheet-content-box', children: children })] })] }));
 };
-const BottomSheetComp = ({ component, isExpandabled, height, params, animationDuration }) => {
-    return (jsxRuntime.jsx(BottomSheetContainer, { isExpandabled: isExpandabled, height: height, animationDuration: animationDuration, children: React.cloneElement(component, Object.assign({ params })) }));
+const BottomSheetComp = ({ component, isExpandabled, height, params }) => {
+    return (jsxRuntime.jsx(BottomSheetContainer, { isExpandabled: isExpandabled, height: height, children: React.cloneElement(component, Object.assign({ params })) }));
 };
 const BottomSheet = ({ route, component, isExpandabled, height, className }) => {
     const { addScreen } = React.useContext(ReactStackContext);
-    React.useLayoutEffect(() => {
-        addScreen(new Screen$1({
-            route,
-            component: jsxRuntime.jsx(BottomSheetComp, { isExpandabled: isExpandabled, height: height, component: component }),
-            animation: exports.AnimationType.BotttomSheet,
-            className
-        }));
-    }, []);
+    addScreen(new Screen$1({
+        route,
+        component: jsxRuntime.jsx(BottomSheetComp, { isExpandabled: isExpandabled, height: height, component: component }),
+        animation: exports.AnimationType.BotttomSheet,
+        className
+    }));
     return null;
 };
 
@@ -34174,14 +34170,12 @@ const ToastComponent = ({ component, params, animationDuration }) => {
 };
 const Toast = ({ route, component, className }) => {
     const { addScreen } = React.useContext(ReactStackContext);
-    React.useLayoutEffect(() => {
-        addScreen(new Screen$1({
-            route,
-            component: jsxRuntime.jsx(ToastComponent, { component: component }),
-            animation: exports.AnimationType.Toast,
-            className
-        }));
-    }, []);
+    addScreen(new Screen$1({
+        route,
+        component: jsxRuntime.jsx(ToastComponent, { component: component }),
+        animation: exports.AnimationType.Toast,
+        className
+    }));
     return null;
 };
 

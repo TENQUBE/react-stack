@@ -7,19 +7,7 @@ import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import ReactStackProvider, { AnimationType, Screen, useNavigation } from '../../dist/esm'
-
-const initWindowLocation = () => {
-  window = Object.create(window)
-
-  Object.defineProperty(window, 'location', {
-    value: {
-      href: 'http://localhost:1234/',
-      origin: 'http://localhost:1234',
-      pathname: '/'
-    },
-    writable: true
-  })
-}
+import { initWindowLocation } from './shares/location'
 
 beforeEach(() => {
   initWindowLocation()

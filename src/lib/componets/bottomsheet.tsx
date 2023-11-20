@@ -1,4 +1,4 @@
-import { ReactElement, cloneElement, useContext, useEffect, useLayoutEffect } from 'react'
+import { ReactElement, cloneElement, useContext, useEffect } from 'react'
 
 import { useBottomSheet } from '../hooks/useBottomSheet'
 import { usePDC } from '../hooks/usePDC'
@@ -10,11 +10,10 @@ import { AnimationType } from '../interfaces'
 interface IContainerProps {
   height?: number
   isExpandabled?: boolean
-  animationDuration?: number
   children: React.ReactNode
 }
 
-const BottomSheetContainer = ({ isExpandabled, height = window.innerHeight * 0.4, animationDuration, children }: IContainerProps) => {
+const BottomSheetContainer = ({ isExpandabled, height = window.innerHeight * 0.4, children }: IContainerProps) => {
   const navigation = useNavigation()
   const pdc = usePDC()
 
@@ -68,12 +67,11 @@ interface IBottomSheetComp {
   isExpandabled?: boolean
   height?: number
   params?: unknown
-  animationDuration?: number
 }
 
-const BottomSheetComp = ({ component, isExpandabled, height, params, animationDuration }: IBottomSheetComp) => {
+const BottomSheetComp = ({ component, isExpandabled, height, params }: IBottomSheetComp) => {
   return (
-    <BottomSheetContainer isExpandabled={isExpandabled} height={height} animationDuration={animationDuration}>
+    <BottomSheetContainer isExpandabled={isExpandabled} height={height}>
       { cloneElement(component, {...{ params }}) }
     </BottomSheetContainer>
   )
@@ -90,14 +88,12 @@ interface IProps {
 const BottomSheet = ({ route,  component, isExpandabled, height, className }: IProps)  => {
   const { addScreen } = useContext(ReactStackContext)
 
-  useLayoutEffect(() => {
-    addScreen(new ScreenObj({ 
-      route, 
-      component: <BottomSheetComp isExpandabled={isExpandabled} height={height} component={component} />, 
-      animation: AnimationType.BotttomSheet,
-      className
-    }))
-  }, [])
+  addScreen(new ScreenObj({ 
+    route, 
+    component: <BottomSheetComp isExpandabled={isExpandabled} height={height} component={component} />, 
+    animation: AnimationType.BotttomSheet,
+    className
+  }))
 
   return null
 }

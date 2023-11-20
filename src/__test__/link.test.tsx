@@ -7,19 +7,7 @@ import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import ReactStackProvider, { AnimationType, Link, Screen } from '../../dist/esm'
-
-const initWindowLocation = () => {
-  window = Object.create(window)
-
-  Object.defineProperty(window, 'location', {
-    value: {
-      href: 'http://localhost:1234/',
-      origin: 'http://localhost:1234',
-      pathname: '/'
-    },
-    writable: true
-  })
-}
+import { initWindowLocation } from './shares/location'
 
 beforeEach(() => {
   initWindowLocation()
@@ -43,7 +31,7 @@ test('링크 컴포넌트를 사용하여 새로운 화면(스택)을 추가할 
     )
   }
 
-  const result = render(
+  render(
     <ReactStackProvider duration={0} delay={0} progressIndicator={false} loadingComponent={null}>
       <Screen route="/" component={<Dashboard />} animation={AnimationType.None} className={''} />
       <Screen route="/about" component={<AboutUs />} animation={AnimationType.None} className={''} />
@@ -54,7 +42,7 @@ test('링크 컴포넌트를 사용하여 새로운 화면(스택)을 추가할 
 
   expect(screen.getByText('dashboard')).toBeInTheDocument()
 
-  await user.click(result.getByText('about'))
+  await user.click(screen.getByText('about'))
   expect(screen.getByText('about us')).toBeInTheDocument()
 })
 
@@ -69,7 +57,7 @@ test('링크 컴포넌트를 사용하여 해시를 추가할 수 있다.', asyn
     )
   }
 
-  const result = render(
+  render(
     <ReactStackProvider duration={0} delay={0} progressIndicator={false} loadingComponent={null}>
       <Screen route="/" component={<Dashboard />} animation={AnimationType.None} className={''} />
     </ReactStackProvider>
@@ -79,6 +67,6 @@ test('링크 컴포넌트를 사용하여 해시를 추가할 수 있다.', asyn
 
   expect(screen.getByText('dashboard')).toBeInTheDocument()
 
-  await user.click(result.getByText('new hash'))
+  await user.click(screen.getByText('new hash'))
   expect(window.location.hash).toEqual('#hash')
 })
