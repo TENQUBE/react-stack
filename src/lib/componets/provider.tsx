@@ -1,11 +1,12 @@
 import { createContext, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
-import { IStackProvider } from '..'
+import { IStackProvider, Screen } from '..'
 import { ANIMAITON_DELAY, ANIMATION_DURATION, STORAGE_KEY_SCREEN_STACKS } from '../constants'
 import { isHashRoute, matchRouteToPathname } from '../utils'
-import Screen, { IScreen } from '../data/screen'
+import ScreenObj, { IScreen } from '../data/screen'
 import Stacks from './stacks'
 import inMemoryCache from '../utils/inMemoryCache'
+import NotFound from './notFound'
 
 export const ReactStackContext = createContext(null)
 
@@ -77,7 +78,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
 
     // 패스는 같고 해시만 변했을 때
     if(pathname === bPath && hash && (!bHash || isForward)) {
-      const newHashScreen = Screen.hashScreen(allPath)
+      const newHashScreen = ScreenObj.hashScreen(allPath)
       setStacks([...stacks, newHashScreen])
       return
     }
@@ -94,7 +95,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
     const allPath = decodeURI(href.split(origin)[1])
     const storageStacks: IScreen[] = storageStacksData.map((screen: IScreen) => {
       return isHashRoute(screen.route) 
-        ? Screen.hashScreen(screen.URIPath) 
+        ? ScreenObj.hashScreen(screen.URIPath) 
         : matchRouteToPathname(screenList.current, screen.URIPath) 
     }).filter(Boolean)
 
@@ -156,6 +157,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
       }}>
         <Stacks />
         {children}
+        <Screen route='*' component={<NotFound />} />
       </ReactStackContext.Provider>
     </div>
   )

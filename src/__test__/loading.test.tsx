@@ -3,10 +3,10 @@
  */
 
 import React from 'react'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
-import ReactStackProvider, { AnimationType, Link, Screen, Toast, useLoading } from '../../dist/esm'
+import ReactStackProvider, { AnimationType, Screen, useLoading } from '../../dist/esm'
 import { initWindowLocation } from './shares/location'
 
 beforeEach(() => {

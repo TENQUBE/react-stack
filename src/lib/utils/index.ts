@@ -89,5 +89,5 @@ export const matchRouteToPathname = (stacks: IScreen[], pathname: string) => {
       stacks[i].setHash(pathname.split('#')[1])
       return stacks[i]
     }
-  }    
+  }
 }
