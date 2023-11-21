@@ -11,6 +11,7 @@ const Stacks = () => {
   const beforeStackLength = useRef(stacks.length)
 
   const [isAnimation, setAnimation] = useState(null)
+  const [isAddStack, setIsAddStack] = useState(true)
 
   // 현재 출력된 전체 스크린 배열
   const allPrintScreenArr = stacks.filter(({ route }) => !isHashRoute(route))
@@ -26,6 +27,9 @@ const Stacks = () => {
     if(stacks.length === 0) return
     // 새로고침으로 접근했을때, (이미 스택을 가지고 있는 경우 애니메이션을 비활성화)
     setAnimation(!(isAnimation === null && stacks.length > 1))
+    // 스택이 추가(감소)되었는지 확인
+    setIsAddStack(stacks.length >= beforeStackLength.current)
+    beforeStackLength.current = stacks.length
   }, [stacks])
 
   useEffect(() => {
@@ -34,25 +38,22 @@ const Stacks = () => {
     setAnimation(true)
   }, [isAnimation])
 
-  // 스택이 추가되었는지 확인
-  const isAddStack = stacks.length > beforeStackLength.current
-  beforeStackLength.current = stacks.length
-
   const duration = isAnimation ? animationDuration / 1000 : 0
   const delay = isAnimation ? animationDelay / 1000 : 0
+
+  // 스택이 추가되는 경우 애니메이션 딜레이 시간 추가
+  const timeout = isAddStack ? animationDuration + animationDelay : animationDuration
 
   return (
     <TransitionGroup style={{
       '--animation-duration': `${duration}s`,
-      '--animation-delay': `${delay}s`
+      '--animation-delay': `${isAddStack ? delay : 0}s`
     } as any}>
       {stacks.map(({ route, component, animation, pathVariable, className }, i: number, arr: IScreen[]) => {
         // 해시로 추가된 히스토리는 스크린을 출력하지 않음
         if(isHashRoute(route)) return null
         // 출력된 각각의 스크린 인덱스
         const idx = i - arr.slice(0, i).filter(({ route }) => isHashRoute(route)).length
-        // 스택이 추가되는 경우 애니메이션 딜레이 시간 추가
-        const timeout = isAddStack ? animationDuration + animationDelay : animationDuration
         // className 프롭스가 있다면 추가
         const stackClassName = className ? `${className} react-stack-box` : 'react-stack-box'
 

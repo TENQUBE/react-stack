@@ -27,7 +27,7 @@ var AnimationClassName;
 })(AnimationClassName || (AnimationClassName = {}));
 
 const STORAGE_KEY_SCREEN_STACKS = 'reactAllPrintedScreenStacks';
-const ANIMATION_DURATION = !/iPhone/i.test(window.navigator.userAgent) ? 400 : 350;
+const ANIMATION_DURATION = 350;
 const ANIMAITON_DELAY = 150;
 
 const isHashRoute = (route) => {
@@ -33687,6 +33687,7 @@ const Stacks = () => {
     const { stacks, animationDuration, animationDelay } = React.useContext(ReactStackContext);
     const beforeStackLength = React.useRef(stacks.length);
     const [isAnimation, setAnimation] = React.useState(null);
+    const [isAddStack, setIsAddStack] = React.useState(true);
     // 현재 출력된 전체 스크린 배열
     const allPrintScreenArr = stacks.filter(({ route }) => !isHashRoute(route));
     // 현재 출력된 마지막 스크린의 인덱스
@@ -33702,6 +33703,9 @@ const Stacks = () => {
             return;
         // 새로고침으로 접근했을때, (이미 스택을 가지고 있는 경우 애니메이션을 비활성화)
         setAnimation(!(isAnimation === null && stacks.length > 1));
+        // 스택이 추가(감소)되었는지 확인
+        setIsAddStack(stacks.length >= beforeStackLength.current);
+        beforeStackLength.current = stacks.length;
     }, [stacks]);
     React.useEffect(() => {
         if (isAnimation)
@@ -33709,22 +33713,19 @@ const Stacks = () => {
         // 랜더링이 된 후 애니메이션이 비활성화 되어 있다면 다시 활성화
         setAnimation(true);
     }, [isAnimation]);
-    // 스택이 추가되었는지 확인
-    const isAddStack = stacks.length > beforeStackLength.current;
-    beforeStackLength.current = stacks.length;
     const duration = isAnimation ? animationDuration / 1000 : 0;
     const delay = isAnimation ? animationDelay / 1000 : 0;
+    // 스택이 추가되는 경우 애니메이션 딜레이 시간 추가
+    const timeout = isAddStack ? animationDuration + animationDelay : animationDuration;
     return (jsxRuntime.jsx(TransitionGroup$1, { style: {
             '--animation-duration': `${duration}s`,
-            '--animation-delay': `${delay}s`
+            '--animation-delay': `${isAddStack ? delay : 0}s`
         }, children: stacks.map(({ route, component, animation, pathVariable, className }, i, arr) => {
             // 해시로 추가된 히스토리는 스크린을 출력하지 않음
             if (isHashRoute(route))
                 return null;
             // 출력된 각각의 스크린 인덱스
             const idx = i - arr.slice(0, i).filter(({ route }) => isHashRoute(route)).length;
-            // 스택이 추가되는 경우 애니메이션 딜레이 시간 추가
-            const timeout = isAddStack ? animationDuration + animationDelay : animationDuration;
             // className 프롭스가 있다면 추가
             const stackClassName = className ? `${className} react-stack-box` : 'react-stack-box';
             return (jsxRuntime.jsx(CSSTransition$1, { timeout: isAnimation ? timeout : 0, classNames: `${stackClassName} react-stack-box-${AnimationClassName[animation]} react-stack-box`, children: jsxRuntime.jsx("div", { "data-after-animation": getAfterAnimation(idx), children: React.cloneElement(component, Object.assign({
