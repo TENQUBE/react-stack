@@ -53,12 +53,14 @@ const Stacks = () => {
         const idx = i - arr.slice(0, i).filter(({ route }) => isHashRoute(route)).length
         // 스택이 추가되는 경우 애니메이션 딜레이 시간 추가
         const timeout = isAddStack ? animationDuration + animationDelay : animationDuration
+        // className 프롭스가 있다면 추가
+        const stackClassName = className ? `${className} react-stack-box` : 'react-stack-box'
 
         return (
           <CSSTransition 
             key={route + i} 
             timeout={isAnimation ? timeout : 0} 
-            classNames={`${className} react-stack-box react-stack-box-${AnimationClassName[animation]} react-stack-box`}
+            classNames={`${stackClassName} react-stack-box-${AnimationClassName[animation]} react-stack-box`}
           >
             <div data-after-animation={getAfterAnimation(idx)}>
               {

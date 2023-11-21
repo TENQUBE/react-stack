@@ -1,4 +1,4 @@
-import { ReactElement, cloneElement, useContext, useLayoutEffect } from 'react'
+import { ReactElement, cloneElement, useContext } from 'react'
 import { ReactStackContext } from './provider'
 import ScreenObj from '../data/screen'
 import { AnimationType } from '../interfaces'
@@ -45,14 +45,12 @@ interface IProps {
 const Screen = ({ route, component, animation, className }: IProps) => {
   const { addScreen } = useContext(ReactStackContext)
 
-  useLayoutEffect(() => {
-    addScreen(new ScreenObj({ 
-      route, 
-      component: <ScreenComponent component={component} />, 
-      animation,
-      className
-    }))
-  }, [])
+  addScreen(new ScreenObj({ 
+    route, 
+    component: <ScreenComponent component={component} />, 
+    animation,
+    className
+  }))
 
   return null
 }

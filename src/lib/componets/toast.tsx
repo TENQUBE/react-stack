@@ -1,11 +1,11 @@
-import { ReactElement, cloneElement, useContext, useLayoutEffect } from 'react'
+import { ReactElement, cloneElement, useContext } from 'react'
 import { ReactStackContext } from './provider'
 import ScreenObj from '../data/screen'
 import { AnimationType } from '../interfaces'
 import { useNavigation } from '..'
 import { usePDC } from '../hooks/usePDC'
 
-const ToastContainer = ({ animationDuration, children }) => {
+const ToastContainer = ({ children }) => {
   const navigation = useNavigation()
   const pdc = usePDC()
 
@@ -35,13 +35,12 @@ const ToastContainer = ({ animationDuration, children }) => {
 
 interface IToastComp {
   component: ReactElement
-  animationDuration?: number
   params?: unknown
 }
 
-const ToastComponent = ({ component, params, animationDuration }: IToastComp) => {
+const ToastComponent = ({ component, params }: IToastComp) => {
   return (
-    <ToastContainer animationDuration={animationDuration}>
+    <ToastContainer>
       { cloneElement(component, {...{ params }}) }
     </ToastContainer>
   )
@@ -50,21 +49,18 @@ const ToastComponent = ({ component, params, animationDuration }: IToastComp) =>
 interface IProps {
   route: string
   component: ReactElement
-  animation?: AnimationType
   className?: string
 }
 
 const Toast = ({ route, component, className }: IProps) => {
   const { addScreen } = useContext(ReactStackContext)
 
-  useLayoutEffect(() => {
-    addScreen(new ScreenObj({ 
-      route, 
-      component: <ToastComponent component={component} />, 
-      animation: AnimationType.Toast,
-      className
-    }))
-  }, [])
+  addScreen(new ScreenObj({ 
+    route, 
+    component: <ToastComponent component={component} />, 
+    animation: AnimationType.Toast,
+    className
+  }))
 
   return null
 }
