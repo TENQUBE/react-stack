@@ -24,6 +24,11 @@ class InMemoryCache {
   getHistoryIndex() {
     return this.historyIndex
   }
+
+  clear() {
+    this.screens = []
+    this.historyIndex = 1
+  }
 }
 
 export default new InMemoryCache()

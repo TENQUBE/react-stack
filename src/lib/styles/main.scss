@@ -2,7 +2,8 @@
   position: absolute;
   width: 100vw;
   height: 100vh;
-  overflow: hidden; 
+  overflow: hidden;
+  font-family: Roboto, sans-serif;
 }
 
 .react-stack-box {
@@ -340,5 +341,14 @@
 
   & > div {
     margin-top: -2%;
+  }
+}
+
+.react-stack-not-found-area {
+  padding-top: 10%;
+  text-align: center;
+  h2 {
+    font-size: 18px;
+    font-weight: 600;
   }
 }

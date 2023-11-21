@@ -65,7 +65,6 @@ declare const BottomSheet: ({ route, component, isExpandabled, height, className
 interface IProps {
     route: string;
     component: ReactElement;
-    animation?: AnimationType;
     className?: string;
 }
 declare const Toast: ({ route, component, className }: IProps) => any;

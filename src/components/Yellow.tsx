@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from '../../dist/esm'
+import { Link, useNavigation } from '../../dist/esm'
 const styles: any = {
   background: '#fff',
   position: 'absolute',
@@ -8,9 +8,16 @@ const styles: any = {
 }
 
 export default () => {
+  const navigaiton = useNavigation()
+
+  const handleClick = () => {
+    navigaiton.back()
+  }
+
   return (
     <div style={{...styles}}>
       <h1>Yellow</h1>
+      <p onClick={handleClick}>back</p>
       <Link to="/black">/black</Link>
     </div>
   )
