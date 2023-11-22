@@ -3,7 +3,7 @@ import { createContext, useCallback, useEffect, useLayoutEffect, useRef, useStat
 import { IStackProvider, Screen } from '..'
 import { ANIMAITON_DELAY, ANIMATION_DURATION, STORAGE_KEY_SCREEN_STACKS } from '../constants'
 import { isHashRoute, matchRouteToPathname } from '../utils'
-import ScreenObj, { IScreen } from '../data/screen'
+import ScreenObj, { IScreen, IScreenParams } from '../data/screen'
 import Stacks from './stacks'
 import inMemoryCache from '../utils/inMemoryCache'
 import NotFound from './notFound'
@@ -11,16 +11,17 @@ import NotFound from './notFound'
 export const ReactStackContext = createContext(null)
 
 const StackProvider = ({ duration, delay, children, progressIndicator }: IStackProvider) => {
-  const screenList = useRef<IScreen[]>([])
+  const screenList = useRef<IScreenParams[]>([])
   const checkMultipleMovesOrClear = useRef<boolean>(false)
   const beforeHash = useRef<string>('')
   const beforePathname = useRef<string>('')
+  const isAddStack = useRef<boolean>(true)
 
   const [stacks, setStacks] = useState<IScreen[]>([])
   const [isLoading, setLoading] = useState(false)
   const [isPDC, setPDC] = useState(false)
 
-  const addScreen = useCallback((data: IScreen) => {
+  const addScreen = useCallback((data: IScreenParams) => {
     screenList.current = [...screenList.current, data]
   }, [])
 
@@ -37,11 +38,16 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
 
     if(isToNo) {
       if(to < -1) checkMultipleMovesOrClear.current = true
+      isAddStack.current = false
       inMemoryCache.setScreens(baseStack.slice(0, baseStack.length + to))
       setStacks(baseStack.slice(0, baseStack.length + to))
     } else {
-      if(isClear) checkMultipleMovesOrClear.current = true
       const stackData = matchRouteToPathname(screenList.current, to)
+      if(isClear) {
+        checkMultipleMovesOrClear.current = true
+        isAddStack.current = false
+      }
+      isAddStack.current = true
       inMemoryCache.setScreens(isClear ? [stackData] : [...baseStack, stackData])
       setStacks(isClear ? [stackData] : [...baseStack, stackData])
     }
@@ -93,10 +99,12 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
     if(!storageStacksData || storageStacksData.length === 0) return
 
     const allPath = decodeURI(href.split(origin)[1])
-    const storageStacks: IScreen[] = storageStacksData.map((screen: IScreen) => {
-      return isHashRoute(screen.route) 
-        ? ScreenObj.hashScreen(screen.URIPath) 
-        : matchRouteToPathname(screenList.current, screen.URIPath) 
+    const storageStacks: IScreen[] = storageStacksData.map((screen: IScreen, i: number) => {
+      if(isHashRoute(screen.route)) {
+        return ScreenObj.hashScreen(screen.URIPath) 
+      } else {
+        return matchRouteToPathname(screenList.current, screen.URIPath)
+      }
     }).filter(Boolean)
 
     if(storageStacks[storageStacks.length - 1].URIPath !== allPath 
@@ -130,6 +138,9 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
   }, [stacks])
 
   useLayoutEffect(() => {
+    // 인메모리 초기화
+    inMemoryCache.clear()
+
     // 초기 히스토리 인덱스 설정
     const index = window.history?.state?.index
     if(index) {
@@ -137,9 +148,6 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
     } else {
       window.history.replaceState({ index: 1 }, '')
     }
-
-    // 인메모리 초기화
-    inMemoryCache.clear()
 
     // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
     if(initStorageStackData()) return
@@ -153,7 +161,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
     <div className="react-stack-area">
       <ReactStackContext.Provider value={{ 
         addScreen, stacks, updateStacks, changeLastScreen, animationDuration, animationDelay,
-        isPDC, setPDC, isLoading, setLoading, progressIndicator
+        isPDC, setPDC, isLoading, setLoading, progressIndicator, isAddStack
       }}>
         <Stacks />
         {children}

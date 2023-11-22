@@ -1,4 +1,4 @@
-import { IScreen } from '../data/screen'
+import Screen, { IScreenParams } from '../data/screen'
 
 export const isHashRoute = (route: string | number): boolean => {
   return typeof route === 'string' && route[0] === '#'
@@ -76,7 +76,7 @@ const matchRoute = (paths: string[], matchData: IPathSubDirectory[]): { match: b
   }
 }
 
-export const matchRouteToPathname = (stacks: IScreen[], pathname: string) => {
+export const matchRouteToPathname = (stacks: IScreenParams[], pathname: string) => {
   const matchData = stacks.map(({ route }) => explodeRouteSegments(route))
   const segments = pathname.split('#')[0].split('?')[0].split('/')
   const paths = segments.slice(1, segments.length)
@@ -84,10 +84,11 @@ export const matchRouteToPathname = (stacks: IScreen[], pathname: string) => {
   for(let i=0; i<matchData.length; i++) {
     const { match, pathVariable } = matchRoute(paths, matchData[i])
     if(match) {
-      stacks[i].setPathVariable(pathVariable)
-      stacks[i].setURIPath(pathname)
-      stacks[i].setHash(pathname.split('#')[1])
-      return stacks[i]
+      const screenStack = new Screen(stacks[i])
+      screenStack.setPathVariable(pathVariable)
+      screenStack.setURIPath(pathname)
+      screenStack.setHash(pathname.split('#')[1])
+      return screenStack
     }
   }
 }

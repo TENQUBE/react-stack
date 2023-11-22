@@ -30,6 +30,33 @@ const STORAGE_KEY_SCREEN_STACKS = 'reactAllPrintedScreenStacks';
 const ANIMATION_DURATION = 350;
 const ANIMAITON_DELAY = 150;
 
+let Screen$1 = class Screen {
+    constructor({ route, component, animation, className }) {
+        this.route = route ? route : '*';
+        this.component = component ? component : null;
+        this.animation = typeof animation === 'undefined' ? exports.AnimationType.None : animation;
+        if (className)
+            this.className = className;
+        this.pathVariable = {};
+    }
+    static hashScreen(allPath) {
+        const hash = allPath.split('#')[1];
+        const hashStack = new Screen({ route: `#${hash}` });
+        hashStack.setURIPath(allPath);
+        hashStack.hash = hash;
+        return hashStack;
+    }
+    setPathVariable(pathVariable) {
+        this.pathVariable = pathVariable;
+    }
+    setURIPath(path) {
+        this.URIPath = path;
+    }
+    setHash(hash) {
+        this.hash = hash;
+    }
+};
+
 const isHashRoute = (route) => {
     return typeof route === 'string' && route[0] === '#';
 };
@@ -97,38 +124,12 @@ const matchRouteToPathname = (stacks, pathname) => {
     for (let i = 0; i < matchData.length; i++) {
         const { match, pathVariable } = matchRoute(paths, matchData[i]);
         if (match) {
-            stacks[i].setPathVariable(pathVariable);
-            stacks[i].setURIPath(pathname);
-            stacks[i].setHash(pathname.split('#')[1]);
-            return stacks[i];
+            const screenStack = new Screen$1(stacks[i]);
+            screenStack.setPathVariable(pathVariable);
+            screenStack.setURIPath(pathname);
+            screenStack.setHash(pathname.split('#')[1]);
+            return screenStack;
         }
-    }
-};
-
-let Screen$1 = class Screen {
-    constructor({ route, component, animation, className }) {
-        this.route = route ? route : '*';
-        this.component = component ? component : null;
-        this.animation = typeof animation === 'undefined' ? exports.AnimationType.None : animation;
-        if (className)
-            this.className = className;
-        this.pathVariable = {};
-    }
-    static hashScreen(allPath) {
-        const hash = allPath.split('#')[1];
-        const hashStack = new Screen({ route: `#${hash}` });
-        hashStack.setURIPath(allPath);
-        hashStack.hash = hash;
-        return hashStack;
-    }
-    setPathVariable(pathVariable) {
-        this.pathVariable = pathVariable;
-    }
-    setURIPath(path) {
-        this.URIPath = path;
-    }
-    setHash(hash) {
-        this.hash = hash;
     }
 };
 
@@ -33684,10 +33685,8 @@ TransitionGroup.defaultProps = defaultProps;
 var TransitionGroup$1 = TransitionGroup;
 
 const Stacks = () => {
-    const { stacks, animationDuration, animationDelay } = React.useContext(ReactStackContext);
-    const beforeStackLength = React.useRef(stacks.length);
+    const { stacks, animationDuration, animationDelay, isAddStack } = React.useContext(ReactStackContext);
     const [isAnimation, setAnimation] = React.useState(null);
-    const [isAddStack, setIsAddStack] = React.useState(true);
     // 현재 출력된 전체 스크린 배열
     const allPrintScreenArr = stacks.filter(({ route }) => !isHashRoute(route));
     // 현재 출력된 마지막 스크린의 인덱스
@@ -33703,23 +33702,20 @@ const Stacks = () => {
             return;
         // 새로고침으로 접근했을때, (이미 스택을 가지고 있는 경우 애니메이션을 비활성화)
         setAnimation(!(isAnimation === null && stacks.length > 1));
-        // 스택이 추가(감소)되었는지 확인
-        setIsAddStack(stacks.length >= beforeStackLength.current);
-        beforeStackLength.current = stacks.length;
     }, [stacks]);
     React.useEffect(() => {
         if (isAnimation)
             return;
         // 랜더링이 된 후 애니메이션이 비활성화 되어 있다면 다시 활성화
-        setAnimation(true);
+        setTimeout(() => {
+            setAnimation(true);
+        }, animationDuration);
     }, [isAnimation]);
     const duration = isAnimation ? animationDuration / 1000 : 0;
     const delay = isAnimation ? animationDelay / 1000 : 0;
-    // 스택이 추가되는 경우 애니메이션 딜레이 시간 추가
-    const timeout = isAddStack ? animationDuration + animationDelay : animationDuration;
     return (jsxRuntime.jsx(TransitionGroup$1, { style: {
             '--animation-duration': `${duration}s`,
-            '--animation-delay': `${isAddStack ? delay : 0}s`
+            '--animation-delay': `${isAddStack.current ? delay : 0}s`
         }, children: stacks.map(({ route, component, animation, pathVariable, className }, i, arr) => {
             // 해시로 추가된 히스토리는 스크린을 출력하지 않음
             if (isHashRoute(route))
@@ -33728,7 +33724,10 @@ const Stacks = () => {
             const idx = i - arr.slice(0, i).filter(({ route }) => isHashRoute(route)).length;
             // className 프롭스가 있다면 추가
             const stackClassName = className ? `${className} react-stack-box` : 'react-stack-box';
-            return (jsxRuntime.jsx(CSSTransition$1, { timeout: isAnimation ? timeout : 0, classNames: `${stackClassName} react-stack-box-${AnimationClassName[animation]} react-stack-box`, children: jsxRuntime.jsx("div", { "data-after-animation": getAfterAnimation(idx), children: React.cloneElement(component, Object.assign({
+            return (jsxRuntime.jsx(CSSTransition$1, { timeout: {
+                    enter: animationDuration + animationDelay,
+                    exit: animationDuration
+                }, classNames: `${stackClassName} react-stack-box-${AnimationClassName[animation]} react-stack-box`, children: jsxRuntime.jsx("div", { "data-after-animation": getAfterAnimation(idx), children: React.cloneElement(component, Object.assign({
                         params: pathVariable,
                         animationDuration: animationDuration
                     })) }) }, route + i));
@@ -33769,6 +33768,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
     const checkMultipleMovesOrClear = React.useRef(false);
     const beforeHash = React.useRef('');
     const beforePathname = React.useRef('');
+    const isAddStack = React.useRef(true);
     const [stacks, setStacks] = React.useState([]);
     const [isLoading, setLoading] = React.useState(false);
     const [isPDC, setPDC] = React.useState(false);
@@ -33787,13 +33787,17 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
         if (isToNo) {
             if (to < -1)
                 checkMultipleMovesOrClear.current = true;
+            isAddStack.current = false;
             inMemoryCache.setScreens(baseStack.slice(0, baseStack.length + to));
             setStacks(baseStack.slice(0, baseStack.length + to));
         }
         else {
-            if (isClear)
-                checkMultipleMovesOrClear.current = true;
             const stackData = matchRouteToPathname(screenList.current, to);
+            if (isClear) {
+                checkMultipleMovesOrClear.current = true;
+                isAddStack.current = false;
+            }
+            isAddStack.current = true;
             inMemoryCache.setScreens(isClear ? [stackData] : [...baseStack, stackData]);
             setStacks(isClear ? [stackData] : [...baseStack, stackData]);
         }
@@ -33838,10 +33842,13 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
         if (!storageStacksData || storageStacksData.length === 0)
             return;
         const allPath = decodeURI(href.split(origin)[1]);
-        const storageStacks = storageStacksData.map((screen) => {
-            return isHashRoute(screen.route)
-                ? Screen$1.hashScreen(screen.URIPath)
-                : matchRouteToPathname(screenList.current, screen.URIPath);
+        const storageStacks = storageStacksData.map((screen, i) => {
+            if (isHashRoute(screen.route)) {
+                return Screen$1.hashScreen(screen.URIPath);
+            }
+            else {
+                return matchRouteToPathname(screenList.current, screen.URIPath);
+            }
         }).filter(Boolean);
         if (storageStacks[storageStacks.length - 1].URIPath !== allPath
             || storageStacks.length !== ((_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index)) {
@@ -33868,6 +33875,8 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
     }, [stacks]);
     React.useLayoutEffect(() => {
         var _a, _b;
+        // 인메모리 초기화
+        inMemoryCache.clear();
         // 초기 히스토리 인덱스 설정
         const index = (_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index;
         if (index) {
@@ -33876,8 +33885,6 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
         else {
             window.history.replaceState({ index: 1 }, '');
         }
-        // 인메모리 초기화
-        inMemoryCache.clear();
         // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
         if (initStorageStackData())
             return;
@@ -33887,7 +33894,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
     const animationDelay = typeof delay === 'number' ? delay : ANIMAITON_DELAY;
     return (jsxRuntime.jsx("div", { className: "react-stack-area", children: jsxRuntime.jsxs(ReactStackContext.Provider, { value: {
                 addScreen, stacks, updateStacks, changeLastScreen, animationDuration, animationDelay,
-                isPDC, setPDC, isLoading, setLoading, progressIndicator
+                isPDC, setPDC, isLoading, setLoading, progressIndicator, isAddStack
             }, children: [jsxRuntime.jsx(Stacks, {}), children, jsxRuntime.jsx(Screen, { route: '*', component: jsxRuntime.jsx(NotFound, {}) })] }) }));
 };
 
@@ -33975,12 +33982,12 @@ const ScreenComponent = ({ component, params, animationDuration }) => {
 };
 const Screen = ({ route, component, animation, className }) => {
     const { addScreen } = React.useContext(ReactStackContext);
-    addScreen(new Screen$1({
+    addScreen({
         route,
         component: jsxRuntime.jsx(ScreenComponent, { component: component }),
         animation,
         className
-    }));
+    });
     return null;
 };
 
@@ -34153,12 +34160,12 @@ const BottomSheetComp = ({ component, isExpandabled, height, params }) => {
 };
 const BottomSheet = ({ route, component, isExpandabled, height, className }) => {
     const { addScreen } = React.useContext(ReactStackContext);
-    addScreen(new Screen$1({
+    addScreen({
         route,
         component: jsxRuntime.jsx(BottomSheetComp, { isExpandabled: isExpandabled, height: height, component: component }),
         animation: exports.AnimationType.BotttomSheet,
         className
-    }));
+    });
     return null;
 };
 
@@ -34175,12 +34182,12 @@ const ToastComponent = ({ component, params }) => {
 };
 const Toast = ({ route, component, className }) => {
     const { addScreen } = React.useContext(ReactStackContext);
-    addScreen(new Screen$1({
+    addScreen({
         route,
         component: jsxRuntime.jsx(ToastComponent, { component: component }),
         animation: exports.AnimationType.Toast,
         className
-    }));
+    });
     return null;
 };
 

@@ -4,7 +4,6 @@ import { useBottomSheet } from '../hooks/useBottomSheet'
 import { usePDC } from '../hooks/usePDC'
 import { useNavigation } from '..'
 import { ReactStackContext } from './provider'
-import ScreenObj from '../data/screen'
 import { AnimationType } from '../interfaces'
 
 interface IContainerProps {
@@ -88,12 +87,12 @@ interface IProps {
 const BottomSheet = ({ route,  component, isExpandabled, height, className }: IProps)  => {
   const { addScreen } = useContext(ReactStackContext)
 
-  addScreen(new ScreenObj({ 
+  addScreen({ 
     route, 
     component: <BottomSheetComp isExpandabled={isExpandabled} height={height} component={component} />, 
     animation: AnimationType.BotttomSheet,
     className
-  }))
+  })
 
   return null
 }
