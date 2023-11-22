@@ -1,6 +1,5 @@
 import { ReactElement, cloneElement, useContext } from 'react'
 import { ReactStackContext } from './provider'
-import ScreenObj from '../data/screen'
 import { AnimationType } from '../interfaces'
 
 const ScreenContainer = ({ animationDuration, children }) => {
@@ -45,12 +44,12 @@ interface IProps {
 const Screen = ({ route, component, animation, className }: IProps) => {
   const { addScreen } = useContext(ReactStackContext)
 
-  addScreen(new ScreenObj({ 
+  addScreen({ 
     route, 
     component: <ScreenComponent component={component} />, 
     animation,
     className
-  }))
+  })
 
   return null
 }

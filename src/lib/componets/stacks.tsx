@@ -1,4 +1,4 @@
-import { cloneElement, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { cloneElement, useContext, useEffect, useLayoutEffect, useState } from 'react'
 import { CSSTransition, TransitionGroup } from 'react-transition-group'
 
 import { IScreen } from '../data/screen'
@@ -7,11 +7,9 @@ import { isHashRoute } from '../utils'
 import { ReactStackContext } from './provider'
 
 const Stacks = () => {
-  const { stacks, animationDuration, animationDelay } = useContext(ReactStackContext)
-  const beforeStackLength = useRef(stacks.length)
+  const { stacks, animationDuration, animationDelay, isAddStack } = useContext(ReactStackContext)
 
   const [isAnimation, setAnimation] = useState(null)
-  const [isAddStack, setIsAddStack] = useState(true)
 
   // 현재 출력된 전체 스크린 배열
   const allPrintScreenArr = stacks.filter(({ route }) => !isHashRoute(route))
@@ -27,27 +25,23 @@ const Stacks = () => {
     if(stacks.length === 0) return
     // 새로고침으로 접근했을때, (이미 스택을 가지고 있는 경우 애니메이션을 비활성화)
     setAnimation(!(isAnimation === null && stacks.length > 1))
-    // 스택이 추가(감소)되었는지 확인
-    setIsAddStack(stacks.length >= beforeStackLength.current)
-    beforeStackLength.current = stacks.length
   }, [stacks])
 
   useEffect(() => {
     if(isAnimation) return
     // 랜더링이 된 후 애니메이션이 비활성화 되어 있다면 다시 활성화
-    setAnimation(true)
+    setTimeout(() => {
+      setAnimation(true)
+    }, animationDuration)
   }, [isAnimation])
 
   const duration = isAnimation ? animationDuration / 1000 : 0
   const delay = isAnimation ? animationDelay / 1000 : 0
-
-  // 스택이 추가되는 경우 애니메이션 딜레이 시간 추가
-  const timeout = isAddStack ? animationDuration + animationDelay : animationDuration
-
+  
   return (
     <TransitionGroup style={{
       '--animation-duration': `${duration}s`,
-      '--animation-delay': `${isAddStack ? delay : 0}s`
+      '--animation-delay': `${isAddStack.current ? delay : 0}s`
     } as any}>
       {stacks.map(({ route, component, animation, pathVariable, className }, i: number, arr: IScreen[]) => {
         // 해시로 추가된 히스토리는 스크린을 출력하지 않음
@@ -60,7 +54,10 @@ const Stacks = () => {
         return (
           <CSSTransition 
             key={route + i} 
-            timeout={isAnimation ? timeout : 0} 
+            timeout={{ 
+              enter: animationDuration + animationDelay, 
+              exit: animationDuration 
+            }} 
             classNames={`${stackClassName} react-stack-box-${AnimationClassName[animation]} react-stack-box`}
           >
             <div data-after-animation={getAfterAnimation(idx)}>

@@ -14,7 +14,7 @@ export interface IScreen {
   setHash(hash: string): void
 }
 
-interface IScreenParams {
+export interface IScreenParams {
   readonly route?: string | null
   readonly component?: ReactElement | null
   readonly animation?: AnimationType

@@ -1,6 +1,5 @@
 import { ReactElement, cloneElement, useContext } from 'react'
 import { ReactStackContext } from './provider'
-import ScreenObj from '../data/screen'
 import { AnimationType } from '../interfaces'
 import { useNavigation } from '..'
 import { usePDC } from '../hooks/usePDC'
@@ -55,12 +54,12 @@ interface IProps {
 const Toast = ({ route, component, className }: IProps) => {
   const { addScreen } = useContext(ReactStackContext)
 
-  addScreen(new ScreenObj({ 
+  addScreen({ 
     route, 
     component: <ToastComponent component={component} />, 
     animation: AnimationType.Toast,
     className
-  }))
+  })
 
   return null
 }
