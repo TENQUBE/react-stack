@@ -5,7 +5,6 @@
 import React from 'react'
 import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@testing-library/jest-dom'
 import ReactStackProvider, { AnimationType, Screen, useNavigation } from '../../dist/esm'
 import { initWindowLocation } from './shares/location'
 

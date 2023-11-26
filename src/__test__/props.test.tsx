@@ -4,8 +4,7 @@
 
 import React from 'react'
 import {render, screen} from '@testing-library/react'
-import '@testing-library/jest-dom'
-import ReactStackProvider, { AnimationType, BottomSheet, Link, Screen, Toast } from '../../dist/esm'
+import ReactStackProvider, { AnimationType, BottomSheet, Screen, Toast } from '../../dist/esm'
 
 beforeEach(() => {
   window = Object.create(window)

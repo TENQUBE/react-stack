@@ -3,11 +3,9 @@
  */
 
 import React from 'react'
-import {renderHook, waitFor} from '@testing-library/react'
-import '@testing-library/jest-dom'
-import ReactStackProvider, { AnimationType, BottomSheet, Link, Screen, useNavigation, useStacks } from '../../dist/esm'
+import {act, renderHook, waitFor} from '@testing-library/react'
+import ReactStackProvider, { AnimationType, Link, Screen, useNavigation, useStacks } from '../../dist/esm'
 import { initWindowLocation } from './shares/location'
-import { act } from 'react-dom/test-utils'
 
 beforeEach(() => {
   initWindowLocation()
