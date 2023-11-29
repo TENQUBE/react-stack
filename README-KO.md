@@ -1,5 +1,5 @@
 # @tenqube/react-stack
-A library that helps with screen stack routing and transition animation in webviews of hybrid apps.
+모바일 웹 또는 하이브리드 앱의 웹뷰에서 화면 스택 라우팅 및 전환 애니메이션을 제공하는 라이브러리입니다.
 
 ## Language
 [🇺🇲](https://github.com/TENQUBE/react-stack) [🇰🇷](https://github.com/TENQUBE/react-stack/blob/master/README-KO.md)
@@ -59,7 +59,7 @@ root.render(
 ```
 
 ## Anumations
-Supports 5 route transition animations.
+아래 5가지의 화면 전환 애니메이션을 제공합니다.
 ```ts
 enum AnimationType {
   None,
@@ -83,15 +83,15 @@ root.render(
 
 ```ts
 interface ProviderProps {
-  duration?: number // default 350 - Animation duration of stack transitions
-  delay?: number // default 150 - Animation delay of stack transitions
-  progressIndicator?: boolean // default true - Whether to use progress indicators
-  loadingComponent?: ReactElement // You can customize the progress indicator
+  duration?: number // default 350 - 화면 전환 애니메이션의 지속 시간입니다. (1000 = 1s)
+  delay?: number // default 150 - 화면 전환 애니메이션의 지연 시간 입니다. (1000 = 1s)
+  progressIndicator?: boolean // default true - 프로그레스 인디케이터 사용 여부를 정합니다.
+  loadingComponent?: ReactElement // 프로그레스 인디케티어를 컴포넌트 형태로 설정할 수 있습니다.
 }
 ```
 
 ### Screen
-You can use the 'Screen' component to configure the entire screen view according to Pathname.
+Screen 컴포넌트를 사용하여 Pathname에 따른 전체 화면의 뷰를 구성할 수 있습니다.
 ```ts
 root.render(
   <ReactStackProvider>
@@ -103,15 +103,15 @@ root.render(
 
 ```ts
 interface ScreenProps {
-  route?: string // default '*' - Sets the target URI path name.
-  component: ReactElement // Enter the component to be output to the route.
-  animation?: AnimationType // default AnimationType.None - Animation delay of stack transitions
-  className?: string // Set the class name of the stack.
+  route?: string // 기본값 '*' - 컴포넌트를 출력할 URI Pathname을 설정합니다.
+  component: ReactElement // route에 출력할 컴포넌트를 설정합니다.
+  animation?: AnimationType // 기본값 AnimationType.None - 화면 전환간 사용할 애니메이션을 설정합니다.
+  className?: string // 해당 스택의 class name을 설정합니다.
 }
 ```
 
 #### 404 Not Found
-You can configure the 404 screen by using the '*' route at the end inside the ReactStackProvider.
+ReactStackProvider 안의 마지막에 '*' 라우트를 사용하여 404 화면을 구성 할 수 있습니다.
 ```ts
 root.render(
   <ReactStackProvider>
@@ -122,7 +122,7 @@ root.render(
 ```
 
 ### BottomSheet Dialog
-You can use the 'BottomSheet' component to configure a bottom sheet type view.
+BottomSheet 컴포넌트를 사용하여 바텀시트 형태의 뷰를 구성할 수 있습니다.
 ```ts
 import React from 'react'
 import ReactDOM from 'react-dom/client'
@@ -162,16 +162,16 @@ root.render(
 
 ```ts
 interface BottomSheetProps {
-  route?: string // default '*' - Sets the target URI path name.
-  component: ReactElement // Enter the component to be output to the route.
-  className?: string // Set the class name of the stack.
-  height?: number // Set the height of the botoom sheet.
-  isExpandabled?: boolean // Set whether to expand to full screen by dragging.
+  route?: string // 기본값 '*' - 컴포넌트를 출력할 URI Pathname을 설정합니다.
+  component: ReactElement // route에 출력할 컴포넌트를 설정합니다.
+  className?: string // 해당 스택의 class name을 설정합니다.
+  height?: number // 바텀시트의 높이값을 설정합니다.
+  isExpandabled?: boolean // 드래그하여 전체 화면으로 확장가능 여부를 설정합니다.
 }
 ```
 
 ### Toast
-You can use the 'Toast' component to configure a toast box-shaped view.
+Toast 컴포넌트를 사용하여 토스트 박스 형태의 뷰를 구성할 수 있습니다.
 ```ts
 import React from 'react'
 import ReactDOM from 'react-dom/client'
@@ -211,16 +211,16 @@ root.render(
 
 ```ts
 interface ToastProps {
-  route?: string // default '*' - Sets the target URI path name.
-  component: ReactElement // Enter the component to be output to the route.
-  className?: string // Set the class name of the stack.
+  route?: string // 기본값 '*' - 컴포넌트를 출력할 URI Pathname을 설정합니다.
+  component: ReactElement // route에 출력할 컴포넌트를 설정합니다.
+  className?: string // 해당 스택의 class name을 설정합니다.
 }
 ```
 
 ## Route
 
-### Dynamic Routing
-If a route segment starts with : then it becomes a pathvariable.
+### 동적 라우팅
+route 경로에 ':'으로 시작하면 경로 변수로 사용할 수 있습니다.
 ```ts
 root.render(
   <ReactStackProvider>
@@ -228,20 +228,20 @@ root.render(
   </ReactStackProvider>
 )
 ```
-The pathvarialbe value can be checked with the component's 'parmas' Props.
+사용된 경로 변수 값은 컴포넌트의 'params' Props를 통해 사용할 수 있습니다.
 ```ts
 // ex. URI path '/color/red'
 const Black = ({ params }) => {
   console.log(params) // { color: red }
-  
+
   ...
 ```
 
 ## Hooks
 
 ### useNavigation
-The push and replace methods operate the same as 'window.history.pushState' and 'window.history.replaceState'. The back method is similar to 'window.history.back', but provides the size to move back to as a parameter.
-> If you use 'window.history.pushState' or 'window.history.replaceState' directly, there may be issues with stack history management. Please use a hook.
+'push' 및 'replace' 메소드는 'window.history.pushState' 및 'window.history.replaceState'와 동일하게 작동합니다. 'back' 메소드는 'window.history.back'과 유사하지만, 이동할 히스토리의 단계를 파라미터로 제공합니다.
+> 'window.history.pushState' 또는 'window.history.replaceState'를 직접 사용하는 경우 스택 히스토리가 관리되지 않아 문제가 발생합니다. useNavigation 훅을 사용해주세요.
 ```ts
 ...
 import { useNavigation } from '@tenqube/react-stack'
@@ -259,8 +259,8 @@ const White = () => {
 
   const handleClickBack = () => {
     navigation.back()
-    // Go back one step
-    // history.back(2) - Go back two steps
+    // 이전 화면으로 이동합니다. (마지막 스택을 종료합니다.)
+    // history.back(2) - 두화면 전으로 이동합니다. (마지막 두개의 스택을 종료합니다.)
   }
 
   ...
@@ -281,10 +281,11 @@ interface INavigationPushState {
 }
 ```
 
-If you set the clear option, all previous stacks will disappear and only the requested screen will be displayed.
+'push' 메서드에서 'clear' 옵션을 설정하면 이전 모든 스택이 종료되고 마지막 'push'에서 요청한 route의 화면만 출력됩니다.
 
 ### useStacks
-You can see which stack is active.
+출력되어 있는 모든 스택의 정보를 확인 할 수 있습니다.
+
 ```ts
 ...
 import { useStacks } from '@tenqube/react-stack'
@@ -299,11 +300,13 @@ const White = () => {
   ...
 }
 ```
+
 ```ts
 interface IScreen {
   readonly route?: string
   readonly component?: ReactElement | null
   readonly animation?: AnimationType
+  readonly className?: string
   pathVariable: unknown
   URIPath: string
   hash: string
@@ -311,7 +314,7 @@ interface IScreen {
 ```
 
 ### useLoading
-You can call a progress indicator.
+프로그레스 인디케이터를 호출할 수 있습니다.
 ```ts
 const Dashboard = () => {
   const setLoading = useLoading()
