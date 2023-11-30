@@ -283,6 +283,16 @@ interface INavigationPushState {
 
 'push' 메서드에서 'clear' 옵션을 설정하면 이전 모든 스택이 종료되고 마지막 'push'에서 요청한 route의 화면만 출력됩니다.
 
+```ts
+  const handleClickEvent = async () => {
+    await navigation.back()
+    await navigation.back()
+    navigation.push('/black')
+  }
+```
+
+만약 위와 같이 연속적으로 사용해야 한다면, async, await를 사용하여 구현할 수 있습니다.
+
 ### useStacks
 출력되어 있는 모든 스택의 정보를 확인 할 수 있습니다.
 
@@ -312,6 +322,7 @@ interface IScreen {
   hash: string
 }
 ```
+
 
 ### useLoading
 프로그레스 인디케이터를 호출할 수 있습니다.

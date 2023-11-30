@@ -283,6 +283,16 @@ interface INavigationPushState {
 
 If you set the clear option, all previous stacks will disappear and only the requested screen will be displayed.
 
+```ts
+  const handleClickEvent = async () => {
+    await navigation.back()
+    await navigation.back()
+    navigation.push('/black')
+  }
+```
+
+If you need to use it continuously as above, you can implement it using async and await.
+
 ### useStacks
 You can see which stack is active.
 ```ts
