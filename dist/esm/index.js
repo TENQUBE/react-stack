@@ -33759,11 +33759,11 @@ function NotFound() {
 }
 
 const ReactStackContext = createContext(null);
-const StackProvider = ({ duration, delay, children, progressIndicator, }) => {
+const StackProvider = ({ duration, delay, children, progressIndicator }) => {
     const screenList = useRef([]);
     const checkMultipleMovesOrClear = useRef(false);
-    const beforeHash = useRef("");
-    const beforePathname = useRef("");
+    const beforeHash = useRef('');
+    const beforePathname = useRef('');
     const isAddStack = useRef(true);
     const [stacks, setStacks] = useState([]);
     const [isLoading, setLoading] = useState(false);
@@ -33774,14 +33774,11 @@ const StackProvider = ({ duration, delay, children, progressIndicator, }) => {
     const changeLastScreen = useCallback((to) => {
         const baseStack = inMemoryCache.getScreens();
         const stackData = matchRouteToPathname(screenList.current, to);
-        inMemoryCache.setScreens([
-            ...baseStack.slice(0, baseStack.length - 1),
-            stackData,
-        ]);
+        inMemoryCache.setScreens([...baseStack.slice(0, baseStack.length - 1), stackData]);
         setStacks([...baseStack.slice(0, baseStack.length - 1), stackData]);
     }, [stacks]);
     const updateStacks = useCallback((to, isClear = false) => {
-        const isToNo = typeof to === "number";
+        const isToNo = typeof to === 'number';
         const baseStack = inMemoryCache.getScreens();
         if (isToNo) {
             if (to < -1)
@@ -33805,10 +33802,10 @@ const StackProvider = ({ duration, delay, children, progressIndicator, }) => {
         var _a, _b;
         const historyIndex = inMemoryCache.getHistoryIndex();
         const stateIndex = (_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index;
-        if (typeof stateIndex !== "number") {
-            window.history.replaceState({ index: historyIndex + 1 }, "");
+        if (typeof stateIndex !== 'number') {
+            window.history.replaceState({ index: historyIndex + 1 }, '');
         }
-        const index = typeof stateIndex === "number" ? stateIndex : historyIndex + 1;
+        const index = typeof stateIndex === 'number' ? stateIndex : historyIndex + 1;
         inMemoryCache.setHistoryIndex(index);
         return index > historyIndex;
     };
@@ -33816,8 +33813,8 @@ const StackProvider = ({ duration, delay, children, progressIndicator, }) => {
         // 여러 히스토리가 이동하거나 클리어 옵션 설정에는 스택 설정을 진행하기 때문에, 아래의 설정을 진행하지 않음
         if (checkMultipleMovesOrClear.current) {
             checkMultipleMovesOrClear.current = false;
-            window.history.replaceState({ index: 1 }, "");
-            // clear시
+            window.history.replaceState({ index: 1 }, '');
+            // clear시 pathname 초기화
             beforePathname.current = window.location.pathname;
             return;
         }
@@ -33831,7 +33828,6 @@ const StackProvider = ({ duration, delay, children, progressIndicator, }) => {
         // 패스는 같고 해시만 변했을 때
         if (pathname === bPath && hash && (!bHash || isForward)) {
             const newHashScreen = Screen$1.hashScreen(allPath);
-            console.log("new hash screen: ", newHashScreen);
             inMemoryCache.setScreens([...stacks, newHashScreen]);
             setStacks([...stacks, newHashScreen]);
             return;
@@ -33866,9 +33862,9 @@ const StackProvider = ({ duration, delay, children, progressIndicator, }) => {
     // 히스토리 변화에 대한 이벤트 등록
     useEffect(() => {
         beforePathname.current = window.location.pathname;
-        window.addEventListener("popstate", historyChangeStack);
+        window.addEventListener('popstate', historyChangeStack);
         return () => {
-            window.removeEventListener("popstate", historyChangeStack);
+            window.removeEventListener('popstate', historyChangeStack);
         };
     }, [stacks]);
     // 스택 변경 시 스토리지에 저장
@@ -33888,15 +33884,15 @@ const StackProvider = ({ duration, delay, children, progressIndicator, }) => {
             inMemoryCache.setHistoryIndex(index);
         }
         else {
-            window.history.replaceState({ index: 1 }, "");
+            window.history.replaceState({ index: 1 }, '');
         }
         // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
         if (initStorageStackData())
             return;
         updateStacks(window.location.pathname);
     }, []);
-    const animationDuration = typeof duration === "number" ? duration : ANIMATION_DURATION;
-    const animationDelay = typeof delay === "number" ? delay : ANIMAITON_DELAY;
+    const animationDuration = typeof duration === 'number' ? duration : ANIMATION_DURATION;
+    const animationDelay = typeof delay === 'number' ? delay : ANIMAITON_DELAY;
     return (jsx("div", { className: "react-stack-area", children: jsxs(ReactStackContext.Provider, { value: {
                 addScreen,
                 stacks,
@@ -33909,7 +33905,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator, }) => {
                 isLoading,
                 setLoading,
                 progressIndicator,
-                isAddStack,
+                isAddStack
             }, children: [jsx(Stacks, {}), children, jsx(Screen, { route: "*", component: jsx(NotFound, {}) })] }) }));
 };
 
@@ -33949,7 +33945,7 @@ const useNavigaiton = () => {
                 startLoading();
                 updateStacks(to);
                 inMemoryCache.setHistoryIndex(historyIndex + 1);
-                window.history.pushState({ index: historyIndex + 1 }, "", to);
+                window.history.pushState({ index: historyIndex + 1 }, '', to);
                 return setTimeout(() => {
                     resolve(null);
                 }, animationDuration * 2 + animationDelay + DELAY_MARGIN$1);
@@ -33959,7 +33955,7 @@ const useNavigaiton = () => {
             return new Promise((resolve) => {
                 startLoading();
                 changeLastScreen(to);
-                window.history.replaceState({ index: inMemoryCache.getHistoryIndex() }, "", to);
+                window.history.replaceState({ index: inMemoryCache.getHistoryIndex() }, '', to);
                 return setTimeout(() => {
                     resolve(null);
                 }, animationDuration + animationDelay + DELAY_MARGIN$1);
@@ -33976,7 +33972,7 @@ const useNavigaiton = () => {
                     resolve(null);
                 }, animationDuration + DELAY_MARGIN$1);
             });
-        },
+        }
     };
 };
 
@@ -33987,9 +33983,9 @@ const useStacks = () => {
 
 const ScreenContainer = ({ animationDuration, children }) => {
     return (jsxs(Fragment, { children: [jsx("div", { className: 'react-stack-dimmed-area', style: {
-                    'transitionProperty': 'opacity',
-                    'transitionDuration': `${animationDuration / 1000}s`,
-                    'transitionTimingFunction': 'ease'
+                    transitionProperty: 'opacity',
+                    transitionDuration: `${animationDuration / 1000}s`,
+                    transitionTimingFunction: 'ease'
                 } }), jsx("div", { className: 'react-stack-content-area', children: children })] }));
 };
 const ScreenComponent = ({ component, params, animationDuration }) => {
@@ -34156,7 +34152,10 @@ const BottomSheetContainer = ({ isExpandabled, height = window.innerHeight * 0.4
     const pdc = usePDC();
     const maxHeightFromTop = window.innerHeight - height;
     const minHeightFromTop = isExpandabled ? 0 : maxHeightFromTop;
-    const { eventRef, sheetRef, contentRef, isExit } = useBottomSheet({ minHeightFromTop, maxHeightFromTop });
+    const { eventRef, sheetRef, contentRef, isExit } = useBottomSheet({
+        minHeightFromTop,
+        maxHeightFromTop
+    });
     const handleClickExit = () => {
         pdc(navigation.back);
     };
@@ -34164,11 +34163,11 @@ const BottomSheetContainer = ({ isExpandabled, height = window.innerHeight * 0.4
         if (isExit)
             handleClickExit();
     }, [isExit]);
-    return (jsxs(Fragment, { children: [jsx("div", { className: 'react-stack-bottom-sheet-dimmed-area', onClick: handleClickExit }), jsxs("div", { ref: sheetRef, className: 'react-stack-bottom-sheet-content-area', onClick: (e) => e.stopPropagation(), style: {
+    return (jsxs(Fragment, { children: [jsx("div", { className: "react-stack-bottom-sheet-dimmed-area", onClick: handleClickExit }), jsxs("div", { ref: sheetRef, className: 'react-stack-bottom-sheet-content-area', onClick: (e) => e.stopPropagation(), style: {
                     '--maxHeight-fromTop': `${maxHeightFromTop}px`,
                     '--bottomsheet-height': `${height}px`,
-                    'top': `${maxHeightFromTop}px`
-                }, children: [jsx("div", { ref: eventRef, className: 'react-stack-bottom-sheet-drag-area', onClick: (e) => e.stopPropagation() }), jsx("div", { ref: contentRef, className: 'react-stack-bottom-sheet-content-box', children: children })] })] }));
+                    top: `${maxHeightFromTop}px`
+                }, children: [jsx("div", { ref: eventRef, className: "react-stack-bottom-sheet-drag-area", onClick: (e) => e.stopPropagation() }), jsx("div", { ref: contentRef, className: "react-stack-bottom-sheet-content-box", children: children })] })] }));
 };
 const BottomSheetComp = ({ component, isExpandabled, height, params }) => {
     return (jsx(BottomSheetContainer, { isExpandabled: isExpandabled, height: height, children: cloneElement(component, Object.assign({ params })) }));
@@ -34177,7 +34176,7 @@ const BottomSheet = ({ route, component, isExpandabled, height, className }) => 
     const { addScreen } = useContext(ReactStackContext);
     addScreen({
         route,
-        component: jsx(BottomSheetComp, { isExpandabled: isExpandabled, height: height, component: component }),
+        component: (jsx(BottomSheetComp, { isExpandabled: isExpandabled, height: height, component: component })),
         animation: AnimationType.BotttomSheet,
         className
     });
@@ -34193,7 +34192,7 @@ const ToastContainer = ({ children }) => {
     return (jsxs(Fragment, { children: [jsx("div", { className: 'react-stack-toast-dimmed-area' }), jsx("div", { className: 'react-stack-toast-content-area', onClick: handleClickExit, children: jsx("div", { className: 'react-stack-toast-content-box', onClick: (e) => e.stopPropagation(), children: children }) })] }));
 };
 const ToastComponent = ({ component, params }) => {
-    return (jsx(ToastContainer, { children: cloneElement(component, Object.assign({ params })) }));
+    return jsx(ToastContainer, { children: cloneElement(component, Object.assign({ params })) });
 };
 const Toast = ({ route, component, className }) => {
     const { addScreen } = useContext(ReactStackContext);
@@ -55298,7 +55297,7 @@ function Loading({ loadingComp }) {
             className.push('done');
         return className.join(' ');
     };
-    return (jsx("div", { className: classNameGenerator(), children: loadingComp ? cloneElement(loadingComp) : jsx(Lottie, { animationData: loadingLottie, loop: true }) }));
+    return (jsx("div", { className: classNameGenerator(), children: loadingComp ? (cloneElement(loadingComp)) : (jsx(Lottie, { animationData: loadingLottie, loop: true })) }));
 }
 
 function styleInject(css, ref) {
