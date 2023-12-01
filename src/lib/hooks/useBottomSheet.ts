@@ -43,7 +43,7 @@ export function useBottomSheet({ minHeightFromTop, maxHeightFromTop }: IProps) {
     if (!isContentTouched) return true
     if (sheetRef.current.getBoundingClientRect().y !== minHeightFromTop) return true
     if (touchMove.movingDirection === 'down') return contentRef.current.scrollTop <= 0
-    
+
     return false
   }
 
@@ -53,10 +53,7 @@ export function useBottomSheet({ minHeightFromTop, maxHeightFromTop }: IProps) {
     touchStart.sheetY = sheetRef.current.getBoundingClientRect().y
     touchStart.touchY = e.touches[0].clientY
 
-    sheetRef.current.style.setProperty(
-      'transition',
-      `none`
-    )
+    sheetRef.current.style.setProperty('transition', `none`)
   }, [])
 
   const handleTouchMove = useCallback(
@@ -97,14 +94,14 @@ export function useBottomSheet({ minHeightFromTop, maxHeightFromTop }: IProps) {
     const { touchMove } = metrics.current
     const currentSheetY = sheetRef.current.getBoundingClientRect().y
 
-    sheetRef.current.style.setProperty(
-      'transition',
-      `transform ${ANIMATION_DURATION/1000}s`
-    )
+    sheetRef.current.style.setProperty('transition', `transform ${ANIMATION_DURATION / 1000}s`)
 
     if (touchMove.movingDirection === 'down') {
-      if(currentSheetY > maxHeightFromTop + 30) {
-        sheetRef.current.style.setProperty('transform', `translateY(calc(100vh - ${maxHeightFromTop}px))`)
+      if (currentSheetY > maxHeightFromTop + 30) {
+        sheetRef.current.style.setProperty(
+          'transform',
+          `translateY(calc(100vh - ${maxHeightFromTop}px))`
+        )
         setExit(true)
       } else {
         sheetRef.current.style.setProperty('transform', 'translateY(0)')

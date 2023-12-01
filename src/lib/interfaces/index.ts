@@ -8,7 +8,6 @@ export enum AnimationType {
   Toast
 }
 
-
 export enum AnimationClassName {
   'none',
   'to-left',

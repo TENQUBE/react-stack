@@ -27,46 +27,49 @@ class PathSubDirectory implements IPathSubDirectory {
 }
 
 const explodeRouteSegments = (route: string): IPathSubDirectory[] => {
-  if(route === '*') return [new PathSubDirectory(PathSubDirectoryType.Splat, '*')]
+  if (route === '*') return [new PathSubDirectory(PathSubDirectoryType.Splat, '*')]
   const segments = route.split('/')
   const segmentNames = segments.slice(1, segments.length)
 
   return segmentNames.map((seg: string) => {
-    if(seg === '*') return new PathSubDirectory(PathSubDirectoryType.Splat, '*')
+    if (seg === '*') return new PathSubDirectory(PathSubDirectoryType.Splat, '*')
 
     const isDynamic = seg.charAt(0) === ':'
     const directoryName = seg.replace(/^\:/, '')
 
     return new PathSubDirectory(
-      isDynamic ? PathSubDirectoryType.Dynamic : PathSubDirectoryType.Static, 
+      isDynamic ? PathSubDirectoryType.Dynamic : PathSubDirectoryType.Static,
       directoryName
     )
   })
 }
 
-const matchRoute = (paths: string[], matchData: IPathSubDirectory[]): { match: boolean; pathVariable: unknown } => {
+const matchRoute = (
+  paths: string[],
+  matchData: IPathSubDirectory[]
+): { match: boolean; pathVariable: unknown } => {
   const pathVariable = {}
-  for(let i=0; i<paths.length; i++) {
+  for (let i = 0; i < paths.length; i++) {
     const match = matchData[i]
-    if(!match) {
+    if (!match) {
       return {
         match: false,
         pathVariable
       }
     }
-    if(match.type === PathSubDirectoryType.Splat) {
+    if (match.type === PathSubDirectoryType.Splat) {
       return {
         match: true,
         pathVariable
       }
     }
-    if(match.type === PathSubDirectoryType.Static && paths[i] !== match.name) {
+    if (match.type === PathSubDirectoryType.Static && paths[i] !== match.name) {
       return {
         match: false,
         pathVariable
       }
-    } 
-    if(match.type === PathSubDirectoryType.Dynamic) {
+    }
+    if (match.type === PathSubDirectoryType.Dynamic) {
       pathVariable[match.name] = paths[i]
     }
   }
@@ -80,10 +83,10 @@ export const matchRouteToPathname = (stacks: IScreenParams[], pathname: string) 
   const matchData = stacks.map(({ route }) => explodeRouteSegments(route))
   const segments = pathname.split('#')[0].split('?')[0].split('/')
   const paths = segments.slice(1, segments.length)
-  
-  for(let i=0; i<matchData.length; i++) {
+
+  for (let i = 0; i < matchData.length; i++) {
     const { match, pathVariable } = matchRoute(paths, matchData[i])
-    if(match) {
+    if (match) {
       const screenStack = new Screen(stacks[i])
       screenStack.setPathVariable(pathVariable)
       screenStack.setURIPath(pathname)

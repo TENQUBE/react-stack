@@ -1,4 +1,4 @@
-import { IScreen } from "../data/screen"
+import { IScreen } from '../data/screen'
 
 class InMemoryCache {
   screens: IScreen[]

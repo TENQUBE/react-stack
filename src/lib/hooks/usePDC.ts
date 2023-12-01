@@ -5,7 +5,7 @@ export function usePDC() {
   const { isPDC, setPDC } = useContext(ReactStackContext)
 
   const handleClick = (fnc: any) => {
-    if(isPDC) return
+    if (isPDC) return
     setPDC(true)
     setTimeout(() => {
       setPDC(false)

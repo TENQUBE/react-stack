@@ -32,7 +32,12 @@ test('토스트박스 형태의 화면을 출력할 수 있다.', async () => {
 
   render(
     <ReactStackProvider duration={0} delay={0} progressIndicator={false} loadingComponent={null}>
-      <Screen route="/" component={<Dashboard />} animation={AnimationType.None} className={'dashboard'} />
+      <Screen
+        route="/"
+        component={<Dashboard />}
+        animation={AnimationType.None}
+        className={'dashboard'}
+      />
       <Toast route="/toast" component={<ToastContent />} className={'toast'} />
     </ReactStackProvider>
   )
@@ -64,7 +69,12 @@ test('토스트 화면의 dimmed 영역을 터치하면 바텀시트 화면을 �
 
   render(
     <ReactStackProvider duration={0} delay={0} progressIndicator={false} loadingComponent={null}>
-      <Screen route="/" component={<Dashboard />} animation={AnimationType.None} className={'dashboard'} />
+      <Screen
+        route="/"
+        component={<Dashboard />}
+        animation={AnimationType.None}
+        className={'dashboard'}
+      />
       <Toast route="/toast" component={<ToastContent />} className={'toast'} />
     </ReactStackProvider>
   )

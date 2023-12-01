@@ -3,7 +3,7 @@
  */
 
 import React from 'react'
-import {render, screen} from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import ReactStackProvider, { AnimationType, BottomSheet, Screen, Toast } from '../../dist/esm'
 
 beforeEach(() => {
@@ -13,7 +13,7 @@ beforeEach(() => {
     value: {
       href: 'http://localhost:1234/about/boo',
       origin: 'http://localhost:1234',
-      pathname: '/about/boo',
+      pathname: '/about/boo'
     },
     writable: true
   })
@@ -33,7 +33,12 @@ test('스크린 컴포넌트에서 Path Variable 값을 Params Props로 사용�
 
   render(
     <ReactStackProvider duration={0} delay={0} progressIndicator={false} loadingComponent={null}>
-      <Screen route="/about/:foo" component={<AboutUs />} animation={AnimationType.None} className={''} />
+      <Screen
+        route="/about/:foo"
+        component={<AboutUs />}
+        animation={AnimationType.None}
+        className={''}
+      />
     </ReactStackProvider>
   )
 
@@ -53,7 +58,13 @@ test('바텀시트에서 Path Variable 값을 Params Props로 사용할 수 있�
 
   render(
     <ReactStackProvider duration={0} delay={0} progressIndicator={false} loadingComponent={null}>
-      <BottomSheet route="/about/:foo" component={<AboutUs />} className={''} isExpandabled={false} height={200} />
+      <BottomSheet
+        route="/about/:foo"
+        component={<AboutUs />}
+        className={''}
+        isExpandabled={false}
+        height={200}
+      />
     </ReactStackProvider>
   )
 

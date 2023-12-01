@@ -9,4 +9,4 @@ export const initWindowLocation = () => {
     },
     writable: true
   })
-} 
+}

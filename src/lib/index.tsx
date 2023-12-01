@@ -21,14 +21,33 @@ interface IStackProvider {
   children: any
 }
 
-const ReactStackProvider = ({ duration, delay, children, progressIndicator=true, loadingComponent }: IStackProvider) => {
+const ReactStackProvider = ({
+  duration,
+  delay,
+  children,
+  progressIndicator = true,
+  loadingComponent
+}: IStackProvider) => {
   return (
     <StackProvider duration={duration} delay={delay} progressIndicator={progressIndicator}>
-      { children }
-      { progressIndicator && <Loading loadingComp={loadingComponent} /> }
+      {children}
+      {progressIndicator && <Loading loadingComp={loadingComponent} />}
     </StackProvider>
   )
 }
 
-export { IStackProvider, Screen, BottomSheet, Toast, Link, AnimationType, useNavigation, useLoading, INavigation, INavigationPushState, useStacks, IScreen }
+export {
+  IStackProvider,
+  Screen,
+  BottomSheet,
+  Toast,
+  Link,
+  AnimationType,
+  useNavigation,
+  useLoading,
+  INavigation,
+  INavigationPushState,
+  useStacks,
+  IScreen
+}
 export default ReactStackProvider
