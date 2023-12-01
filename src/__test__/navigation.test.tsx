@@ -3,7 +3,7 @@
  */
 
 import React from 'react'
-import {render, screen, waitFor} from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ReactStackProvider, { AnimationType, Screen, useNavigation } from '../../dist/esm'
 import { initWindowLocation } from './shares/location'
@@ -39,7 +39,12 @@ test('네비게이션 훅을 사용하여 새로운 화면(스택)을 추가할 
   render(
     <ReactStackProvider duration={0} delay={0} progressIndicator={false} loadingComponent={null}>
       <Screen route="/" component={<Dashboard />} animation={AnimationType.None} className={''} />
-      <Screen route="/about" component={<AboutUs />} animation={AnimationType.None} className={''} />
+      <Screen
+        route="/about"
+        component={<AboutUs />}
+        animation={AnimationType.None}
+        className={''}
+      />
     </ReactStackProvider>
   )
 
@@ -96,7 +101,7 @@ test('네비게이션 훅을 사용하여 모든 화면(스택)을 닫고 새로
   }
 
   const Clear = () => {
-    return(
+    return (
       <div>
         <h1>clear screen</h1>
       </div>
@@ -105,10 +110,30 @@ test('네비게이션 훅을 사용하여 모든 화면(스택)을 닫고 새로
 
   render(
     <ReactStackProvider duration={0} delay={0} progressIndicator={false} loadingComponent={null}>
-      <Screen route="/" component={<Dashboard />} animation={AnimationType.None} className={'dashboard'} />
-      <Screen route="/about" component={<AboutUs />} animation={AnimationType.None} className={'about'} />
-      <Screen route="/contact" component={<ContactUs />} animation={AnimationType.None} className={'contact'} />
-      <Screen route="/clear" component={<Clear />} animation={AnimationType.None} className={'clear'} />
+      <Screen
+        route="/"
+        component={<Dashboard />}
+        animation={AnimationType.None}
+        className={'dashboard'}
+      />
+      <Screen
+        route="/about"
+        component={<AboutUs />}
+        animation={AnimationType.None}
+        className={'about'}
+      />
+      <Screen
+        route="/contact"
+        component={<ContactUs />}
+        animation={AnimationType.None}
+        className={'contact'}
+      />
+      <Screen
+        route="/clear"
+        component={<Clear />}
+        animation={AnimationType.None}
+        className={'clear'}
+      />
     </ReactStackProvider>
   )
 
@@ -121,7 +146,7 @@ test('네비게이션 훅을 사용하여 모든 화면(스택)을 닫고 새로
 
   expect(screen.getByText('about us')).toBeInTheDocument()
   expect(document.getElementsByClassName('about').length).toBe(1)
-  
+
   await user.click(screen.getByText('contact'))
 
   expect(screen.getByText('contact us')).toBeInTheDocument()
@@ -162,8 +187,18 @@ test('네비게이션 훅을 사용하여 현재 화면을 다른 화면으로 �
 
   render(
     <ReactStackProvider duration={0} delay={0} progressIndicator={false} loadingComponent={null}>
-      <Screen route="/" component={<Dashboard />} animation={AnimationType.None} className={'dashboard'} />
-      <Screen route="/about" component={<AboutUs />} animation={AnimationType.None} className={'about'} />
+      <Screen
+        route="/"
+        component={<Dashboard />}
+        animation={AnimationType.None}
+        className={'dashboard'}
+      />
+      <Screen
+        route="/about"
+        component={<AboutUs />}
+        animation={AnimationType.None}
+        className={'about'}
+      />
     </ReactStackProvider>
   )
 
@@ -212,8 +247,18 @@ test('네비게이션 훅을 사용하여 이전 화면(스택)으로 돌아갈 
 
   render(
     <ReactStackProvider duration={0} delay={0} progressIndicator={false} loadingComponent={null}>
-      <Screen route="/" component={<Dashboard />} animation={AnimationType.None} className={'dashboard'} />
-      <Screen route="/about" component={<AboutUs />} animation={AnimationType.None} className={'about'} />
+      <Screen
+        route="/"
+        component={<Dashboard />}
+        animation={AnimationType.None}
+        className={'dashboard'}
+      />
+      <Screen
+        route="/about"
+        component={<AboutUs />}
+        animation={AnimationType.None}
+        className={'about'}
+      />
     </ReactStackProvider>
   )
 
@@ -226,14 +271,13 @@ test('네비게이션 훅을 사용하여 이전 화면(스택)으로 돌아갈 
 
   expect(screen.getByText('about us')).toBeInTheDocument()
   expect(document.getElementsByClassName('about').length).toBe(1)
-  
+
   await user.click(screen.getByText('back'))
-  
+
   // 뒤로가기를 사용하였기 때문에 about us 화면을 사라짐.
   await waitFor(() => expect(document.getElementsByClassName('about').length).toBe(0))
   expect(document.getElementsByClassName('dashboard').length).toBe(1)
 })
-
 
 test('네비게이션 훅을 사용하여 여러 이전 화면(스택)으로 돌아갈 수 있다.', async () => {
   const Dashboard = () => {
@@ -281,9 +325,24 @@ test('네비게이션 훅을 사용하여 여러 이전 화면(스택)으로 돌
 
   render(
     <ReactStackProvider duration={0} delay={0} progressIndicator={false} loadingComponent={null}>
-      <Screen route="/" component={<Dashboard />} animation={AnimationType.None} className={'dashboard'} />
-      <Screen route="/about" component={<AboutUs />} animation={AnimationType.None} className={'about'} />
-      <Screen route="/contact" component={<ContactUs />} animation={AnimationType.None} className={'contact'} />
+      <Screen
+        route="/"
+        component={<Dashboard />}
+        animation={AnimationType.None}
+        className={'dashboard'}
+      />
+      <Screen
+        route="/about"
+        component={<AboutUs />}
+        animation={AnimationType.None}
+        className={'about'}
+      />
+      <Screen
+        route="/contact"
+        component={<ContactUs />}
+        animation={AnimationType.None}
+        className={'contact'}
+      />
     </ReactStackProvider>
   )
 
@@ -296,7 +355,7 @@ test('네비게이션 훅을 사용하여 여러 이전 화면(스택)으로 돌
 
   expect(screen.getByText('about us')).toBeInTheDocument()
   expect(document.getElementsByClassName('about').length).toBe(1)
-  
+
   await user.click(screen.getByText('contact'))
 
   expect(screen.getByText('contact us')).toBeInTheDocument()

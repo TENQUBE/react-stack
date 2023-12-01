@@ -11,21 +11,13 @@ const ToastContainer = ({ children }) => {
   const handleClickExit = () => {
     pdc(navigation.back)
   }
-  
+
   return (
     <>
-      <div 
-        className={'react-stack-toast-dimmed-area'}
-      />
-      <div 
-        className={'react-stack-toast-content-area'}
-        onClick={handleClickExit}
-      >
-        <div 
-          className={'react-stack-toast-content-box'}
-          onClick={(e) => e.stopPropagation()} 
-        >
-          { children }
+      <div className={'react-stack-toast-dimmed-area'} />
+      <div className={'react-stack-toast-content-area'} onClick={handleClickExit}>
+        <div className={'react-stack-toast-content-box'} onClick={(e) => e.stopPropagation()}>
+          {children}
         </div>
       </div>
     </>
@@ -38,11 +30,7 @@ interface IToastComp {
 }
 
 const ToastComponent = ({ component, params }: IToastComp) => {
-  return (
-    <ToastContainer>
-      { cloneElement(component, {...{ params }}) }
-    </ToastContainer>
-  )
+  return <ToastContainer>{cloneElement(component, { ...{ params } })}</ToastContainer>
 }
 
 interface IProps {
@@ -54,9 +42,9 @@ interface IProps {
 const Toast = ({ route, component, className }: IProps) => {
   const { addScreen } = useContext(ReactStackContext)
 
-  addScreen({ 
-    route, 
-    component: <ToastComponent component={component} />, 
+  addScreen({
+    route,
+    component: <ToastComponent component={component} />,
     animation: AnimationType.Toast,
     className
   })

@@ -3,7 +3,7 @@
  */
 
 import React from 'react'
-import {render, screen} from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ReactStackProvider, { AnimationType, Link, Screen } from '../../dist/esm'
 import { initWindowLocation } from './shares/location'
@@ -33,7 +33,12 @@ test('링크 컴포넌트를 사용하여 새로운 화면(스택)을 추가할 
   render(
     <ReactStackProvider duration={0} delay={0} progressIndicator={false} loadingComponent={null}>
       <Screen route="/" component={<Dashboard />} animation={AnimationType.None} className={''} />
-      <Screen route="/about" component={<AboutUs />} animation={AnimationType.None} className={''} />
+      <Screen
+        route="/about"
+        component={<AboutUs />}
+        animation={AnimationType.None}
+        className={''}
+      />
     </ReactStackProvider>
   )
 
@@ -44,7 +49,6 @@ test('링크 컴포넌트를 사용하여 새로운 화면(스택)을 추가할 
   await user.click(screen.getByText('about'))
   expect(screen.getByText('about us')).toBeInTheDocument()
 })
-
 
 test('링크 컴포넌트를 사용하여 해시를 추가할 수 있다.', async () => {
   const Dashboard = () => {

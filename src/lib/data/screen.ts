@@ -34,7 +34,7 @@ class Screen implements IScreen {
     this.route = route ? route : '*'
     this.component = component ? component : null
     this.animation = typeof animation === 'undefined' ? AnimationType.None : animation
-    if(className) this.className = className
+    if (className) this.className = className
     this.pathVariable = {}
   }
 

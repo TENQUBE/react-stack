@@ -33763,11 +33763,11 @@ function NotFound() {
 }
 
 const ReactStackContext = React.createContext(null);
-const StackProvider = ({ duration, delay, children, progressIndicator }) => {
+const StackProvider = ({ duration, delay, children, progressIndicator, }) => {
     const screenList = React.useRef([]);
     const checkMultipleMovesOrClear = React.useRef(false);
-    const beforeHash = React.useRef('');
-    const beforePathname = React.useRef('');
+    const beforeHash = React.useRef("");
+    const beforePathname = React.useRef("");
     const isAddStack = React.useRef(true);
     const [stacks, setStacks] = React.useState([]);
     const [isLoading, setLoading] = React.useState(false);
@@ -33778,11 +33778,14 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
     const changeLastScreen = React.useCallback((to) => {
         const baseStack = inMemoryCache.getScreens();
         const stackData = matchRouteToPathname(screenList.current, to);
-        inMemoryCache.setScreens([...baseStack.slice(0, baseStack.length - 1), stackData]);
+        inMemoryCache.setScreens([
+            ...baseStack.slice(0, baseStack.length - 1),
+            stackData,
+        ]);
         setStacks([...baseStack.slice(0, baseStack.length - 1), stackData]);
     }, [stacks]);
     const updateStacks = React.useCallback((to, isClear = false) => {
-        const isToNo = typeof to === 'number';
+        const isToNo = typeof to === "number";
         const baseStack = inMemoryCache.getScreens();
         if (isToNo) {
             if (to < -1)
@@ -33806,10 +33809,10 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
         var _a, _b;
         const historyIndex = inMemoryCache.getHistoryIndex();
         const stateIndex = (_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index;
-        if (typeof stateIndex !== 'number') {
-            window.history.replaceState({ index: historyIndex + 1 }, '');
+        if (typeof stateIndex !== "number") {
+            window.history.replaceState({ index: historyIndex + 1 }, "");
         }
-        const index = typeof stateIndex === 'number' ? stateIndex : historyIndex + 1;
+        const index = typeof stateIndex === "number" ? stateIndex : historyIndex + 1;
         inMemoryCache.setHistoryIndex(index);
         return index > historyIndex;
     };
@@ -33817,7 +33820,9 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
         // 여러 히스토리가 이동하거나 클리어 옵션 설정에는 스택 설정을 진행하기 때문에, 아래의 설정을 진행하지 않음
         if (checkMultipleMovesOrClear.current) {
             checkMultipleMovesOrClear.current = false;
-            window.history.replaceState({ index: 1 }, '');
+            window.history.replaceState({ index: 1 }, "");
+            // clear시
+            beforePathname.current = window.location.pathname;
             return;
         }
         const isForward = checkGoForward();
@@ -33830,6 +33835,8 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
         // 패스는 같고 해시만 변했을 때
         if (pathname === bPath && hash && (!bHash || isForward)) {
             const newHashScreen = Screen$1.hashScreen(allPath);
+            console.log("new hash screen: ", newHashScreen);
+            inMemoryCache.setScreens([...stacks, newHashScreen]);
             setStacks([...stacks, newHashScreen]);
             return;
         }
@@ -33842,16 +33849,18 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
         if (!storageStacksData || storageStacksData.length === 0)
             return;
         const allPath = decodeURI(href.split(origin)[1]);
-        const storageStacks = storageStacksData.map((screen, i) => {
+        const storageStacks = storageStacksData
+            .map((screen, i) => {
             if (isHashRoute(screen.route)) {
                 return Screen$1.hashScreen(screen.URIPath);
             }
             else {
                 return matchRouteToPathname(screenList.current, screen.URIPath);
             }
-        }).filter(Boolean);
-        if (storageStacks[storageStacks.length - 1].URIPath !== allPath
-            || storageStacks.length !== ((_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index)) {
+        })
+            .filter(Boolean);
+        if (storageStacks[storageStacks.length - 1].URIPath !== allPath ||
+            storageStacks.length !== ((_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index)) {
             return false;
         }
         inMemoryCache.setScreens(storageStacks);
@@ -33861,9 +33870,9 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
     // 히스토리 변화에 대한 이벤트 등록
     React.useEffect(() => {
         beforePathname.current = window.location.pathname;
-        window.addEventListener('popstate', historyChangeStack);
+        window.addEventListener("popstate", historyChangeStack);
         return () => {
-            window.removeEventListener('popstate', historyChangeStack);
+            window.removeEventListener("popstate", historyChangeStack);
         };
     }, [stacks]);
     // 스택 변경 시 스토리지에 저장
@@ -33883,19 +33892,29 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
             inMemoryCache.setHistoryIndex(index);
         }
         else {
-            window.history.replaceState({ index: 1 }, '');
+            window.history.replaceState({ index: 1 }, "");
         }
         // 진입시 스토리지에 데이터 있는지 확인 후 초기 스택 설정
         if (initStorageStackData())
             return;
         updateStacks(window.location.pathname);
     }, []);
-    const animationDuration = typeof duration === 'number' ? duration : ANIMATION_DURATION;
-    const animationDelay = typeof delay === 'number' ? delay : ANIMAITON_DELAY;
+    const animationDuration = typeof duration === "number" ? duration : ANIMATION_DURATION;
+    const animationDelay = typeof delay === "number" ? delay : ANIMAITON_DELAY;
     return (jsxRuntime.jsx("div", { className: "react-stack-area", children: jsxRuntime.jsxs(ReactStackContext.Provider, { value: {
-                addScreen, stacks, updateStacks, changeLastScreen, animationDuration, animationDelay,
-                isPDC, setPDC, isLoading, setLoading, progressIndicator, isAddStack
-            }, children: [jsxRuntime.jsx(Stacks, {}), children, jsxRuntime.jsx(Screen, { route: '*', component: jsxRuntime.jsx(NotFound, {}) })] }) }));
+                addScreen,
+                stacks,
+                updateStacks,
+                changeLastScreen,
+                animationDuration,
+                animationDelay,
+                isPDC,
+                setPDC,
+                isLoading,
+                setLoading,
+                progressIndicator,
+                isAddStack,
+            }, children: [jsxRuntime.jsx(Stacks, {}), children, jsxRuntime.jsx(Screen, { route: "*", component: jsxRuntime.jsx(NotFound, {}) })] }) }));
 };
 
 function useLoading() {
@@ -33934,17 +33953,17 @@ const useNavigaiton = () => {
                 startLoading();
                 updateStacks(to);
                 inMemoryCache.setHistoryIndex(historyIndex + 1);
-                window.history.pushState({ index: historyIndex + 1 }, '', to);
+                window.history.pushState({ index: historyIndex + 1 }, "", to);
                 return setTimeout(() => {
                     resolve(null);
-                }, (animationDuration * 2) + animationDelay + DELAY_MARGIN$1);
+                }, animationDuration * 2 + animationDelay + DELAY_MARGIN$1);
             });
         },
         replace: (to) => {
             return new Promise((resolve) => {
                 startLoading();
                 changeLastScreen(to);
-                window.history.replaceState({ index: inMemoryCache.getHistoryIndex() }, '', to);
+                window.history.replaceState({ index: inMemoryCache.getHistoryIndex() }, "", to);
                 return setTimeout(() => {
                     resolve(null);
                 }, animationDuration + animationDelay + DELAY_MARGIN$1);
@@ -33961,7 +33980,7 @@ const useNavigaiton = () => {
                     resolve(null);
                 }, animationDuration + DELAY_MARGIN$1);
             });
-        }
+        },
     };
 };
 

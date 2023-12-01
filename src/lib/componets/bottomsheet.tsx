@@ -12,49 +12,52 @@ interface IContainerProps {
   children: React.ReactNode
 }
 
-const BottomSheetContainer = ({ isExpandabled, height = window.innerHeight * 0.4, children }: IContainerProps) => {
+const BottomSheetContainer = ({
+  isExpandabled,
+  height = window.innerHeight * 0.4,
+  children
+}: IContainerProps) => {
   const navigation = useNavigation()
   const pdc = usePDC()
 
   const maxHeightFromTop = window.innerHeight - height
   const minHeightFromTop = isExpandabled ? 0 : maxHeightFromTop
 
-  const { eventRef, sheetRef, contentRef, isExit } = useBottomSheet({ minHeightFromTop, maxHeightFromTop })
+  const { eventRef, sheetRef, contentRef, isExit } = useBottomSheet({
+    minHeightFromTop,
+    maxHeightFromTop
+  })
 
   const handleClickExit = () => {
     pdc(navigation.back)
   }
 
   useEffect(() => {
-    if(isExit) handleClickExit()
+    if (isExit) handleClickExit()
   }, [isExit])
 
   return (
     <>
-      <div 
-        className='react-stack-bottom-sheet-dimmed-area' 
-        onClick={handleClickExit} 
-      />
-      <div 
-        ref={sheetRef}  
+      <div className="react-stack-bottom-sheet-dimmed-area" onClick={handleClickExit} />
+      <div
+        ref={sheetRef}
         className={'react-stack-bottom-sheet-content-area'}
         onClick={(e) => e.stopPropagation()}
-        style={{
-          '--maxHeight-fromTop': `${maxHeightFromTop}px`,
-          '--bottomsheet-height': `${height}px`,
-          'top': `${maxHeightFromTop}px`
-        } as any}
+        style={
+          {
+            '--maxHeight-fromTop': `${maxHeightFromTop}px`,
+            '--bottomsheet-height': `${height}px`,
+            top: `${maxHeightFromTop}px`
+          } as any
+        }
       >
-        <div 
-          ref={eventRef} 
-          className='react-stack-bottom-sheet-drag-area'
-          onClick={(e) => e.stopPropagation()} 
+        <div
+          ref={eventRef}
+          className="react-stack-bottom-sheet-drag-area"
+          onClick={(e) => e.stopPropagation()}
         />
-        <div 
-          ref={contentRef} 
-          className='react-stack-bottom-sheet-content-box'
-        >
-          { children }
+        <div ref={contentRef} className="react-stack-bottom-sheet-content-box">
+          {children}
         </div>
       </div>
     </>
@@ -71,7 +74,7 @@ interface IBottomSheetComp {
 const BottomSheetComp = ({ component, isExpandabled, height, params }: IBottomSheetComp) => {
   return (
     <BottomSheetContainer isExpandabled={isExpandabled} height={height}>
-      { cloneElement(component, {...{ params }}) }
+      {cloneElement(component, { ...{ params } })}
     </BottomSheetContainer>
   )
 }
@@ -84,12 +87,14 @@ interface IProps {
   className?: string
 }
 
-const BottomSheet = ({ route,  component, isExpandabled, height, className }: IProps)  => {
+const BottomSheet = ({ route, component, isExpandabled, height, className }: IProps) => {
   const { addScreen } = useContext(ReactStackContext)
 
-  addScreen({ 
-    route, 
-    component: <BottomSheetComp isExpandabled={isExpandabled} height={height} component={component} />, 
+  addScreen({
+    route,
+    component: (
+      <BottomSheetComp isExpandabled={isExpandabled} height={height} component={component} />
+    ),
     animation: AnimationType.BotttomSheet,
     className
   })

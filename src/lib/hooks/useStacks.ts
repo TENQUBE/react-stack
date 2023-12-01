@@ -4,7 +4,7 @@ import { IScreen } from '../data/screen'
 
 const useStacks = (): IScreen[] => {
   const { stacks } = useContext(ReactStackContext)
-  
+
   return stacks
 }
 

@@ -17,7 +17,8 @@ export interface INavigation {
 }
 
 const useNavigaiton = (): INavigation => {
-  const { updateStacks, changeLastScreen, animationDuration, animationDelay } = useContext(ReactStackContext)
+  const { updateStacks, changeLastScreen, animationDuration, animationDelay } =
+    useContext(ReactStackContext)
   const startLoading = useLoading()
 
   return {
@@ -25,14 +26,14 @@ const useNavigaiton = (): INavigation => {
       return new Promise((resolve) => {
         const historyIndex = inMemoryCache.getHistoryIndex()
 
-        if(isHashRoute(to)) {
+        if (isHashRoute(to)) {
           window.location.hash = String(to)
           return setTimeout(() => {
             resolve(null)
           }, DELAY_MARGIN)
         }
-  
-        if(state?.clear) {
+
+        if (state?.clear) {
           const stackLen = inMemoryCache.getScreens().length
           startLoading()
           updateStacks(to, true)
@@ -49,7 +50,7 @@ const useNavigaiton = (): INavigation => {
         window.history.pushState({ index: historyIndex + 1 }, '', to)
         return setTimeout(() => {
           resolve(null)
-        }, (animationDuration * 2) + animationDelay + DELAY_MARGIN)
+        }, animationDuration * 2 + animationDelay + DELAY_MARGIN)
       })
     },
     replace: (to: string) => {
@@ -65,7 +66,7 @@ const useNavigaiton = (): INavigation => {
     back: (to = 1) => {
       return new Promise((resolve) => {
         const toSize = to > 0 ? to * -1 : -1
-        if(toSize < -1) {
+        if (toSize < -1) {
           updateStacks(toSize)
         }
         window.history.go(toSize)

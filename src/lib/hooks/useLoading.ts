@@ -5,7 +5,7 @@ export default function useLoading(): () => void {
   const { progressIndicator, setLoading } = useContext(ReactStackContext)
 
   return () => {
-    if(!progressIndicator) return
+    if (!progressIndicator) return
     setLoading(true)
   }
 }

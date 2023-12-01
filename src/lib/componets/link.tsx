@@ -15,10 +15,10 @@ const Link = ({ to, target = '_self', children }: IProps) => {
   const startLoading = useLoading()
 
   const handleClickPush = (e) => {
-    if(target === '_blank') return
+    if (target === '_blank') return
     e.preventDefault()
 
-    if(isHashRoute(to)) {
+    if (isHashRoute(to)) {
       window.location.hash = String(to)
       return
     }
