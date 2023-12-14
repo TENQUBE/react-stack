@@ -109,7 +109,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
 
     const allPath = decodeURI(href.split(origin)[1])
     const storageStacks: IScreen[] = storageStacksData
-      .map((screen: IScreen, i: number) => {
+      .map((screen: IScreen) => {
         if (isHashRoute(screen.route)) {
           return ScreenObj.hashScreen(screen.URIPath)
         } else {

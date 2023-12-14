@@ -16,6 +16,7 @@ interface IScreen {
     readonly component: ReactElement | null;
     readonly animation: AnimationType;
     readonly className?: string;
+    readonly useInitialAnimation: boolean;
     pathVariable: unknown;
     URIPath: string;
     hash: string;
@@ -42,9 +43,10 @@ interface IProps$3 {
     route: string;
     component: ReactElement;
     animation?: AnimationType;
+    useInitialAnimation?: boolean;
     className?: string;
 }
-declare const Screen: ({ route, component, animation, className }: IProps$3) => any;
+declare const Screen: ({ route, component, animation, useInitialAnimation, className }: IProps$3) => any;
 
 interface IProps$2 {
     to: string;
@@ -74,7 +76,7 @@ interface IStackProvider {
     delay?: number;
     progressIndicator?: boolean;
     loadingComponent?: ReactElement;
-    children: any;
+    children: ReactNode;
 }
 declare const ReactStackProvider: ({ duration, delay, children, progressIndicator, loadingComponent }: IStackProvider) => react_jsx_runtime.JSX.Element;
 

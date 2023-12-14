@@ -5,6 +5,7 @@ export interface IScreen {
     readonly component: ReactElement | null;
     readonly animation: AnimationType;
     readonly className?: string;
+    readonly useInitialAnimation: boolean;
     pathVariable: unknown;
     URIPath: string;
     hash: string;
@@ -16,6 +17,7 @@ export interface IScreenParams {
     readonly route?: string | null;
     readonly component?: ReactElement | null;
     readonly animation?: AnimationType;
+    readonly useInitialAnimation?: boolean;
     readonly className?: string;
 }
 declare class Screen implements IScreen {
@@ -23,10 +25,11 @@ declare class Screen implements IScreen {
     readonly component: ReactElement | null;
     readonly animation: AnimationType;
     readonly className?: string;
+    readonly useInitialAnimation: boolean;
     pathVariable: unknown;
     URIPath: string;
     hash: string;
-    constructor({ route, component, animation, className }: IScreenParams);
+    constructor({ route, component, animation, useInitialAnimation, className }: IScreenParams);
     static hashScreen(allPath: string): Screen;
     setPathVariable(pathVariable: unknown): void;
     setURIPath(path: string): void;

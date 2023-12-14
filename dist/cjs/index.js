@@ -31,10 +31,12 @@ const ANIMATION_DURATION = 350;
 const ANIMAITON_DELAY = 150;
 
 let Screen$1 = class Screen {
-    constructor({ route, component, animation, className }) {
+    constructor({ route, component, animation, useInitialAnimation, className }) {
         this.route = route ? route : '*';
         this.component = component ? component : null;
         this.animation = typeof animation === 'undefined' ? exports.AnimationType.None : animation;
+        this.useInitialAnimation =
+            typeof useInitialAnimation === 'undefined' ? true : useInitialAnimation;
         if (className)
             this.className = className;
         this.pathVariable = {};
@@ -33700,6 +33702,11 @@ const Stacks = () => {
     React.useLayoutEffect(() => {
         if (stacks.length === 0)
             return;
+        // 스택이 없고 초기 라우팅에서 애니메이션을 사용하고 싶지 않을때
+        if (isAnimation === null && stacks.length === 1 && !stacks[0].useInitialAnimation) {
+            setAnimation(false);
+            return;
+        }
         // 새로고침으로 접근했을때, (이미 스택을 가지고 있는 경우 애니메이션을 비활성화)
         setAnimation(!(isAnimation === null && stacks.length > 1));
     }, [stacks]);
@@ -33846,7 +33853,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
             return;
         const allPath = decodeURI(href.split(origin)[1]);
         const storageStacks = storageStacksData
-            .map((screen, i) => {
+            .map((screen) => {
             if (isHashRoute(screen.route)) {
                 return Screen$1.hashScreen(screen.URIPath);
             }
@@ -33995,12 +34002,13 @@ const ScreenContainer = ({ animationDuration, children }) => {
 const ScreenComponent = ({ component, params, animationDuration }) => {
     return (jsxRuntime.jsx(ScreenContainer, { animationDuration: animationDuration, children: React.cloneElement(component, Object.assign({ params })) }));
 };
-const Screen = ({ route, component, animation, className }) => {
+const Screen = ({ route, component, animation, useInitialAnimation, className }) => {
     const { addScreen } = React.useContext(ReactStackContext);
     addScreen({
         route,
         component: jsxRuntime.jsx(ScreenComponent, { component: component }),
         animation,
+        useInitialAnimation,
         className
     });
     return null;

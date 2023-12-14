@@ -106,6 +106,7 @@ interface ScreenProps {
   route?: string // 기본값 '*' - 컴포넌트를 출력할 URI Pathname을 설정합니다.
   component: ReactElement // route에 출력할 컴포넌트를 설정합니다.
   animation?: AnimationType // 기본값 AnimationType.None - 화면 전환간 사용할 애니메이션을 설정합니다.
+  useInitialAnimation?: boolean // 기본값 true - 초기 Screen의 render시 애니메이션 사용 여부를 설정합니다.
   className?: string // 해당 스택의 class name을 설정합니다.
 }
 ```
@@ -317,6 +318,7 @@ interface IScreen {
   readonly component?: ReactElement | null
   readonly animation?: AnimationType
   readonly className?: string
+  readonly useInitialAnimation?: boolean
   pathVariable: unknown
   URIPath: string
   hash: string

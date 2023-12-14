@@ -6,6 +6,7 @@ export interface IScreen {
   readonly component: ReactElement | null
   readonly animation: AnimationType
   readonly className?: string
+  readonly useInitialAnimation: boolean
   pathVariable: unknown
   URIPath: string
   hash: string
@@ -18,6 +19,7 @@ export interface IScreenParams {
   readonly route?: string | null
   readonly component?: ReactElement | null
   readonly animation?: AnimationType
+  readonly useInitialAnimation?: boolean
   readonly className?: string
 }
 
@@ -26,14 +28,17 @@ class Screen implements IScreen {
   readonly component: ReactElement | null
   readonly animation: AnimationType
   readonly className?: string
+  readonly useInitialAnimation: boolean
   pathVariable: unknown
   URIPath: string
   hash: string
 
-  constructor({ route, component, animation, className }: IScreenParams) {
+  constructor({ route, component, animation, useInitialAnimation, className }: IScreenParams) {
     this.route = route ? route : '*'
     this.component = component ? component : null
     this.animation = typeof animation === 'undefined' ? AnimationType.None : animation
+    this.useInitialAnimation =
+      typeof useInitialAnimation === 'undefined' ? true : useInitialAnimation
     if (className) this.className = className
     this.pathVariable = {}
   }

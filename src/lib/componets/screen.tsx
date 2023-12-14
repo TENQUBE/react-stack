@@ -36,16 +36,18 @@ interface IProps {
   route: string
   component: ReactElement
   animation?: AnimationType
+  useInitialAnimation?: boolean
   className?: string
 }
 
-const Screen = ({ route, component, animation, className }: IProps) => {
+const Screen = ({ route, component, animation, useInitialAnimation, className }: IProps) => {
   const { addScreen } = useContext(ReactStackContext)
 
   addScreen({
     route,
     component: <ScreenComponent component={component} />,
     animation,
+    useInitialAnimation,
     className
   })
 

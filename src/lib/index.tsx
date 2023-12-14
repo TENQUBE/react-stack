@@ -1,4 +1,4 @@
-import { ReactElement } from 'react'
+import { ReactElement, ReactNode } from 'react'
 
 import { AnimationType } from './interfaces'
 import { IScreen } from './data/screen'
@@ -18,7 +18,7 @@ interface IStackProvider {
   delay?: number
   progressIndicator?: boolean
   loadingComponent?: ReactElement
-  children: any
+  children: ReactNode
 }
 
 const ReactStackProvider = ({
