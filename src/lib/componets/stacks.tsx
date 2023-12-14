@@ -23,6 +23,13 @@ const Stacks = () => {
 
   useLayoutEffect(() => {
     if (stacks.length === 0) return
+
+    // 스택이 없고 초기 라우팅에서 애니메이션을 사용하고 싶지 않을때
+    if (isAnimation === null && stacks.length === 1 && !stacks[0].useInitialAnimation) {
+      setAnimation(false)
+      return
+    }
+
     // 새로고침으로 접근했을때, (이미 스택을 가지고 있는 경우 애니메이션을 비활성화)
     setAnimation(!(isAnimation === null && stacks.length > 1))
   }, [stacks])

@@ -106,6 +106,7 @@ interface ScreenProps {
   route?: string // default '*' - Sets the target URI path name.
   component: ReactElement // Enter the component to be output to the route.
   animation?: AnimationType // default AnimationType.None - Animation delay of stack transitions
+  useInitialAnimation?: boolean // default false - Set whether to use animation when rendering the initial screen
   className?: string // Set the class name of the stack.
 }
 ```
@@ -314,6 +315,8 @@ interface IScreen {
   readonly route?: string
   readonly component?: ReactElement | null
   readonly animation?: AnimationType
+  readonly className?: string
+  readonly useInitialAnimation?: boolean
   pathVariable: unknown
   URIPath: string
   hash: string
