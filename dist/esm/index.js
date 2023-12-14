@@ -32,7 +32,7 @@ let Screen$1 = class Screen {
         this.component = component ? component : null;
         this.animation = typeof animation === 'undefined' ? AnimationType.None : animation;
         this.useInitialAnimation =
-            typeof useInitialAnimation === 'undefined' ? false : useInitialAnimation;
+            typeof useInitialAnimation === 'undefined' ? true : useInitialAnimation;
         if (className)
             this.className = className;
         this.pathVariable = {};
