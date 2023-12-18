@@ -22,7 +22,7 @@ const Home = () => {
   }
 
   return (
-    <div style={{ background: '#fff' }}>
+    <div style={{ background: '#fff', height: '100%' }}>
       <h1>Home</h1>
       <button onClick={onClick}>/yellow</button>
       <button onClick={onGreenClick}>/green</button>
@@ -31,7 +31,12 @@ const Home = () => {
 }
 
 const Yellow = () => {
+  const stacks = useStacks()
   const navigation = useNavigation()
+
+  useEffect(() => {
+    console.log(stacks)
+  }, [stacks])
 
   const onClick = () => {
     navigation.push('/green')
@@ -47,18 +52,28 @@ const Yellow = () => {
     // clear시 animation이 어색함
   }
 
+  const onClickReplace = () => {
+    navigation.replace('/', { clear: true })
+  }
+
   return (
-    <div style={{ background: 'blue' }}>
+    <div style={{ background: 'blue', height: '100%' }}>
       <h1>yellow</h1>
       <button onClick={onClick}>green</button>
       <button onClick={onClickBack}>back</button>
       <button onClick={onClickClear}>clear</button>
+      <button onClick={onClickReplace}>replace</button>
     </div>
   )
 }
 
 const Green = () => {
+  const stacks = useStacks()
   const navigation = useNavigation()
+
+  useEffect(() => {
+    console.log(stacks)
+  }, [stacks])
 
   const onClick = () => {
     navigation.back()
@@ -71,7 +86,7 @@ const Green = () => {
   }
 
   const onClickReplace = () => {
-    navigation.replace('/black')
+    navigation.replace('/black', { clear: true })
   }
 
   const onClickBlack = () => {
@@ -79,7 +94,7 @@ const Green = () => {
   }
 
   return (
-    <div style={{ background: '#fff' }}>
+    <div style={{ background: '#fff', height: '100%' }}>
       <h1>green</h1>
       <button onClick={onClick}>back</button>
       <button onClick={onClickClear}>clear</button>
@@ -90,7 +105,12 @@ const Green = () => {
 }
 
 const Black = () => {
+  const stacks = useStacks()
   const navigation = useNavigation()
+
+  useEffect(() => {
+    console.log(stacks)
+  }, [stacks])
 
   const onClick = () => {
     navigation.back()
@@ -107,7 +127,7 @@ const Black = () => {
   }
 
   return (
-    <div style={{ background: '#fff' }}>
+    <div style={{ background: '#fff', height: '100%' }}>
       <h1>Black</h1>
       <button onClick={onClick}>back</button>
       <button onClick={onClickClear}>yellow clear</button>
@@ -119,7 +139,7 @@ const Black = () => {
 const App = () => {
   return (
     <div>
-      <ReactStackProvider duration={400} delay={200} progressIndicator={true}>
+      <ReactStackProvider duration={1000} delay={200} progressIndicator={true}>
         <Screen route="/" component={<Home />} animation={AnimationType.None} />
         <Screen route="/yellow" component={<Yellow />} animation={AnimationType.ToLeft} />
         <Screen route="/green" component={<Green />} animation={AnimationType.ToLeft} />

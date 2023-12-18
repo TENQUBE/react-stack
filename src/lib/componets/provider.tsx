@@ -15,6 +15,7 @@ import ScreenObj, { IScreen, IScreenParams } from '../data/screen'
 import Stacks from './stacks'
 import inMemoryCache from '../utils/inMemoryCache'
 import NotFound from './notFound'
+import { DELAY_MARGIN } from '../hooks/useNavigaiton'
 
 export const ReactStackContext = createContext(null)
 
@@ -33,6 +34,9 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
     const additionalNum = typeof action?.initialNum === 'number' ? action.initialNum : 1
     return i + additionalNum
   }, 1)
+
+  const animationDuration = typeof duration === 'number' ? duration : ANIMATION_DURATION
+  const animationDelay = typeof delay === 'number' ? delay : ANIMAITON_DELAY
 
   const createId = useCallback(
     (initialNum?: number) => {
@@ -72,14 +76,18 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
         const stackData = matchRouteToPathname(screenList.current, to, createId())
         if (isClear) {
           checkMultipleMovesOrClear.current = true
-          isAddStack.current = false
+          setTimeout(() => {
+            isAddStack.current = true
+            inMemoryCache.setScreens([stackData])
+            setStacks([stackData])
+          }, animationDuration + animationDelay + DELAY_MARGIN)
         }
         isAddStack.current = true
-        inMemoryCache.setScreens(isClear ? [stackData] : [...baseStack, stackData])
-        setStacks(isClear ? [stackData] : [...baseStack, stackData])
+        inMemoryCache.setScreens([...baseStack, stackData])
+        setStacks([...baseStack, stackData])
       }
     },
-    [stacks, createId]
+    [stacks, createId, animationDuration, animationDelay]
   )
 
   const checkGoForward = () => {
@@ -192,9 +200,6 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
     if (initStorageStackData()) return
     updateStacks(window.location.pathname)
   }, [])
-
-  const animationDuration = typeof duration === 'number' ? duration : ANIMATION_DURATION
-  const animationDelay = typeof delay === 'number' ? delay : ANIMAITON_DELAY
 
   return (
     <div className="react-stack-area">

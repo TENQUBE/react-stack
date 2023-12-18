@@ -33793,6 +33793,8 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
         const additionalNum = typeof (action === null || action === void 0 ? void 0 : action.initialNum) === 'number' ? action.initialNum : 1;
         return i + additionalNum;
     }, 1);
+    const animationDuration = typeof duration === 'number' ? duration : ANIMATION_DURATION;
+    const animationDelay = typeof delay === 'number' ? delay : ANIMAITON_DELAY;
     const createId = useCallback((initialNum) => {
         increase({ initialNum });
         return String(counter);
@@ -33821,13 +33823,17 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
             const stackData = matchRouteToPathname(screenList.current, to, createId());
             if (isClear) {
                 checkMultipleMovesOrClear.current = true;
-                isAddStack.current = false;
+                setTimeout(() => {
+                    isAddStack.current = true;
+                    inMemoryCache.setScreens([stackData]);
+                    setStacks([stackData]);
+                }, animationDuration + animationDelay + DELAY_MARGIN$1);
             }
             isAddStack.current = true;
-            inMemoryCache.setScreens(isClear ? [stackData] : [...baseStack, stackData]);
-            setStacks(isClear ? [stackData] : [...baseStack, stackData]);
+            inMemoryCache.setScreens([...baseStack, stackData]);
+            setStacks([...baseStack, stackData]);
         }
-    }, [stacks, createId]);
+    }, [stacks, createId, animationDuration, animationDelay]);
     const checkGoForward = () => {
         var _a, _b;
         const historyIndex = inMemoryCache.getHistoryIndex();
@@ -33923,8 +33929,6 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
             return;
         updateStacks(window.location.pathname);
     }, []);
-    const animationDuration = typeof duration === 'number' ? duration : ANIMATION_DURATION;
-    const animationDelay = typeof delay === 'number' ? delay : ANIMAITON_DELAY;
     return (jsx("div", { className: "react-stack-area", children: jsxs(ReactStackContext.Provider, { value: {
                 addScreen,
                 stacks,
@@ -33969,10 +33973,12 @@ const useNavigaiton = () => {
                     const stackLen = inMemoryCache.getScreens().length;
                     startLoading();
                     updateStacks(to, true);
-                    inMemoryCache.setHistoryIndex(1);
-                    window.history.go((stackLen - 1) * -1);
+                    inMemoryCache.setHistoryIndex(historyIndex + 1);
+                    window.history.pushState({ index: historyIndex + 1 }, '', to);
                     return setTimeout(() => {
                         resolve(null);
+                        inMemoryCache.setHistoryIndex(1);
+                        window.history.go(stackLen * -1);
                     }, animationDuration + animationDelay + DELAY_MARGIN$1);
                 }
                 startLoading();
