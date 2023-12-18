@@ -8,7 +8,7 @@ export interface INavigationPushState {
   clear: boolean
 }
 
-const DELAY_MARGIN = 10
+export const DELAY_MARGIN = 10
 
 export interface INavigation {
   push: (to: string, state?: INavigationPushState) => void
@@ -37,10 +37,12 @@ const useNavigaiton = (): INavigation => {
           const stackLen = inMemoryCache.getScreens().length
           startLoading()
           updateStacks(to, true)
-          inMemoryCache.setHistoryIndex(1)
-          window.history.go((stackLen - 1) * -1)
+          inMemoryCache.setHistoryIndex(historyIndex + 1)
+          window.history.pushState({ index: historyIndex + 1 }, '', to)
           return setTimeout(() => {
             resolve(null)
+            inMemoryCache.setHistoryIndex(1)
+            window.history.go(stackLen * -1)
           }, animationDuration + animationDelay + DELAY_MARGIN)
         }
 

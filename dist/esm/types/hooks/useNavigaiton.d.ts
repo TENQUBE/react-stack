@@ -1,6 +1,7 @@
 export interface INavigationPushState {
     clear: boolean;
 }
+export declare const DELAY_MARGIN = 10;
 export interface INavigation {
     push: (to: string, state?: INavigationPushState) => void;
     replace: (to: string) => void;
