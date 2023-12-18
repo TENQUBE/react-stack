@@ -7,7 +7,8 @@ import { isHashRoute } from '../utils'
 import { ReactStackContext } from './provider'
 
 const Stacks = () => {
-  const { stacks, animationDuration, animationDelay, isAddStack } = useContext(ReactStackContext)
+  const { stacks, animationDuration, animationDelay, isAddStack, checkMultipleMovesOrClear } =
+    useContext(ReactStackContext)
 
   const [isAnimation, setAnimation] = useState(null)
 
@@ -19,6 +20,18 @@ const Stacks = () => {
   const getAfterAnimation = (idx: number) => {
     if (idx >= activeScreenIdx || !allPrintScreenArr[idx + 1]) return 'none'
     return AnimationClassName[allPrintScreenArr[idx + 1].animation]
+  }
+
+  const handleExit = (id: string, index: number) => {
+    if (checkMultipleMovesOrClear.current) {
+      const el = document.getElementById(id)
+      el.setAttribute('data-after-animation', 'none')
+
+      // 애니메이션 되지 않는 screen들은 duration 동안 보이지 않게 처리
+      if (stacks.length > 2 && index < stacks.length - 1) {
+        el.style.display = 'none'
+      }
+    }
   }
 
   useLayoutEffect(() => {
@@ -55,7 +68,11 @@ const Stacks = () => {
       }
     >
       {stacks.map(
-        ({ route, component, animation, pathVariable, className }, i: number, arr: IScreen[]) => {
+        (
+          { route, component, animation, pathVariable, id, className },
+          i: number,
+          arr: IScreen[]
+        ) => {
           // 해시로 추가된 히스토리는 스크린을 출력하지 않음
           if (isHashRoute(route)) return null
           // 출력된 각각의 스크린 인덱스
@@ -65,14 +82,15 @@ const Stacks = () => {
 
           return (
             <CSSTransition
-              key={route + i}
+              key={id}
               timeout={{
                 enter: animationDuration + animationDelay,
                 exit: animationDuration
               }}
+              onExit={() => handleExit(id, i)}
               classNames={`${stackClassName} react-stack-box-${AnimationClassName[animation]} react-stack-box`}
             >
-              <div data-after-animation={getAfterAnimation(idx)}>
+              <div id={id} data-after-animation={getAfterAnimation(idx)}>
                 {cloneElement(component, {
                   ...{
                     params: pathVariable,

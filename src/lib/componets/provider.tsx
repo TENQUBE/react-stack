@@ -1,4 +1,12 @@
-import { createContext, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useReducer
+} from 'react'
 
 import { IStackProvider, Screen } from '..'
 import { ANIMAITON_DELAY, ANIMATION_DURATION, STORAGE_KEY_SCREEN_STACKS } from '../constants'
@@ -21,6 +29,20 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
   const [isLoading, setLoading] = useState(false)
   const [isPDC, setPDC] = useState(false)
 
+  const [counter, increase] = useReducer((i: number, action: { initialNum: number }) => {
+    const additionalNum = typeof action?.initialNum === 'number' ? action.initialNum : 1
+    return i + additionalNum
+  }, 1)
+
+  const createId = useCallback(
+    (initialNum?: number) => {
+      increase({ initialNum })
+
+      return String(counter)
+    },
+    [counter, increase]
+  )
+
   const addScreen = useCallback((data: IScreenParams) => {
     screenList.current = [...screenList.current, data]
   }, [])
@@ -28,7 +50,8 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
   const changeLastScreen = useCallback(
     (to: string) => {
       const baseStack = inMemoryCache.getScreens()
-      const stackData = matchRouteToPathname(screenList.current, to)
+      const lastScreenId = baseStack[baseStack.length - 1].id
+      const stackData = matchRouteToPathname(screenList.current, to, lastScreenId)
       inMemoryCache.setScreens([...baseStack.slice(0, baseStack.length - 1), stackData])
       setStacks([...baseStack.slice(0, baseStack.length - 1), stackData])
     },
@@ -46,7 +69,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
         inMemoryCache.setScreens(baseStack.slice(0, baseStack.length + to))
         setStacks(baseStack.slice(0, baseStack.length + to))
       } else {
-        const stackData = matchRouteToPathname(screenList.current, to)
+        const stackData = matchRouteToPathname(screenList.current, to, createId())
         if (isClear) {
           checkMultipleMovesOrClear.current = true
           isAddStack.current = false
@@ -56,7 +79,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
         setStacks(isClear ? [stackData] : [...baseStack, stackData])
       }
     },
-    [stacks]
+    [stacks, createId]
   )
 
   const checkGoForward = () => {
@@ -113,10 +136,13 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
         if (isHashRoute(screen.route)) {
           return ScreenObj.hashScreen(screen.URIPath)
         } else {
-          return matchRouteToPathname(screenList.current, screen.URIPath)
+          return matchRouteToPathname(screenList.current, screen.URIPath, screen.id)
         }
       })
       .filter(Boolean)
+
+    const lastId = storageStacks[storageStacks.length - 1].id
+    increase({ initialNum: Number(lastId) })
 
     if (
       storageStacks[storageStacks.length - 1].URIPath !== allPath ||
@@ -129,7 +155,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
     setStacks(storageStacks)
 
     return true
-  }, [stacks])
+  }, [stacks, createId])
 
   // 히스토리 변화에 대한 이벤트 등록
   useEffect(() => {
@@ -185,7 +211,8 @@ const StackProvider = ({ duration, delay, children, progressIndicator }: IStackP
           isLoading,
           setLoading,
           progressIndicator,
-          isAddStack
+          isAddStack,
+          checkMultipleMovesOrClear
         }}
       >
         <Stacks />

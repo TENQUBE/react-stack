@@ -17,9 +17,11 @@ interface IScreen {
     readonly animation: AnimationType;
     readonly className?: string;
     readonly useInitialAnimation: boolean;
+    id: string;
     pathVariable: unknown;
     URIPath: string;
     hash: string;
+    setId(id: string): void;
     setPathVariable(pathVariable: unknown): void;
     setURIPath(path: string): void;
     setHash(hash: string): void;
