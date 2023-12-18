@@ -1,5 +1,5 @@
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
-import React, { Children, isValidElement, cloneElement, useContext, useState, useLayoutEffect, useEffect, createContext, useRef, useCallback } from 'react';
+import React, { Children, isValidElement, cloneElement, useContext, useState, useLayoutEffect, useEffect, createContext, useRef, useReducer, useCallback } from 'react';
 
 var AnimationType;
 (function (AnimationType) {
@@ -43,6 +43,9 @@ let Screen$1 = class Screen {
         hashStack.setURIPath(allPath);
         hashStack.hash = hash;
         return hashStack;
+    }
+    setId(id) {
+        this.id = id;
     }
     setPathVariable(pathVariable) {
         this.pathVariable = pathVariable;
@@ -115,7 +118,7 @@ const matchRoute = (paths, matchData) => {
         pathVariable
     };
 };
-const matchRouteToPathname = (stacks, pathname) => {
+const matchRouteToPathname = (stacks, pathname, id) => {
     const matchData = stacks.map(({ route }) => explodeRouteSegments(route));
     const segments = pathname.split('#')[0].split('?')[0].split('/');
     const paths = segments.slice(1, segments.length);
@@ -126,6 +129,7 @@ const matchRouteToPathname = (stacks, pathname) => {
             screenStack.setPathVariable(pathVariable);
             screenStack.setURIPath(pathname);
             screenStack.setHash(pathname.split('#')[1]);
+            screenStack.setId(id);
             return screenStack;
         }
     }
@@ -33683,7 +33687,7 @@ TransitionGroup.defaultProps = defaultProps;
 var TransitionGroup$1 = TransitionGroup;
 
 const Stacks = () => {
-    const { stacks, animationDuration, animationDelay, isAddStack } = useContext(ReactStackContext);
+    const { stacks, animationDuration, animationDelay, isAddStack, checkMultipleMovesOrClear } = useContext(ReactStackContext);
     const [isAnimation, setAnimation] = useState(null);
     // 현재 출력된 전체 스크린 배열
     const allPrintScreenArr = stacks.filter(({ route }) => !isHashRoute(route));
@@ -33694,6 +33698,16 @@ const Stacks = () => {
         if (idx >= activeScreenIdx || !allPrintScreenArr[idx + 1])
             return 'none';
         return AnimationClassName[allPrintScreenArr[idx + 1].animation];
+    };
+    const handleExit = (id, index) => {
+        if (checkMultipleMovesOrClear.current) {
+            const el = document.getElementById(id);
+            el.setAttribute('data-after-animation', 'none');
+            // 애니메이션 되지 않는 screen들은 duration 동안 보이지 않게 처리
+            if (stacks.length > 2 && index < stacks.length - 1) {
+                el.style.display = 'none';
+            }
+        }
     };
     useLayoutEffect(() => {
         if (stacks.length === 0)
@@ -33719,7 +33733,7 @@ const Stacks = () => {
     return (jsx(TransitionGroup$1, { style: {
             '--animation-duration': `${duration}s`,
             '--animation-delay': `${isAddStack.current ? delay : 0}s`
-        }, children: stacks.map(({ route, component, animation, pathVariable, className }, i, arr) => {
+        }, children: stacks.map(({ route, component, animation, pathVariable, id, className }, i, arr) => {
             // 해시로 추가된 히스토리는 스크린을 출력하지 않음
             if (isHashRoute(route))
                 return null;
@@ -33730,10 +33744,10 @@ const Stacks = () => {
             return (jsx(CSSTransition$1, { timeout: {
                     enter: animationDuration + animationDelay,
                     exit: animationDuration
-                }, classNames: `${stackClassName} react-stack-box-${AnimationClassName[animation]} react-stack-box`, children: jsx("div", { "data-after-animation": getAfterAnimation(idx), children: cloneElement(component, Object.assign({
+                }, onExit: () => handleExit(id, i), classNames: `${stackClassName} react-stack-box-${AnimationClassName[animation]} react-stack-box`, children: jsx("div", { id: id, "data-after-animation": getAfterAnimation(idx), children: cloneElement(component, Object.assign({
                         params: pathVariable,
                         animationDuration: animationDuration
-                    })) }) }, route + i));
+                    })) }) }, id));
         }) }));
 };
 
@@ -33775,12 +33789,21 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
     const [stacks, setStacks] = useState([]);
     const [isLoading, setLoading] = useState(false);
     const [isPDC, setPDC] = useState(false);
+    const [counter, increase] = useReducer((i, action) => {
+        const additionalNum = typeof (action === null || action === void 0 ? void 0 : action.initialNum) === 'number' ? action.initialNum : 1;
+        return i + additionalNum;
+    }, 1);
+    const createId = useCallback((initialNum) => {
+        increase({ initialNum });
+        return String(counter);
+    }, [counter, increase]);
     const addScreen = useCallback((data) => {
         screenList.current = [...screenList.current, data];
     }, []);
     const changeLastScreen = useCallback((to) => {
         const baseStack = inMemoryCache.getScreens();
-        const stackData = matchRouteToPathname(screenList.current, to);
+        const lastScreenId = baseStack[baseStack.length - 1].id;
+        const stackData = matchRouteToPathname(screenList.current, to, lastScreenId);
         inMemoryCache.setScreens([...baseStack.slice(0, baseStack.length - 1), stackData]);
         setStacks([...baseStack.slice(0, baseStack.length - 1), stackData]);
     }, [stacks]);
@@ -33795,7 +33818,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
             setStacks(baseStack.slice(0, baseStack.length + to));
         }
         else {
-            const stackData = matchRouteToPathname(screenList.current, to);
+            const stackData = matchRouteToPathname(screenList.current, to, createId());
             if (isClear) {
                 checkMultipleMovesOrClear.current = true;
                 isAddStack.current = false;
@@ -33804,7 +33827,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
             inMemoryCache.setScreens(isClear ? [stackData] : [...baseStack, stackData]);
             setStacks(isClear ? [stackData] : [...baseStack, stackData]);
         }
-    }, [stacks]);
+    }, [stacks, createId]);
     const checkGoForward = () => {
         var _a, _b;
         const historyIndex = inMemoryCache.getHistoryIndex();
@@ -33854,10 +33877,12 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
                 return Screen$1.hashScreen(screen.URIPath);
             }
             else {
-                return matchRouteToPathname(screenList.current, screen.URIPath);
+                return matchRouteToPathname(screenList.current, screen.URIPath, screen.id);
             }
         })
             .filter(Boolean);
+        const lastId = storageStacks[storageStacks.length - 1].id;
+        increase({ initialNum: Number(lastId) });
         if (storageStacks[storageStacks.length - 1].URIPath !== allPath ||
             storageStacks.length !== ((_b = (_a = window.history) === null || _a === void 0 ? void 0 : _a.state) === null || _b === void 0 ? void 0 : _b.index)) {
             return false;
@@ -33865,7 +33890,7 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
         inMemoryCache.setScreens(storageStacks);
         setStacks(storageStacks);
         return true;
-    }, [stacks]);
+    }, [stacks, createId]);
     // 히스토리 변화에 대한 이벤트 등록
     useEffect(() => {
         beforePathname.current = window.location.pathname;
@@ -33912,7 +33937,8 @@ const StackProvider = ({ duration, delay, children, progressIndicator }) => {
                 isLoading,
                 setLoading,
                 progressIndicator,
-                isAddStack
+                isAddStack,
+                checkMultipleMovesOrClear
             }, children: [jsx(Stacks, {}), children, jsx(Screen, { route: "*", component: jsx(NotFound, {}) })] }) }));
 };
 

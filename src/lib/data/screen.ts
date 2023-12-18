@@ -7,9 +7,11 @@ export interface IScreen {
   readonly animation: AnimationType
   readonly className?: string
   readonly useInitialAnimation: boolean
+  id: string
   pathVariable: unknown
   URIPath: string
   hash: string
+  setId(id: string): void
   setPathVariable(pathVariable: unknown): void
   setURIPath(path: string): void
   setHash(hash: string): void
@@ -29,6 +31,7 @@ class Screen implements IScreen {
   readonly animation: AnimationType
   readonly className?: string
   readonly useInitialAnimation: boolean
+  id: string
   pathVariable: unknown
   URIPath: string
   hash: string
@@ -49,6 +52,10 @@ class Screen implements IScreen {
     hashStack.setURIPath(allPath)
     hashStack.hash = hash
     return hashStack
+  }
+
+  setId(id: string) {
+    this.id = id
   }
 
   setPathVariable(pathVariable: unknown) {

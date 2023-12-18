@@ -317,6 +317,7 @@ interface IScreen {
   readonly animation?: AnimationType
   readonly className?: string
   readonly useInitialAnimation?: boolean
+  id: string
   pathVariable: unknown
   URIPath: string
   hash: string

@@ -79,7 +79,7 @@ const matchRoute = (
   }
 }
 
-export const matchRouteToPathname = (stacks: IScreenParams[], pathname: string) => {
+export const matchRouteToPathname = (stacks: IScreenParams[], pathname: string, id: string) => {
   const matchData = stacks.map(({ route }) => explodeRouteSegments(route))
   const segments = pathname.split('#')[0].split('?')[0].split('/')
   const paths = segments.slice(1, segments.length)
@@ -91,6 +91,7 @@ export const matchRouteToPathname = (stacks: IScreenParams[], pathname: string) 
       screenStack.setPathVariable(pathVariable)
       screenStack.setURIPath(pathname)
       screenStack.setHash(pathname.split('#')[1])
+      screenStack.setId(id)
       return screenStack
     }
   }
