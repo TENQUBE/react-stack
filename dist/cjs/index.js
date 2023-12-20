@@ -34178,14 +34178,14 @@ function useBottomSheet({ minHeightFromTop, maxHeightFromTop }) {
 }
 
 function usePDC() {
-    const { isPDC, setPDC } = React.useContext(ReactStackContext);
+    const { isPDC, setPDC, animationDuration, animationDelay } = React.useContext(ReactStackContext);
     const handleClick = (fnc) => {
         if (isPDC)
             return;
         setPDC(true);
         setTimeout(() => {
             setPDC(false);
-        }, 300);
+        }, animationDuration + animationDelay);
         fnc();
     };
     return handleClick;
