@@ -34006,7 +34006,9 @@ const useNavigaiton = () => {
         },
         back: (to = 1) => {
             return new Promise((resolve) => {
-                const toSize = to > 0 ? to * -1 : -1;
+                const stackLen = inMemoryCache.getScreens().length;
+                const positiveTo = to > 0 ? to : to * -1;
+                const toSize = stackLen > positiveTo ? positiveTo * -1 : (stackLen - 1) * -1;
                 if (toSize < -1) {
                     updateStacks(toSize);
                 }
